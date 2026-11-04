@@ -1,0 +1,78 @@
+# ==============================
+# Raw Dataset and Archives
+# ==============================
+data/mvtec/
+*.tar.xz
+*.tar.gz
+*.tar
+*.zip
+
+# ==============================
+# Python Cache and Compiled Files
+# ==============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# ==============================
+# Virtual Environments
+# ==============================
+.venv/
+venv/
+env/
+ENV/
+
+# ==============================
+# Jupyter Notebook
+# ==============================
+.ipynb_checkpoints/
+
+# ==============================
+# Environment Variables and Secrets
+# ==============================
+.env
+.env.*
+!.env.example
+
+# ==============================
+# VS Code
+# ==============================
+.vscode/
+
+# ==============================
+# Operating System Files
+# ==============================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==============================
+# Logs and Temporary Files
+# ==============================
+*.log
+*.tmp
+*.bak
+
+# ==============================
+# Build and Distribution Files
+# ==============================
+build/
+dist/
+*.egg-info/
+
+# ==============================
+# Model and Large Generated Files
+# ==============================
+*.h5
+*.hdf5
+*.onnx
+*.pt
+*.pth
+
+# ==============================
+# Testing and Coverage
+# ==============================
+.pytest_cache/
+.coverage
+htmlcov/
