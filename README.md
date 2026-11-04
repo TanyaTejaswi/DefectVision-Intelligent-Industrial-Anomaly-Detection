@@ -1,24 +1,27 @@
 # Unsupervised Visual Anomaly Discovery for Industrial Quality Inspection
 
-An unsupervised machine learning framework designed to inspect industrial products, discover structural or surface anomalies, and group feature representations without requiring manual defect labels during training.
+An end-to-end unsupervised machine learning and computer vision framework for detecting industrial defects and discovering visual cluster representations without requiring defect annotations during training.
 
 ---
 
 ## 1. Project Overview
-Industrial manufacturing lines require high-precision visual inspection to detect defective components. Traditional supervised systems require thousands of labeled defect examples, which are costly and rare in practice. This project addresses that challenge by:
-1. Extracting high-level visual features using a pre-trained deep convolutional neural network (ResNet50).
-2. Reducing embedding dimensionality to mitigate the curse of dimensionality and isolate salient feature variations (PCA).
-3. Clustering representations and identifying anomalous patterns via density-based and centroid-based algorithms (K-Means, DBSCAN, HDBSCAN).
-4. Providing 2D/3D visual projections (t-SNE) and evaluating cluster cohesion, separation, and anomaly detection quality.
+In industrial manufacturing, defective items are rare, unpredictable, and costly to label manually. This project addresses that challenge by combining deep representation learning with unsupervised discovery:
+1. **Feature Extraction (`ResNet50`)**: Transforms raw inspection images into 2,048-dimensional semantic embeddings.
+2. **Dimensionality Reduction (`PCA`)**: Projects high-dimensional feature spaces down while retaining 95% of total variance, mitigating the curse of dimensionality.
+3. **Unsupervised Clustering (`K-Means`, `DBSCAN`, `HDBSCAN`)**: Partitions normal variations and isolates defect outliers as noise (`label = -1`).
+4. **Memory-Bank Anomaly Detection**: Scores test samples by Euclidean distance to normal reference features and generates localized spatial heatmaps.
+5. **2D Visual Manifold Projections (`t-SNE`)**: Visualizes normal clusters and highlights defect points.
+6. **Interactive Dashboard (`Streamlit`)**: Provides a live web application for parameter tuning, image inspection, and defect heatmap display.
 
 ---
 
 ## 2. Team Roles & Responsibilities
 
-| Team Member | Responsibilities |
-| :--- | :--- |
-| **Gayathri** | - Dimensionality Reduction (PCA, explained variance analysis)<br>- Unsupervised Clustering (K-Means, DBSCAN, HDBSCAN)<br>- Low-dimensional Embeddings & Projections (t-SNE visualization)<br>- Clustering Evaluation Metrics |
-| **Tanya** | - Industrial Dataset Sourcing & Preparation<br>- Image Preprocessing & Augmentation Pipelines<br>- Deep Feature Extraction (ResNet50 backbone)<br>- Anomaly Detection Modeling & Anomaly Scoring |
+| Team Member | Core Focus | Implemented Modules & Deliverables |
+| :--- | :--- | :--- |
+| **Gayathri** | **Unsupervised Learning & Clustering** | - [`src/dimensionality_reduction.py`](src/dimensionality_reduction.py): Scaling, PCA, explained variance, optimal component analysis.<br>- [`src/clustering.py`](src/clustering.py): K-Means with Elbow method, DBSCAN, HDBSCAN, anomaly extraction.<br>- [`src/visualization.py`](src/visualization.py): 2D t-SNE projections with red anomaly markers, dual-axis scree plots, elbow curves.<br>- [`src/evaluation.py`](src/evaluation.py): Intrinsic clustering metrics (Silhouette, Davies-Bouldin, Calinski-Harabasz). |
+| **Tanya** | **Computer Vision & Anomaly Detection** | - [`src/feature_extraction.py`](src/feature_extraction.py): Pre-trained ResNet50 backbone, image transforms, batch feature extractor.<br>- [`src/anomaly_detection.py`](src/anomaly_detection.py): Nearest-neighbor Memory Bank detector, continuous anomaly scoring, Gaussian defect heatmaps.<br>- Dataset preparation & MVTec AD ingestion. |
+| **Shared** | **System Integration** | - [`run_pipeline.py`](run_pipeline.py): Orchestrates end-to-end execution and exports benchmark metrics.<br>- [`app/streamlit_app.py`](app/streamlit_app.py): Interactive Streamlit web application.<br>- [`notebooks/`](notebooks/): Exploratory Jupyter walkthrough notebooks. |
 
 ---
 
@@ -27,74 +30,95 @@ Industrial manufacturing lines require high-precision visual inspection to detec
 ```text
 industrial-anomaly-discovery/
 ├── .gitignore
+├── pytest.ini
 ├── README.md
 ├── requirements.txt
-├── datasets/                 # Raw and preprocessed industrial inspection datasets
-├── notebooks/                # Exploratory notebooks for data exploration and tuning
-├── src/                      # Modular Python package for the project
-│   ├── __init__.py           # Package initializer
+├── run_pipeline.py           # End-to-end pipeline runner
+├── datasets/                 # MVTec AD images, features.npy, labels.npy
+├── notebooks/                # Exploratory Jupyter notebooks
+│   └── 01_clustering_pipeline_walkthrough.ipynb
+├── src/                      # Modular Python package
+│   ├── __init__.py
 │   ├── dimensionality_reduction.py  # PCA & feature reduction routines
-│   ├── clustering.py         # K-Means, DBSCAN, and HDBSCAN implementations
-│   ├── visualization.py      # t-SNE projections, scree plots, cluster visualizations
-│   └── evaluation.py         # Metrics for clustering and anomaly detection
+│   ├── clustering.py         # K-Means, DBSCAN, and HDBSCAN
+│   ├── visualization.py      # t-SNE projections, scree plots, cluster figures
+│   ├── evaluation.py         # Clustering and anomaly metrics
+│   ├── feature_extraction.py # ResNet50 deep feature extractor
+│   └── anomaly_detection.py  # Memory bank detector and defect heatmaps
 ├── results/
-│   ├── plots/                # Exported figures, t-SNE scatter plots, and graphs
-│   └── metrics/              # CSV/JSON evaluation summaries and benchmark logs
-├── app/                      # Interactive user interface / dashboard (Streamlit)
-└── tests/                    # Unit and integration test suites (pytest)
+│   ├── plots/                # Exported figures (t-SNE, scree plots, elbow curves)
+│   └── metrics/              # clustering_benchmark.json
+├── app/
+│   └── streamlit_app.py      # Interactive Streamlit dashboard
+├── scripts/
+│   └── generate_sample_images.py # Industrial sample image generator
+└── tests/                    # Comprehensive unit test suite (27 tests)
+    ├── test_dimensionality_reduction.py
+    ├── test_clustering.py
+    ├── test_visualization.py
+    ├── test_evaluation.py
+    ├── test_feature_extraction.py
+    └── test_anomaly_detection.py
 ```
 
 ---
 
-## 4. Evaluation Framework
+## 4. Evaluation Metrics Framework
 
-To maintain scientific rigor and clear boundaries, evaluation is separated into two independent categories:
+Evaluation is strictly organized into two independent categories:
 
 ### A. Clustering Evaluation Metrics (Unsupervised / Intrinsic)
-Evaluates the geometric structure, cohesion, and separation of clusters in the feature space without requiring ground truth defect labels:
-- **Silhouette Coefficient**: Measures how similar an object is to its own cluster compared to neighboring clusters (range: $[-1, 1]$).
-- **Davies-Bouldin Index**: Evaluates the similarity between each cluster and its most similar one, where lower values signify tighter, well-separated clusters.
-- **Calinski-Harabasz Index (Variance Ratio Criterion)**: Computes the ratio of between-cluster dispersion to within-cluster dispersion, where higher values indicate better-defined clusters.
+Evaluates cluster cohesion, compactness, and separation directly in feature space without labels:
+- **Silhouette Coefficient**: $[-1.0 \text{ to } +1.0]$, higher indicates dense, well-separated clusters.
+- **Davies-Bouldin Index**: Lower is better; ratio of within-cluster scatter to inter-cluster separation.
+- **Calinski-Harabasz Index**: Higher is better; variance ratio criterion.
+- *Noise Exclusion*: DBSCAN/HDBSCAN noise points (`-1`) are filtered out during intrinsic evaluation to avoid distorting cluster compactness scores.
 
-### B. Anomaly Detection Metrics (Detection & Separation Performance)
-Evaluates how effectively the discovered clusters, outlier scores, or distance metrics distinguish normal products from defective components against ground-truth inspection labels (when available for validation):
-- **ROC-AUC (Area Under the Receiver Operating Characteristic Curve)**: Measures global ranking capability across all classification thresholds.
-- **PR-AUC (Precision-Recall Area Under Curve)**: Assesses performance under high class imbalance (defects are typically rare in industrial manufacturing).
-- **Precision, Recall, and F1-Score**: Evaluated at chosen decision boundaries / anomaly score thresholds.
+### B. Anomaly Detection Metrics (Supervised Validation / Extrinsic)
+Evaluates defect separation accuracy against held-out ground truth ($0$: Normal, $1$: Defective):
+- **ROC-AUC**: Global ranking accuracy across all classification thresholds.
+- **PR-AUC (Average Precision)**: Optimal for industrial datasets with high defect imbalance.
+- **Precision, Recall, and F1-Score**: Evaluated at the decision boundary.
 
 ---
 
 ## 5. Getting Started
 
-### Prerequisites
-- Python 3.10+
-- Recommended: Dedicated virtual environment (`venv` or `conda`)
+### 1. Environment Activation
+```powershell
+# Windows PowerShell
+.venv\Scripts\activate
+```
 
-### Installation
-1. Clone the repository and navigate into the project directory:
-   ```bash
-   cd industrial-anomaly-discovery
-   ```
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv .venv
-   # Windows:
-   .venv\Scripts\activate
-   # Linux/macOS:
-   source .venv/bin/activate
-   ```
-3. Install project dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### 2. Run the Full Unit Test Suite (All 27 Tests)
+```powershell
+pytest -v
+```
+
+### 3. Generate Sample Dataset & Extract ResNet50 Features
+```powershell
+# 1. Create sample industrial bottle images
+python scripts/generate_sample_images.py
+
+# 2. Extract 2048-dimensional ResNet50 features
+python -c "from src.feature_extraction import extract_and_save_dataset_features; extract_and_save_dataset_features('datasets/mvtec_ad/bottle')"
+```
+
+### 4. Execute the End-to-End Pipeline
+```powershell
+python run_pipeline.py
+```
+Outputs are automatically saved to `results/plots/` and `results/metrics/clustering_benchmark.json`.
+
+### 5. Launch the Interactive Streamlit Web App
+```powershell
+streamlit run app/streamlit_app.py
+```
 
 ---
 
-## 6. Execution Workflow Roadmap
-1. **Dataset Ingestion & Preparation** (`Tanya`): Place image datasets into `datasets/` and run preprocessing.
-2. **Deep Feature Extraction** (`Tanya`): Extract deep feature embeddings using pre-trained ResNet50.
-3. **Dimensionality Reduction** (`Gayathri`): Project embeddings using PCA in `src/dimensionality_reduction.py`.
-4. **Clustering & Outlier Identification** (`Gayathri`): Execute K-Means, DBSCAN, and HDBSCAN in `src/clustering.py`.
-5. **Visualization** (`Gayathri`): Generate t-SNE projections and cluster diagrams in `src/visualization.py`.
-6. **Evaluation** (`Gayathri` & `Tanya`): Calculate intrinsic clustering metrics and anomaly detection performance in `src/evaluation.py`.
-
+## 6. Real Industrial Data (MVTec AD)
+To test with official industrial datasets:
+1. Download categories (e.g., `bottle`, `cable`, `hazelnut`) from [MVTec AD](https://www.mvtec.com/research-teaching/datasets/mvtec-ad).
+2. Extract to `datasets/mvtec_ad/<category>/`.
+3. Run `python -c "from src.feature_extraction import extract_and_save_dataset_features; extract_and_save_dataset_features('datasets/mvtec_ad/<category>')"`.
