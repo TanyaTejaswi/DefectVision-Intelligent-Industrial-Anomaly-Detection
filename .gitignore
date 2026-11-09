@@ -62,13 +62,17 @@ dist/
 *.egg-info/
 
 # ==============================
-# Model and Large Generated Files
+# Model and Large Generated Files (>100MB GitHub limit)
 # ==============================
 *.h5
 *.hdf5
 *.onnx
 *.pt
 *.pth
+*.pkl
+*.npy
+!data/embeddings/metadata.csv
+
 
 # ==============================
 # Testing and Coverage
