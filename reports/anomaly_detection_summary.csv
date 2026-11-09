@@ -1,0 +1,4 @@
+category,auroc,auprc,f1_score,precision,recall,optimal_threshold
+bottle,0.9968,0.999,0.9756,1.0,0.9524,35.8783
+cable,0.8308,0.8828,0.8377,0.8081,0.8696,39.5373
+hazelnut,0.9936,0.9958,0.9929,0.9859,1.0,39.5638

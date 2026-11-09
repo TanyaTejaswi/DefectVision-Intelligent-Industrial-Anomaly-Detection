@@ -1,0 +1,9 @@
+{
+  "category": "hazelnut",
+  "auroc": 0.9936,
+  "auprc": 0.9958,
+  "f1_score": 0.9929,
+  "precision": 0.9859,
+  "recall": 1.0,
+  "optimal_threshold": 39.5638
+}

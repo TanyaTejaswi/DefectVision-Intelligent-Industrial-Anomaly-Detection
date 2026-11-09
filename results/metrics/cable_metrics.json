@@ -1,0 +1,9 @@
+{
+  "category": "cable",
+  "auroc": 0.8308,
+  "auprc": 0.8828,
+  "f1_score": 0.8377,
+  "precision": 0.8081,
+  "recall": 0.8696,
+  "optimal_threshold": 39.5373
+}
