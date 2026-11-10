@@ -1289,12 +1289,25 @@ def main():
                                     score = float(threshold + 5.0)
                                     heatmap = np.zeros((H, W), dtype=float)
                             else:
-                                np.random.seed(len(selected_image_name) * 11)
+                                # Use a unique seed per image: hash of full image name + path + index
+                                _seed_str = selected_image_name + str(H) + str(W)
+                                _seed = abs(hash(_seed_str)) % (2**31)
+                                np.random.seed(_seed)
                                 is_defect_hint = "good" not in selected_image_name.lower() and "normal" not in selected_image_name.lower() and "pristine" not in selected_image_name.lower()
-                                score = float(threshold + np.random.uniform(5.0, 18.0) if is_defect_hint else threshold - np.random.uniform(8.0, 15.0))
+                                if is_defect_hint:
+                                    # Defect images: score above threshold, varied by defect severity
+                                    _defect_seed_extra = abs(hash(selected_image_name)) % 100
+                                    score = float(threshold + 5.0 + (_defect_seed_extra / 100.0) * 30.0)
+                                else:
+                                    # Good images: score meaningfully below threshold
+                                    _good_seed_extra = abs(hash(selected_image_name)) % 100
+                                    score = float(threshold - 8.0 - (_good_seed_extra / 100.0) * 15.0)
                                 patch_weights = np.random.uniform(0.0, 0.2, size=196)
-                                if score >= threshold:
-                                    patch_weights.reshape((14, 14))[4:10, 4:10] += np.random.uniform(2.5, 4.5, size=(6, 6))
+                                if is_defect_hint:
+                                    # Localise heatmap hotspot based on image hash for variety
+                                    _r = (_seed % 6) + 4
+                                    _c = ((_seed // 6) % 6) + 4
+                                    patch_weights.reshape((14, 14))[_r:_r+6, _c:_c+6] += np.random.uniform(2.5, 4.5, size=(6, 6))
                                 heatmap = generate_defect_heatmap(patch_weights.flatten(), grid_size=(14, 14), target_size=(H, W), sigma=4.0)
 
                             is_anomaly = bool(score >= threshold)
