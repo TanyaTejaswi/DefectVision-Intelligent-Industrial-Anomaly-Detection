@@ -87,3 +87,12 @@ dist/
 .pytest_cache/
 .coverage
 htmlcov/
+
+
+# ==============================
+# Local Project Blueprints & Generator
+# ==============================
+DefectVision_Master_Project_Blueprint.pdf
+generate_master_blueprint_pdf.py
+DefectVision_Complete_Viva_Defense_Compendium.pdf
+generate_viva_defense_pdf.py

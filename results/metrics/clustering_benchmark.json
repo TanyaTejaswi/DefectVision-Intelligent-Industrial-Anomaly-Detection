@@ -3,6 +3,7 @@
         "input_samples": 165,
         "raw_dimensions": 2048,
         "pca_components": 120,
+<<<<<<< Updated upstream
         "retained_variance_ratio": 0.951433228821985
     },
     "clustering_evaluation_metrics (unsupervised)": {
@@ -10,6 +11,15 @@
             "silhouette_score": 0.4180747861815506,
             "davies_bouldin_index": 1.0342756594864186,
             "calinski_harabasz_index": 110.2258858632214,
+=======
+        "retained_variance_ratio": 0.9514332288219852
+    },
+    "clustering_evaluation_metrics (unsupervised)": {
+        "kmeans": {
+            "silhouette_score": 0.4180747861815505,
+            "davies_bouldin_index": 1.0342756594864186,
+            "calinski_harabasz_index": 110.22588586322135,
+>>>>>>> Stashed changes
             "evaluated_samples": 165,
             "evaluated_clusters": 3
         },
@@ -22,8 +32,13 @@
         },
         "hdbscan": {
             "silhouette_score": 0.3891024423733681,
+<<<<<<< Updated upstream
             "davies_bouldin_index": 0.7846823106928649,
             "calinski_harabasz_index": 108.07085001842977,
+=======
+            "davies_bouldin_index": 0.784682310692865,
+            "calinski_harabasz_index": 108.07085001842981,
+>>>>>>> Stashed changes
             "evaluated_samples": 165,
             "evaluated_clusters": 4
         }
