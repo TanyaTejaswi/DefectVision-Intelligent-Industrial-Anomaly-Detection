@@ -29,6 +29,20 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+# Setup authentication module
+AUTH_DIR = PROJECT_ROOT / "authentication"
+if str(AUTH_DIR) not in sys.path:
+    sys.path.insert(0, str(AUTH_DIR))
+
+try:
+    from session_manager import init_session, login_user, logout_user, is_logged_in, get_current_user, show_message, set_message
+    from auth_backend import authenticate_user
+    from database import init_db
+    HAS_AUTH = True
+    init_db()
+except Exception:
+    HAS_AUTH = False
+
 # Optional Plotly import with graceful fallback
 px: Any = None
 go: Any = None
@@ -675,11 +689,119 @@ def resolve_image_path(raw_path: str) -> Optional[Path]:
     return None
 
 
+def render_auth_portal():
+    """Renders the high-tech DefectVision authentication portal."""
+    _CSS_PATH = PROJECT_ROOT / "authentication" / "styles.css"
+    if _CSS_PATH.exists():
+        st.markdown(f"<style>{_CSS_PATH.read_text()}</style>", unsafe_allow_html=True)
+
+    page = st.session_state.get("auth_page", "login")
+
+    if page == "register":
+        import register as _reg
+        _reg.show()
+    elif page == "forgot_password":
+        import forgot_password as _fp
+        _fp.show()
+    else:
+        # Brand Hero
+        st.markdown("""
+        <div class="dv-brand">
+            <div class="dv-logo-ring">🔬</div>
+            <div class="dv-title">DEFECTVISION</div>
+            <div class="dv-subtitle">Intelligent Industrial Anomaly Detection</div>
+            <div class="dv-status">
+                <div class="dv-status-dot"></div>
+                SECURE OPERATOR PORTAL · AUTHENTICATED ACCESS ONLY
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        show_message()
+
+        col_l, col_m, col_r = st.columns([1, 2.6, 1])
+        with col_m:
+            st.markdown('<div class="dv-card">', unsafe_allow_html=True)
+            st.markdown('<div class="dv-card-title">🔐 Sign In to Inspection HUD</div>', unsafe_allow_html=True)
+            st.markdown('<div class="dv-card-desc">Enter your credentials to access the DefectVision industrial platform.</div>', unsafe_allow_html=True)
+
+            identifier = st.text_input("📧 Email or Username", placeholder="admin or you@company.com", key="auth_login_id")
+            password = st.text_input("🔑 Password", type="password", placeholder="••••••••••", key="auth_login_pw")
+
+            col_rem, col_forgot = st.columns([1, 1])
+            with col_rem:
+                remember_me = st.checkbox("Remember me", key="auth_login_rem")
+            with col_forgot:
+                st.markdown('<div style="text-align:right; margin-top:4px;">', unsafe_allow_html=True)
+                if st.button("Forgot password?", key="auth_go_forgot"):
+                    st.session_state.auth_page = "forgot_password"
+                    st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
+
+            st.markdown("<br>", unsafe_allow_html=True)
+
+            col_btn1, col_btn2 = st.columns([1.6, 1.2])
+            with col_btn1:
+                if st.button("🚀 Sign In", key="auth_btn_submit", type="primary", use_container_width=True):
+                    if not identifier or not password:
+                        st.error("⚠️ Please enter both username/email and password.")
+                    else:
+                        with st.spinner("Authenticating credentials with bcrypt..."):
+                            ok, msg, user = authenticate_user(identifier, password)
+                        if ok:
+                            login_user(user, remember_me=remember_me)
+                            st.success("✅ Login successful! Initializing Inspection Station...")
+                            st.rerun()
+                        else:
+                            st.error(f"❌ {msg}")
+
+            with col_btn2:
+                if st.button("⚡ Viva Demo Mode", key="auth_demo_btn", use_container_width=True, help="One-click bypass for university viva presentation"):
+                    demo_user = {
+                        "user_id": 1,
+                        "full_name": "Tanya (Project Lead)",
+                        "username": "admin",
+                        "email": "admin@defectvision.industrial",
+                        "role": "admin"
+                    }
+                    login_user(demo_user, remember_me=True)
+                    st.rerun()
+
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            # Quick credentials helper for viva defense
+            st.info("💡 **Viva Defense Credentials**: Username: `admin` &bull; Password: `DefectVision@Admin2026!` *(Or click **⚡ Viva Demo Mode** to enter instantly)*.")
+
+            # Register link
+            st.markdown('<div style="text-align:center; margin-top:1rem;">', unsafe_allow_html=True)
+            st.markdown("""<span style="color:#64748B; font-size:0.85rem;">Don't have an account?&nbsp;</span>""", unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('<div class="dv-link-btn">', unsafe_allow_html=True)
+            if st.button("✨ Create Account", key="auth_go_register", use_container_width=True):
+                st.session_state.auth_page = "register"
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            # Footer
+            st.markdown("""
+            <div style="text-align:center; margin-top:2rem; color:#334155; font-size:0.72rem; letter-spacing:0.08em;">
+                DEFECTVISION · INDUSTRIAL AI PLATFORM · SECURED BY BCRYPT (12 ROUNDS)
+            </div>
+            """, unsafe_allow_html=True)
+
+
 # ----------------------------------------------------------------------------
 # MAIN APPLICATION CONTROLLER
 # ----------------------------------------------------------------------------
 
 def main():
+    # Enforce Authentication Portal
+    if HAS_AUTH:
+        init_session()
+        if not is_logged_in():
+            render_auth_portal()
+            return
+
     # Initialize session state for selected product category & sample
     if "selected_category" not in st.session_state:
         st.session_state["selected_category"] = "bottle"
@@ -747,6 +869,26 @@ def main():
     # SIDEBAR: ADVANCED CONFIGURATION & CONTROLS (WITHOUT TEAM DIVISION)
     # ------------------------------------------------------------------------
     with st.sidebar:
+        curr_user = get_current_user() if HAS_AUTH else None
+        if curr_user:
+            role_badge_color = "#10B981" if curr_user.get("role") == "admin" else "#38BDF8"
+            st.markdown(f"""
+            <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 10px; padding: 12px; margin-bottom: 14px;">
+                <div style="font-size: 0.72rem; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.8px;">🔐 Authenticated Operator</div>
+                <div style="font-weight: 700; color: #F8FAFC; font-size: 0.95rem; margin-top: 3px;">{curr_user.get('full_name', curr_user.get('username', 'Operator'))}</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                    <span style="font-size: 0.75rem; background: rgba(0,242,254,0.1); color: {role_badge_color}; border: 1px solid {role_badge_color}44; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; font-weight: 700; font-family: 'JetBrains Mono';">
+                        {str(curr_user.get('role', 'operator')).upper()}
+                    </span>
+                    <span style="font-size: 0.72rem; color: #64748B;">ID: #{curr_user.get('user_id', 1):03d}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("🚪 Sign Out", key="sidebar_logout_btn", use_container_width=True):
+                logout_user()
+                st.rerun()
+            st.markdown("---")
+
         st.markdown("### 🎛️ Control Terminal")
         st.caption("Industrial Vision Inspection Configuration")
 
