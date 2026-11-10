@@ -41,50 +41,84 @@ The DefectVision framework is organized into three parallel engineering tracks:
 ```
 DefectVision/
 ├── app/
-│   └── streamlit_app.py            # Production Streamlit inspection & analytics app
+│   └── streamlit_app.py                    # Production Streamlit inspection & analytics app (3-tab HUD)
+├── authentication/
+│   ├── config/
+│   │   └── settings.py                     # Auth configuration & role definitions
+│   ├── database/
+│   │   └── auth_users.db                   # [Excluded in Git] SQLite user store (WAL mode)
+│   ├── auth_backend.py                     # bcrypt password hashing & user validation
+│   ├── login.py                            # Login portal UI
+│   ├── register.py                         # New user registration UI
+│   ├── forgot_password.py                  # Password reset UI
+│   ├── session_manager.py                  # Session state & remember-me logic
+│   ├── user_dashboard.py                   # Operator/engineer dashboard
+│   ├── admin_dashboard.py                  # Admin management panel
+│   ├── styles.css                          # Auth portal custom CSS
+│   └── requirements-auth.txt              # Auth-specific dependencies
 ├── .streamlit/
-│   ├── config.toml                 # Streamlit server and UI configurations
-│   └── credentials.toml            # Streamlit client configurations
+│   ├── config.toml                         # Streamlit server and UI configurations
+│   └── credentials.toml                   # Streamlit client configurations
 ├── data/
-│   ├── mvtec/                      # [Excluded in Git] MVTec categories (bottle, cable, hazelnut)
+│   ├── mvtec/                              # [Excluded in Git] MVTec categories (bottle, cable, hazelnut)
+│   │   ├── bottle/  (train/, test/, ground_truth/)
+│   │   ├── cable/   (train/, test/, ground_truth/)
+│   │   └── hazelnut/(train/, test/, ground_truth/)
 │   └── embeddings/
-│       └── metadata.csv            # Master image metadata index (1,167 samples)
+│       └── metadata.csv                   # Master image metadata index (1,167 samples)
 ├── models/
-│   ├── .gitkeep                    # Directory anchor (tracked in Git)
-│   ├── memory_bank_bottle.pkl      # [Excluded in Git] Generated Bottle memory bank
-│   ├── memory_bank_cable.pkl       # [Excluded in Git] Generated Cable memory bank
-│   └── memory_bank_hazelnut.pkl    # [Excluded in Git] Generated Hazelnut memory bank
+│   ├── .gitkeep                            # Directory anchor (tracked in Git)
+│   ├── memory_bank_bottle.pkl              # [Excluded in Git] Bottle PatchCore memory bank
+│   ├── memory_bank_cable.pkl               # [Excluded in Git] Cable PatchCore memory bank
+│   └── memory_bank_hazelnut.pkl            # [Excluded in Git] Hazelnut PatchCore memory bank
 ├── notebooks/
-│   ├── 01_dataset_exploration.ipynb
-│   ├── 02_feature_extraction_and_anomaly_detection.ipynb  # End-to-end executed training notebook
-│   └── 03_pca_and_clustering.ipynb # Unsupervised learning & clustering notebook
+│   ├── 01_dataset_exploration.ipynb        # Dataset EDA & sample visualization
+│   ├── 01_clustering_pipeline_walkthrough.ipynb  # Chandan's clustering walkthrough
+│   ├── 02_feature_extraction_and_anomaly_detection.ipynb  # Tanya Tejaswi's training notebook
+│   └── 03_pca_and_clustering.ipynb         # Chandan's PCA, t-SNE, K-Means & DBSCAN notebook
 ├── reports/
-│   └── anomaly_detection_summary.csv # Master multi-category performance scoreboard
+│   └── anomaly_detection_summary.csv       # Master multi-category performance scoreboard
 ├── results/
-│   ├── metrics/                    # Category-level JSON evaluation metrics
+│   ├── metrics/                            # Category-level JSON evaluation metrics
 │   │   ├── bottle_metrics.json
 │   │   ├── cable_metrics.json
-│   │   └── hazelnut_metrics.json
-│   └── plots/                      # Evaluation curves & defect localization samples
+│   │   ├── hazelnut_metrics.json
+│   │   └── clustering_benchmark.json       # Chandan's clustering evaluation metrics
+│   └── plots/                              # Evaluation curves & defect localization samples
 │       ├── bottle_roc_pr.png
 │       ├── bottle_sample_0.png, 1.png, 2.png
 │       ├── cable_roc_pr.png
 │       ├── cable_sample_0.png, 1.png, 2.png
 │       ├── hazelnut_roc_pr.png
-│       └── hazelnut_sample_0.png, 1.png, 2.png
+│       ├── hazelnut_sample_0.png, 1.png, 2.png
+│       ├── pca_scree.png                   # PCA explained variance scree plot
+│       ├── tsne_kmeans.png                 # t-SNE coloured by K-Means cluster
+│       ├── tsne_dbscan.png                 # t-SNE coloured by DBSCAN labels
+│       └── kmeans_elbow.png                # K-Means elbow curve
+├── scripts/
+│   └── generate_sample_images.py           # Utility to generate dataset sample previews
 ├── src/
 │   ├── __init__.py
-│   ├── preprocessing.py            # Dataset loaders & image normalization
-│   ├── feature_extraction.py       # ResNet-50 patch and global feature extractor
-│   ├── anomaly_detection.py        # PatchCore memory bank & inference engine
-│   ├── dimensionality_reduction.py # PCA scree analysis & t-SNE projections
-│   ├── clustering.py               # K-Means elbow, DBSCAN, & outlier detection
-│   ├── visualization.py            # Heatmap smoothing & JET overlay rendering
-│   └── evaluation.py               # Image-level AUROC, AUPRC & clustering metrics
-├── run_tanya_pipeline.py           # Standalone headless CLI batch training pipeline
+│   ├── preprocessing.py                    # Dataset loaders & image normalization
+│   ├── feature_extraction.py               # ResNet-50 patch and global feature extractor
+│   ├── anomaly_detection.py                # PatchCore memory bank & inference engine
+│   ├── dimensionality_reduction.py         # PCA scree analysis & t-SNE projections
+│   ├── clustering.py                       # K-Means elbow, DBSCAN & outlier detection
+│   ├── visualization.py                    # Heatmap smoothing & JET overlay rendering
+│   └── evaluation.py                       # Image-level AUROC, AUPRC & clustering metrics
+├── tests/
+│   ├── test_anomaly_detection.py
+│   ├── test_clustering.py
+│   ├── test_dimensionality_reduction.py
+│   ├── test_evaluation.py
+│   ├── test_feature_extraction.py
+│   └── test_visualization.py
+├── run_tanya_pipeline.py                   # Tanya Tejaswi's headless CLI batch training pipeline
+├── run_pipeline.py                         # Shared pipeline runner (Gayatri U & Tanya Tejaswi)
+├── pytest.ini                              # pytest configuration
 ├── requirements.txt
 ├── .gitignore
-├── license.txt                     # CC BY-NC-SA 4.0 License
+├── license.txt                             # CC BY-NC-SA 4.0 License
 └── README.md
 ```
 
