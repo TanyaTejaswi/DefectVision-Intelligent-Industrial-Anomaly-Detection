@@ -113,7 +113,7 @@ DefectVision/
 │   ├── test_evaluation.py
 │   ├── test_feature_extraction.py
 │   └── test_visualization.py
-├── run_tanya_pipeline.py                   # Tanya Tejaswi's headless CLI batch training pipeline
+├── run_pipeline_m1.py                      # Tanya Tejaswi's headless CLI batch training pipeline
 ├── run_pipeline.py                         # Shared pipeline runner (Gayatri U & Tanya Tejaswi)
 ├── pytest.ini                              # pytest configuration
 ├── requirements.txt
