@@ -128,14 +128,14 @@ DefectVision/
 - **Memory Bank & Scoring**: Nearest-neighbor patch distance scoring, coreset subsampling, Gaussian heatmap smoothing ($\sigma=4.0$), and JET overlays.
 - **Evaluation & Metrics**: AUROC (99.68% bottle, 99.36% hazelnut), AUPRC (99.90%), F1 optimization, and model serialization (`models/memory_bank_{category}.pkl`).
 
-### 2. Member 2: Chandan (Unsupervised Learning & Dimensionality Reduction Lead) [TO-DO]
+### 2. Member 2: Chandan (Unsupervised Learning & Dimensionality Reduction Lead) [100% DONE]
 - **Feature Scaling**: Standard normalization across 2048-dimensional feature vectors (`src/dimensionality_reduction.py`).
 - **PCA Decomposition**: Scree plots, cumulative explained variance analysis (90% and 95% retention).
 - **t-SNE Manifold Learning**: Non-linear 2D projections across perplexity settings (15, 30, 50).
 - **Unsupervised Clustering**: K-Means elbow/silhouette optimization, DBSCAN density-based noise outlier detection (`src/clustering.py`).
 - **Validation Metrics**: Evaluation via Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index, Adjusted Rand Index (ARI), and Normalized Mutual Information (NMI).
 
-### 3. Member 3: Gayatri U (Full-Stack MLOps & Dashboard Application Lead) [ACTIVE]
+### 3. Member 3: Gayatri U (Full-Stack MLOps & Dashboard Application Lead) [100% DONE]
 - **Production Dashboard**: 3-Tab interactive Streamlit application (`app/streamlit_app.py`) running on port 8501:
   - **Tab 1: Live Defect Inspector & Benchmarks**: Real-time image upload or sample picker, PatchCore memory bank querying, dynamic threshold slider, verdict badge (NORMAL vs DEFECT DETECTED), 3-panel visualization (Original, Heatmap, Overlay), Tanya Tejaswi's official scoreboard, and evaluation curves (ROC/PR).
   - **Tab 2: Interactive Plotly Cluster Explorer**: 2D/3D PCA & t-SNE scatter plots with hover metadata tooltips and category filtering.
