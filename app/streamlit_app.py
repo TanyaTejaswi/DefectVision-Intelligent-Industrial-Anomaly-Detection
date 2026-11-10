@@ -11,11 +11,12 @@ Architecture:
 """
 
 from pathlib import Path
-from typing import Optional, List, Dict, Tuple
+from typing import Any, Optional, List, Dict, Tuple
 import os
 import sys
 import json
 import pickle
+import importlib
 import numpy as np
 import pandas as pd
 from PIL import Image
@@ -29,24 +30,28 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # Optional Plotly import with graceful fallback
+px: Any = None
+go: Any = None
+HAS_PLOTLY: bool = False
 try:
-    import plotly.express as px
-    import plotly.graph_objects as go
+    px = importlib.import_module("plotly.express")
+    go = importlib.import_module("plotly.graph_objects")
     HAS_PLOTLY = True
-except ImportError:
+except Exception:
     HAS_PLOTLY = False
 
 # Import core modules
 from src.anomaly_detection import MemoryBankAnomalyDetector, generate_defect_heatmap, overlay_heatmap
 
-HAS_TORCH = False
-DeepFeatureExtractor = None
-get_image_transform = None
+HAS_TORCH: bool = False
+DeepFeatureExtractor: Any = None
+get_image_transform: Any = None
 try:
-    import torch
-    from src.feature_extraction import DeepFeatureExtractor, get_image_transform
-    HAS_TORCH = True
-except (ImportError, Exception):
+    _fe = importlib.import_module("src.feature_extraction")
+    DeepFeatureExtractor = getattr(_fe, "DeepFeatureExtractor", None)
+    get_image_transform = getattr(_fe, "get_image_transform", None)
+    HAS_TORCH = DeepFeatureExtractor is not None and get_image_transform is not None
+except Exception:
     HAS_TORCH = False
 
 
@@ -341,7 +346,7 @@ st.markdown("""
 @st.dialog("🛰️ DefectVision Engineering Blueprint & Architecture", width="large")
 def show_architecture_dialog():
     """Interactive modal showing the end-to-end PatchCore vision architecture."""
-    st.markdown("""
+    st.markdown(r"""
     ### 🔬 PatchCore Anomaly Detection Mathematical Formulation
     DefectVision implements the state-of-the-art **PatchCore** unsupervised anomaly detection paradigm 
     tailored for sub-millimeter industrial quality inspection on the **MVTec AD** benchmark.
@@ -399,7 +404,7 @@ def show_scorecard_dialog():
         """, unsafe_allow_html=True)
 
     st.markdown("#### 📐 Key Takeaways & Quality Control Insights")
-    st.markdown("""
+    st.markdown(r"""
     - **Near-Perfect Bottle Detection:** 100% precision achieved at an optimal anomaly threshold of `35.8783`. Zero false positives on clean bottles.
     - **Sub-Millimeter Defect Sensitivity:** The $\sigma=4.0$ Gaussian-smoothed patch heatmaps precisely isolate hairline cracks (`broken_large`) and surface dirt (`contamination`).
     - **Balanced Industrial Trade-Off:** The decision boundary maximizes the harmonic F1 score across all candidate precision-recall thresholds.
@@ -1269,7 +1274,7 @@ def main():
 
             filtered_df = coords_df if selected_cat == "All Categories" else coords_df[coords_df["category"] == selected_cat]
 
-            if HAS_PLOTLY:
+            if HAS_PLOTLY and px is not None:
                 hover_data = ["category", "defect_type", "cluster_kmeans"]
                 if "image_id" in filtered_df.columns:
                     hover_data.insert(0, "image_id")
