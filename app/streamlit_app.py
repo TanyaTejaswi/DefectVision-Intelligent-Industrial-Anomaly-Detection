@@ -719,29 +719,27 @@ def render_auth_portal():
 
         show_message()
 
-        col_l, col_m, col_r = st.columns([1, 2.6, 1])
+        col_l, col_m, col_r = st.columns([1, 2.2, 1])
         with col_m:
-            st.markdown('<div class="dv-card">', unsafe_allow_html=True)
-            st.markdown('<div class="dv-card-title">🔐 Sign In to Inspection HUD</div>', unsafe_allow_html=True)
-            st.markdown('<div class="dv-card-desc">Enter your credentials to access the DefectVision industrial platform.</div>', unsafe_allow_html=True)
+            with st.container(border=True):
+                st.markdown("### 🔐 Sign In to Inspection HUD")
+                st.caption("Enter your credentials to access the DefectVision industrial platform.")
 
-            identifier = st.text_input("📧 Email or Username", placeholder="admin or you@company.com", key="auth_login_id")
-            password = st.text_input("🔑 Password", type="password", placeholder="••••••••••", key="auth_login_pw")
+                identifier = st.text_input("📧 Email or Username", placeholder="admin or you@company.com", key="auth_login_id")
+                password = st.text_input("🔑 Password", type="password", placeholder="••••••••••", key="auth_login_pw")
 
-            col_rem, col_forgot = st.columns([1, 1])
-            with col_rem:
-                remember_me = st.checkbox("Remember me", key="auth_login_rem")
-            with col_forgot:
-                st.markdown('<div style="text-align:right; margin-top:4px;">', unsafe_allow_html=True)
-                if st.button("Forgot password?", key="auth_go_forgot"):
-                    st.session_state.auth_page = "forgot_password"
-                    st.rerun()
-                st.markdown('</div>', unsafe_allow_html=True)
+                col_rem, col_forgot = st.columns([1, 1])
+                with col_rem:
+                    remember_me = st.checkbox("Remember me", key="auth_login_rem")
+                with col_forgot:
+                    st.markdown('<div style="text-align:right; margin-top:4px;">', unsafe_allow_html=True)
+                    if st.button("Forgot password?", key="auth_go_forgot"):
+                        st.session_state.auth_page = "forgot_password"
+                        st.rerun()
+                    st.markdown('</div>', unsafe_allow_html=True)
 
-            st.markdown("<br>", unsafe_allow_html=True)
+                st.markdown("<br>", unsafe_allow_html=True)
 
-            col_btn1, col_btn2 = st.columns([1.6, 1.2])
-            with col_btn1:
                 if st.button("🚀 Sign In", key="auth_btn_submit", type="primary", use_container_width=True):
                     if not identifier or not password:
                         st.error("⚠️ Please enter both username/email and password.")
@@ -754,23 +752,6 @@ def render_auth_portal():
                             st.rerun()
                         else:
                             st.error(f"❌ {msg}")
-
-            with col_btn2:
-                if st.button("⚡ Viva Demo Mode", key="auth_demo_btn", use_container_width=True, help="One-click bypass for university viva presentation"):
-                    demo_user = {
-                        "user_id": 1,
-                        "full_name": "Tanya (Project Lead)",
-                        "username": "admin",
-                        "email": "admin@defectvision.industrial",
-                        "role": "admin"
-                    }
-                    login_user(demo_user, remember_me=True)
-                    st.rerun()
-
-            st.markdown('</div>', unsafe_allow_html=True)
-
-            # Quick credentials helper for viva defense
-            st.info("💡 **Viva Defense Credentials**: Username: `admin` &bull; Password: `DefectVision@Admin2026!` *(Or click **⚡ Viva Demo Mode** to enter instantly)*.")
 
             # Register link
             st.markdown('<div style="text-align:center; margin-top:1rem;">', unsafe_allow_html=True)
