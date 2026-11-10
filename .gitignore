@@ -1,11 +1,14 @@
-# Byte-compiled / optimized / Python cache
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyo
 *.so
 
-# Environments
+# Virtual environments
 .env
+.env.*
+!.env.example
 .venv/
 env/
 venv/
@@ -13,29 +16,53 @@ ENV/
 env.bak/
 venv.bak/
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints
-
-# Datasets (ignore raw and extracted dataset files, keep directory structure)
+# Raw datasets and archives
+data/mvtec/
 datasets/*
 !datasets/.gitkeep
+*.tar.xz
+*.tar.gz
+*.tar
+*.zip
 
-# Results and artifacts (ignore generated outputs, keep directory structure)
+# Generated results
 results/plots/*
 !results/plots/.gitkeep
 results/metrics/*
 !results/metrics/.gitkeep
+
+# Generated model files
+*.h5
+*.hdf5
+*.onnx
+*.pt
+*.pth
+
+# Jupyter notebooks
+.ipynb_checkpoints/
 
 # Testing and coverage
 .pytest_cache/
 .coverage
 htmlcov/
 
-# IDE and OS files
+# IDE files
 .vscode/
 .idea/
-*.swp
-*.swo
+
+# Operating system files
 .DS_Store
 Thumbs.db
+desktop.ini
+*.swp
+*.swo
 
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# Build files
+build/
+dist/
+*.egg-info/

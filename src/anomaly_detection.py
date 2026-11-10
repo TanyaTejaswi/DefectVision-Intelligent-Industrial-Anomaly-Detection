@@ -1,32 +1,34 @@
 """
 Anomaly Detection Module
-Responsibility: Tanya (Computer Vision & Anomaly Detection Lead)
 
-This module implements:
-1. Memory-Bank Anomaly Detector:
-   - Stores feature embeddings from normal (defect-free) training images.
-   - Computes k-Nearest Neighbor distances for test images / patches.
-2. Anomaly Scoring:
-   - Derives continuous anomaly scores based on distance to nearest normal pattern.
-3. Defect Localization Heatmaps:
-   - Converts patch-level distances into spatial anomaly heatmaps using Gaussian smoothing.
-   - Blends defect heatmaps with original industrial inspection photos.
+Implements memory-bank and PatchCore-style nearest-neighbour
+anomaly detection for industrial quality inspection.
+
+Features:
+1. Builds a memory bank using normal (defect-free) features.
+2. Calculates anomaly scores using nearest-neighbour distances.
+3. Predicts normal or anomalous samples using a threshold.
+4. Generates spatial defect localization heatmaps.
+5. Overlays heatmaps onto original inspection images.
+6. Supports image-level and batch-level anomaly prediction.
 """
 
-from typing import Tuple, Optional, Dict, Any, List
-import os
+from typing import Tuple, Optional
 import numpy as np
-from sklearn.neighbors import NearestNeighbors
-from scipy.ndimage import gaussian_filter
 import matplotlib.pyplot as plt
+
+from scipy.ndimage import gaussian_filter, zoom
+from sklearn.neighbors import NearestNeighbors
+from PIL import Image
 
 
 class MemoryBankAnomalyDetector:
     """
-    Nearest-Neighbor Memory Bank Anomaly Detector for industrial quality inspection.
-    Learns the distribution of defect-free products by building a reference bank
-    of normal embeddings and scoring test samples based on their Euclidean distance
-    to the closest normal neighbors.
+    PatchCore-style nearest-neighbour memory bank detector.
+
+    The memory bank is built using only normal training features.
+    Test features are compared against this bank to calculate
+    anomaly scores and identify potential defects.
     """
 
     def __init__(
@@ -34,98 +36,208 @@ class MemoryBankAnomalyDetector:
         n_neighbors: int = 1,
         metric: str = "euclidean",
         subsample_ratio: float = 1.0,
+        gaussian_sigma: float = 4.0,
         random_state: int = 42
     ):
-        """
-        Args:
-            n_neighbors: Number of nearest neighbors to query (default: 1).
-            metric: Distance metric ('euclidean', 'cosine', etc.).
-            subsample_ratio: Fraction of normal features to retain in memory bank (0.0 to 1.0).
-            random_state: Random state for reproducible subsampling.
-        """
         self.n_neighbors = n_neighbors
         self.metric = metric
         self.subsample_ratio = subsample_ratio
+        self.gaussian_sigma = gaussian_sigma
         self.random_state = random_state
 
         self.memory_bank: Optional[np.ndarray] = None
         self.nn_model: Optional[NearestNeighbors] = None
+
+        # Alias retained for compatibility with Tanya's implementation.
+        self.nn_index: Optional[NearestNeighbors] = None
+
         self.threshold: Optional[float] = None
 
     def fit(self, normal_features: np.ndarray) -> "MemoryBankAnomalyDetector":
         """
-        Builds the memory bank using only normal (good) product features.
+        Builds the memory bank using normal training features.
 
         Args:
-            normal_features: Feature matrix of shape (n_normal_samples, n_dimensions).
+            normal_features: Array of shape (N, feature_dimensions).
 
         Returns:
-            self: Fitted detector instance.
+            Fitted detector.
         """
+
         if normal_features.ndim != 2:
-            raise ValueError(f"Features must be 2D array, got shape {normal_features.shape}")
+            raise ValueError("Features must be a 2D array.")
 
         n_samples = normal_features.shape[0]
+
         if n_samples == 0:
-            raise ValueError("Cannot fit memory bank with 0 samples.")
+            raise ValueError("Cannot fit memory bank with zero samples.")
 
-        # Subsample memory bank if requested (useful for large patch banks)
-        if 0.0 < self.subsample_ratio < 1.0:
-            np.random.seed(self.random_state)
-            sample_count = max(1, int(n_samples * self.subsample_ratio))
-            indices = np.random.choice(n_samples, size=sample_count, replace=False)
-            self.memory_bank = normal_features[indices]
+        if not 0 < self.subsample_ratio <= 1:
+            raise ValueError("subsample_ratio must be greater than 0 and at most 1.")
+
+        if self.n_neighbors < 1:
+            raise ValueError("n_neighbors must be at least 1.")
+
+        # Reproducible memory-bank subsampling
+        if self.subsample_ratio < 1.0:
+            rng = np.random.RandomState(self.random_state)
+
+            sample_count = max(
+                1,
+                int(n_samples * self.subsample_ratio)
+            )
+
+            indices = rng.choice(
+                n_samples,
+                size=sample_count,
+                replace=False
+            )
+
+            self.memory_bank = normal_features[indices].copy()
+
         else:
-            self.memory_bank = np.copy(normal_features)
+            self.memory_bank = normal_features.copy()
 
-        # Fit nearest neighbors model on normal memory bank
+        # Fit nearest-neighbour model
         k = min(self.n_neighbors, self.memory_bank.shape[0])
-        self.nn_model = NearestNeighbors(n_neighbors=k, metric=self.metric, algorithm="auto")
+
+        self.nn_model = NearestNeighbors(
+            n_neighbors=k,
+            metric=self.metric,
+            algorithm="auto"
+        )
+
         self.nn_model.fit(self.memory_bank)
 
-        # Compute training baseline distances to set default threshold (95th percentile)
-        distances, _ = self.nn_model.kneighbors(self.memory_bank)
-        mean_distances = np.mean(distances, axis=1)
-        self.threshold = float(np.percentile(mean_distances, 95.0))
+        # Compatibility alias
+        self.nn_index = self.nn_model
+
+        # Calculate training baseline threshold
+        distances, _ = self.nn_model.kneighbors(
+            self.memory_bank,
+            n_neighbors=k
+        )
+
+        # Exclude self-distance when possible
+        if k > 1:
+            training_distances = np.mean(distances[:, 1:], axis=1)
+        else:
+            training_distances = distances[:, 0]
+
+        self.threshold = float(
+            np.percentile(training_distances, 95)
+        )
+
+        print(
+            f"Memory bank built with {self.memory_bank.shape[0]} "
+            f"normal feature vectors."
+        )
 
         return self
 
-    def predict_anomaly_scores(self, features: np.ndarray) -> np.ndarray:
+    def predict_anomaly_scores(
+        self,
+        features: np.ndarray
+    ) -> np.ndarray:
         """
-        Computes anomaly scores for test samples based on distance to nearest normal neighbor.
+        Calculates anomaly scores for test features.
 
-        Args:
-            features: Test feature matrix of shape (n_test_samples, n_dimensions).
-
-        Returns:
-            scores: Continuous anomaly scores of shape (n_test_samples,).
+        Higher scores indicate greater deviation from normal patterns.
         """
-        if self.nn_model is None or self.memory_bank is None:
-            raise ValueError("The detector has not been fitted yet. Call fit() first.")
+
+        if self.nn_model is None:
+            raise RuntimeError("Call fit() before prediction.")
+
         if features.ndim != 2:
-            raise ValueError(f"Features must be 2D array, got shape {features.shape}")
+            raise ValueError("Features must be a 2D array.")
 
         distances, _ = self.nn_model.kneighbors(features)
-        # Average distance across the k nearest normal neighbors
-        scores = np.mean(distances, axis=1)
-        return scores
 
-    def predict(self, features: np.ndarray, threshold: Optional[float] = None) -> np.ndarray:
+        return distances[:, -1]
+
+    def predict(
+        self,
+        features: np.ndarray,
+        threshold: Optional[float] = None
+    ) -> np.ndarray:
         """
-        Predicts binary labels: 0 for Normal, 1 for Anomaly/Defect.
+        Predicts binary labels.
 
-        Args:
-            features: Test feature matrix of shape (n_test_samples, n_dimensions).
-            threshold: Cutoff score. If None, uses the 95th percentile training threshold.
-
-        Returns:
-            binary_predictions: Array of shape (n_test_samples,) with 0s and 1s.
+        0 = Normal
+        1 = Anomaly
         """
+
         scores = self.predict_anomaly_scores(features)
+
         cutoff = self.threshold if threshold is None else threshold
+
         if cutoff is None:
             cutoff = float(np.median(scores))
+
         return (scores >= cutoff).astype(int)
+
+    def predict_image_and_map(
+        self,
+        patch_features: np.ndarray,
+        spatial_grid: Tuple[int, int] = (28, 28),
+        target_size: Tuple[int, int] = (224, 224)
+    ) -> Tuple[float, np.ndarray]:
+        """
+        Calculates an image-level anomaly score and localization map.
+
+        Args:
+            patch_features: Array of shape (H*W, feature_dimensions).
+            spatial_grid: Height and width of the patch feature grid.
+            target_size: Output heatmap dimensions (H, W).
+
+        Returns:
+            image_score: Maximum patch-level anomaly score.
+            anomaly_map: Upsampled spatial anomaly heatmap.
+        """
+
+        if self.nn_model is None:
+            raise RuntimeError("Call fit() before prediction.")
+
+        distances, _ = self.nn_model.kneighbors(patch_features)
+
+        patch_scores = distances[:, -1]
+
+        image_score = float(np.max(patch_scores))
+
+        expected_patches = spatial_grid[0] * spatial_grid[1]
+
+        if len(patch_scores) != expected_patches:
+            raise ValueError(
+                f"Expected {expected_patches} patches, "
+                f"but received {len(patch_scores)}."
+            )
+
+        anomaly_map = generate_defect_heatmap(
+            patch_scores,
+            grid_size=spatial_grid,
+            target_size=target_size,
+            sigma=self.gaussian_sigma
+        )
+
+        return image_score, anomaly_map
+
+    def predict_batch_scores(
+        self,
+        image_patch_list: list
+    ) -> np.ndarray:
+        """
+        Calculates image-level anomaly scores for multiple images.
+
+        Each element contains the patch features of one image.
+        """
+
+        scores = []
+
+        for patches in image_patch_list:
+            image_score, _ = self.predict_image_and_map(patches)
+            scores.append(image_score)
+
+        return np.array(scores)
 
 
 def generate_defect_heatmap(
@@ -135,35 +247,36 @@ def generate_defect_heatmap(
     sigma: float = 2.0
 ) -> np.ndarray:
     """
-    Converts 1D patch-level anomaly scores into a smooth 2D defect localization heatmap.
-
-    Args:
-        patch_scores: Array of anomaly scores for each spatial patch (e.g. 196 scores for 14x14).
-        grid_size: Spatial grid dimensions (H_grid, W_grid) matching patch layout.
-        target_size: Target image dimensions (H_img, W_img).
-        sigma: Standard deviation for Gaussian smoothing filter.
-
-    Returns:
-        heatmap: Normalized 2D anomaly heatmap of shape (H_img, W_img) with values in [0.0, 1.0].
+    Converts patch-level anomaly scores into a smooth 2D heatmap.
     """
-    total_patches = grid_size[0] * grid_size[1]
-    if len(patch_scores) != total_patches:
-        raise ValueError(f"Expected {total_patches} patch scores for grid {grid_size}, got {len(patch_scores)}")
 
-    # Reshape to 2D patch grid
+    total_patches = grid_size[0] * grid_size[1]
+
+    if len(patch_scores) != total_patches:
+        raise ValueError(
+            f"Expected {total_patches} patch scores, "
+            f"but received {len(patch_scores)}."
+        )
+
     grid_2d = patch_scores.reshape(grid_size)
 
-    # Apply Gaussian smoothing to blend discrete patch borders
-    smoothed_grid = gaussian_filter(grid_2d, sigma=sigma)
+    smoothed_grid = gaussian_filter(
+        grid_2d,
+        sigma=sigma
+    )
 
-    # Resize/interpolate to full image dimensions using bilinear interpolation
     zoom_y = target_size[0] / grid_size[0]
     zoom_x = target_size[1] / grid_size[1]
-    from scipy.ndimage import zoom
-    heatmap = zoom(smoothed_grid, (zoom_y, zoom_x), order=1)
 
-    # Normalize heatmap between 0.0 and 1.0
-    min_val, max_val = np.min(heatmap), np.max(heatmap)
+    heatmap = zoom(
+        smoothed_grid,
+        (zoom_y, zoom_x),
+        order=1
+    )
+
+    min_val = np.min(heatmap)
+    max_val = np.max(heatmap)
+
     if max_val > min_val:
         heatmap = (heatmap - min_val) / (max_val - min_val)
     else:
@@ -179,18 +292,11 @@ def overlay_heatmap(
     colormap: str = "jet"
 ) -> np.ndarray:
     """
-    Overlays a colored defect heatmap onto an inspection image.
+    Overlays a colored anomaly heatmap onto an RGB image.
 
-    Args:
-        image: Original image as RGB numpy array of shape (H, W, 3), range [0, 255] or [0, 1].
-        heatmap: 2D anomaly heatmap of shape (H, W), range [0.0, 1.0].
-        alpha: Heatmap transparency factor (0.0 = image only, 1.0 = heatmap only).
-        colormap: Matplotlib colormap name ('jet', 'inferno', 'plasma').
-
-    Returns:
-        blended: RGB image array of shape (H, W, 3) with heatmap overlay in range [0, 255].
+    Returns an RGB image in the range [0, 255].
     """
-    # Normalize image to uint8 [0, 255]
+
     if image.dtype != np.uint8:
         if np.max(image) <= 1.0:
             img_uint8 = (image * 255).astype(np.uint8)
@@ -199,12 +305,25 @@ def overlay_heatmap(
     else:
         img_uint8 = image
 
-    # Apply colormap to heatmap
+    if img_uint8.shape[:2] != heatmap.shape:
+        raise ValueError(
+            "Image and heatmap must have matching height and width."
+        )
+
+    if not 0 <= alpha <= 1:
+        raise ValueError("alpha must be between 0 and 1.")
+
     cmap = plt.get_cmap(colormap)
-    colored_heatmap = cmap(heatmap)[:, :, :3]  # Drop alpha channel -> RGB in [0, 1]
-    colored_heatmap_uint8 = (colored_heatmap * 255).astype(np.uint8)
 
-    # Alpha blend
-    blended = (1.0 - alpha) * img_uint8 + alpha * colored_heatmap_uint8
+    colored_heatmap = cmap(heatmap)[:, :, :3]
+
+    colored_heatmap_uint8 = (
+        colored_heatmap * 255
+    ).astype(np.uint8)
+
+    blended = (
+        (1.0 - alpha) * img_uint8
+        + alpha * colored_heatmap_uint8
+    )
+
     return np.clip(blended, 0, 255).astype(np.uint8)
-
