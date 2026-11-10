@@ -6,7 +6,6 @@ textColor = "#F1F5F9"
 font = "sans serif"
 
 [client]
-showDeployButton = false
 toolbarMode = "minimal"
 
 [server]
