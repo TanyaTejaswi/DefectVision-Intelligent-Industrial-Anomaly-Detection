@@ -695,6 +695,31 @@ def render_auth_portal():
     if _CSS_PATH.exists():
         st.markdown(f"<style>{_CSS_PATH.read_text()}</style>", unsafe_allow_html=True)
 
+    # Wide, centered styling without horizontal squishing & hide Enter instructions
+    st.markdown("""
+    <style>
+    .block-container {
+        max-width: 580px !important;
+        margin: 0 auto !important;
+        padding-top: 2.5rem !important;
+        padding-bottom: 3.5rem !important;
+    }
+    .stCheckbox label {
+        font-size: 0.88rem !important;
+        color: #94A3B8 !important;
+    }
+    [data-testid="stInputInstructions"],
+    div[data-testid="stInputInstructions"],
+    .stInputInstructions {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     page = st.session_state.get("auth_page", "login")
 
     if page == "register":
@@ -719,28 +744,20 @@ def render_auth_portal():
 
         show_message()
 
-        col_l, col_m, col_r = st.columns([1, 2.2, 1])
-        with col_m:
-            with st.container(border=True):
-                st.markdown("### 🔐 Sign In to Inspection HUD")
-                st.caption("Enter your credentials to access the DefectVision industrial platform.")
+        with st.container(border=True):
+            st.markdown("### 🔐 Sign In to Inspection HUD")
+            st.caption("Enter your credentials to access the DefectVision industrial platform.")
 
+            with st.form("auth_login_form", clear_on_submit=False):
                 identifier = st.text_input("📧 Email or Username", placeholder="admin or you@company.com", key="auth_login_id")
                 password = st.text_input("🔑 Password", type="password", placeholder="••••••••••", key="auth_login_pw")
 
-                col_rem, col_forgot = st.columns([1, 1])
-                with col_rem:
-                    remember_me = st.checkbox("Remember me", key="auth_login_rem")
-                with col_forgot:
-                    st.markdown('<div style="text-align:right; margin-top:4px;">', unsafe_allow_html=True)
-                    if st.button("Forgot password?", key="auth_go_forgot"):
-                        st.session_state.auth_page = "forgot_password"
-                        st.rerun()
-                    st.markdown('</div>', unsafe_allow_html=True)
+                remember_me = st.checkbox("Remember me on this workstation", key="auth_login_rem")
 
                 st.markdown("<br>", unsafe_allow_html=True)
 
-                if st.button("🚀 Sign In", key="auth_btn_submit", type="primary", use_container_width=True):
+                submitted = st.form_submit_button("🚀 Sign In", type="primary", use_container_width=True)
+                if submitted:
                     if not identifier or not password:
                         st.error("⚠️ Please enter both username/email and password.")
                     else:
@@ -753,22 +770,29 @@ def render_auth_portal():
                         else:
                             st.error(f"❌ {msg}")
 
-            # Register link
-            st.markdown('<div style="text-align:center; margin-top:1rem;">', unsafe_allow_html=True)
-            st.markdown("""<span style="color:#64748B; font-size:0.85rem;">Don't have an account?&nbsp;</span>""", unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-            st.markdown('<div class="dv-link-btn">', unsafe_allow_html=True)
-            if st.button("✨ Create Account", key="auth_go_register", use_container_width=True):
-                st.session_state.auth_page = "register"
+            # Forgot Password Centered in Middle as Clean Link Button
+            st.markdown('<div class="dv-link-btn" style="text-align: center; margin-top: 10px;">', unsafe_allow_html=True)
+            if st.button("🔑 Forgot Password?", key="auth_go_forgot", use_container_width=True):
+                st.session_state.auth_page = "forgot_password"
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-            # Footer
-            st.markdown("""
-            <div style="text-align:center; margin-top:2rem; color:#334155; font-size:0.72rem; letter-spacing:0.08em;">
-                DEFECTVISION · INDUSTRIAL AI PLATFORM · SECURED BY BCRYPT (12 ROUNDS)
-            </div>
-            """, unsafe_allow_html=True)
+        # Register link
+        st.markdown('<div style="text-align:center; margin-top:1.5rem;">', unsafe_allow_html=True)
+        st.markdown("""<span style="color:#64748B; font-size:0.88rem;">Don't have an account?&nbsp;</span>""", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div class="dv-link-btn">', unsafe_allow_html=True)
+        if st.button("✨ Create Account", key="auth_go_register", use_container_width=True):
+            st.session_state.auth_page = "register"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Footer
+        st.markdown("""
+        <div style="text-align:center; margin-top:2rem; color:#334155; font-size:0.75rem; letter-spacing:0.08em;">
+            DEFECTVISION · INDUSTRIAL AI PLATFORM · SECURED BY BCRYPT (12 ROUNDS)
+        </div>
+        """, unsafe_allow_html=True)
 
 
 # ----------------------------------------------------------------------------
