@@ -1,22 +1,6 @@
-# Python cache
-__pycache__/
-*.py[cod]
-*$py.class
-*.pyo
-*.so
-
-# Virtual environments
-.env
-.env.*
-!.env.example
-.venv/
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Raw datasets and archives
+# ==============================
+# Raw Dataset and Archives
+# ==============================
 data/mvtec/
 datasets/*
 !datasets/.gitkeep
@@ -25,44 +9,81 @@ datasets/*
 *.tar
 *.zip
 
-# Generated results
-results/plots/*
-!results/plots/.gitkeep
-results/metrics/*
-!results/metrics/.gitkeep
+# ==============================
+# Python Cache and Compiled Files
+# ==============================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.so
 
-# Generated model files
-*.h5
-*.hdf5
-*.onnx
-*.pt
-*.pth
+# ==============================
+# Virtual Environments
+# ==============================
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
 
-# Jupyter notebooks
+# ==============================
+# Jupyter Notebook
+# ==============================
 .ipynb_checkpoints/
 
-# Testing and coverage
-.pytest_cache/
-.coverage
-htmlcov/
+# ==============================
+# Environment Variables and Secrets
+# ==============================
+.env
+.env.*
+!.env.example
 
-# IDE files
+# ==============================
+# VS Code & IDE
+# ==============================
 .vscode/
 .idea/
 
-# Operating system files
+# ==============================
+# Operating System Files
+# ==============================
 .DS_Store
 Thumbs.db
 desktop.ini
 *.swp
 *.swo
 
-# Logs and temporary files
+# ==============================
+# Logs and Temporary Files
+# ==============================
 *.log
 *.tmp
 *.bak
 
-# Build files
+# ==============================
+# Build and Distribution Files
+# ==============================
 build/
 dist/
 *.egg-info/
+
+# ==============================
+# Model and Large Generated Files (>100MB GitHub limit)
+# ==============================
+*.h5
+*.hdf5
+*.onnx
+*.pt
+*.pth
+*.pkl
+*.npy
+!data/embeddings/metadata.csv
+
+# ==============================
+# Testing and Coverage
+# ==============================
+.pytest_cache/
+.coverage
+htmlcov/

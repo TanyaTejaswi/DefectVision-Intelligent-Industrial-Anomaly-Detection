@@ -1,4 +1,4 @@
-category,train_normal,test_normal,test_defects,auroc,auprc,f1_score,precision,recall,optimal_threshold
-bottle,209,20,63,0.9968,0.9990,0.9756,1.0000,0.9524,35.8783
-cable,224,58,92,0.8308,0.8828,0.8377,0.8081,0.8696,39.5373
-hazelnut,391,40,70,0.9936,0.9958,0.9929,0.9859,1.0000,39.5638
+category,auroc,auprc,f1_score,precision,recall,optimal_threshold
+bottle,0.9968,0.999,0.9756,1.0,0.9524,35.8783
+cable,0.8308,0.8828,0.8377,0.8081,0.8696,39.5373
+hazelnut,0.9936,0.9958,0.9929,0.9859,1.0,39.5638

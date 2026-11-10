@@ -1,1 +1,3 @@
 # Directory anchor for serialized memory banks (models/memory_bank_{category}.pkl)
+# Keeps models directory in version control.
+# Model weights (*.pkl) are excluded due to GitHub's 100MB file limit.

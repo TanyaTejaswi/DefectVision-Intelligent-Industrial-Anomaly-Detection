@@ -1,0 +1,9 @@
+{
+  "category": "bottle",
+  "auroc": 0.9968,
+  "auprc": 0.999,
+  "f1_score": 0.9756,
+  "precision": 1.0,
+  "recall": 0.9524,
+  "optimal_threshold": 35.8783
+}
