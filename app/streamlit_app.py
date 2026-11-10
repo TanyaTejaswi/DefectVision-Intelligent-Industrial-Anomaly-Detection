@@ -84,6 +84,18 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
+    /* Hide Streamlit Deploy Button & Toolbar Actions */
+    [data-testid="stAppDeployButton"],
+    .stDeployButton,
+    [data-testid="stToolbarActions"],
+    div[data-testid="stAppDeployButton"] {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+    }
+
     html, body, [class*="css"] {
         font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
     }
@@ -771,6 +783,15 @@ def render_auth_portal():
         height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+    }
+    [data-testid="stAppDeployButton"],
+    .stDeployButton,
+    [data-testid="stToolbarActions"],
+    div[data-testid="stAppDeployButton"] {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
     }
     </style>
     """, unsafe_allow_html=True)
