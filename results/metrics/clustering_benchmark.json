@@ -1,37 +1,37 @@
 {
     "pipeline_metadata": {
-        "input_samples": 30,
+        "input_samples": 165,
         "raw_dimensions": 2048,
-        "pca_components": 19,
-        "retained_variance_ratio": 0.9558213949203491
+        "pca_components": 120,
+        "retained_variance_ratio": 0.951433228821985
     },
     "clustering_evaluation_metrics (unsupervised)": {
         "kmeans": {
-            "silhouette_score": 0.22372440993785858,
-            "davies_bouldin_index": 1.207078728492841,
-            "calinski_harabasz_index": 5.452407741543521,
-            "evaluated_samples": 30,
+            "silhouette_score": 0.4180747861815506,
+            "davies_bouldin_index": 1.0342756594864186,
+            "calinski_harabasz_index": 110.2258858632214,
+            "evaluated_samples": 165,
             "evaluated_clusters": 3
         },
         "dbscan": {
             "silhouette_score": NaN,
             "davies_bouldin_index": NaN,
             "calinski_harabasz_index": NaN,
-            "evaluated_samples": 3,
+            "evaluated_samples": 15,
             "evaluated_clusters": 1
         },
         "hdbscan": {
-            "silhouette_score": 0.41072118282318115,
-            "davies_bouldin_index": 0.8975508355073394,
-            "calinski_harabasz_index": 4.7400024833946155,
-            "evaluated_samples": 8,
-            "evaluated_clusters": 2
+            "silhouette_score": 0.3891024423733681,
+            "davies_bouldin_index": 0.7846823106928649,
+            "calinski_harabasz_index": 108.07085001842977,
+            "evaluated_samples": 165,
+            "evaluated_clusters": 4
         }
     },
     "anomaly_detection_metrics (supervised_validation)": {
         "roc_auc": 1.0,
-        "pr_auc": 0.9999999999999999,
-        "threshold": 7.059994220733643,
+        "pr_auc": 1.0,
+        "threshold": 287.2509207482585,
         "precision": 1.0,
         "recall": 1.0,
         "f1_score": 1.0
