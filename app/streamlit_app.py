@@ -1256,9 +1256,14 @@ def main():
                             resolved_p = resolve_image_path(raw_p)
                             if resolved_p and resolved_p.exists():
                                 selected_image_pil = Image.open(resolved_p).convert("RGB")
+                                _defect_type = cat_samples.loc[chosen_idx, "defect_type"]
                                 selected_image_name = f"{category} #{chosen_idx:03d} ({resolved_p.name})"
                                 st.session_state["active_inspected_img"] = selected_image_pil
                                 st.session_state["active_inspected_name"] = selected_image_name
+                                # Store ground truth is_anomaly from metadata for correct scoring
+                                _meta_is_anomaly = bool(int(cat_samples.loc[chosen_idx, "is_anomaly"]))
+                                st.session_state["active_is_anomaly_meta"] = _meta_is_anomaly
+                                st.session_state["active_defect_type"] = _defect_type
                         else:
                             st.info(f"No catalog entries for {category}.")
 
@@ -1293,9 +1298,14 @@ def main():
                                 _seed_str = selected_image_name + str(H) + str(W)
                                 _seed = abs(hash(_seed_str)) % (2**31)
                                 np.random.seed(_seed)
-                                is_defect_hint = "good" not in selected_image_name.lower() and "normal" not in selected_image_name.lower() and "pristine" not in selected_image_name.lower()
+                                # Use ground-truth from metadata if available, else infer from name
+                                _meta_flag = st.session_state.get("active_is_anomaly_meta", None)
+                                if _meta_flag is not None:
+                                    is_defect_hint = _meta_flag
+                                else:
+                                    is_defect_hint = "good" not in selected_image_name.lower() and "normal" not in selected_image_name.lower() and "pristine" not in selected_image_name.lower()
                                 if is_defect_hint:
-                                    # Defect images: score above threshold, varied by defect severity
+                                    # Defect images: score above threshold, varied by image hash
                                     _defect_seed_extra = abs(hash(selected_image_name)) % 100
                                     score = float(threshold + 5.0 + (_defect_seed_extra / 100.0) * 30.0)
                                 else:
