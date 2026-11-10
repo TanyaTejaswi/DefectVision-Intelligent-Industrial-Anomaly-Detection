@@ -609,6 +609,41 @@ def load_pca_tsne_data() -> pd.DataFrame:
     return coords_df
 
 
+def find_sample_image(category: str, split_or_defect: str = "good", preferred_file: str = "000.png") -> Optional[Path]:
+    """Finds a valid sample image on disk across known directory structures."""
+    candidates = [
+        PROJECT_ROOT / "data" / "mvtec" / category / "test" / split_or_defect / preferred_file,
+        PROJECT_ROOT / "data" / "mvtec" / category / "train" / split_or_defect / preferred_file,
+        PROJECT_ROOT / "datasets" / "mvtec_ad" / category / "test" / split_or_defect / preferred_file,
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+        alt_name = "000.png" if preferred_file != "000.png" else "img_000.png"
+        c_alt = c.with_name(alt_name)
+        if c_alt.exists():
+            return c_alt
+
+    test_dir = PROJECT_ROOT / "data" / "mvtec" / category / "test"
+    if test_dir.exists():
+        for sub in test_dir.iterdir():
+            if sub.is_dir() and (split_or_defect.lower() in sub.name.lower() or sub.name.lower() in split_or_defect.lower()):
+                imgs = sorted(list(sub.glob("*.png")) + list(sub.glob("*.jpg")))
+                if imgs:
+                    return imgs[0]
+        all_imgs = sorted(list(test_dir.rglob("*.png")) + list(test_dir.rglob("*.jpg")))
+        if all_imgs:
+            return all_imgs[0]
+
+    train_good = PROJECT_ROOT / "data" / "mvtec" / category / "train" / "good"
+    if train_good.exists():
+        imgs = sorted(list(train_good.glob("*.png")) + list(train_good.glob("*.jpg")))
+        if imgs:
+            return imgs[0]
+
+    return None
+
+
 def resolve_image_path(raw_path: str) -> Optional[Path]:
     """Resolves an image path from metadata across local environments."""
     if not raw_path or pd.isna(raw_path):
@@ -650,9 +685,9 @@ def main():
         st.session_state["selected_category"] = "bottle"
 
     # Preload default sample on first visit
-    default_sample_path = PROJECT_ROOT / "datasets" / "mvtec_ad" / "bottle" / "test" / "broken_large" / "img_000.png"
-    if "active_inspected_img" not in st.session_state:
-        if default_sample_path.exists():
+    if "active_inspected_img" not in st.session_state or st.session_state.get("active_inspected_img") is None:
+        default_sample_path = find_sample_image("bottle", "broken_large") or find_sample_image("bottle", "good")
+        if default_sample_path and default_sample_path.exists():
             st.session_state["active_inspected_img"] = Image.open(default_sample_path).convert("RGB")
             st.session_state["active_inspected_name"] = "Defective Bottle (Broken Large Crack)"
 
@@ -784,9 +819,9 @@ def main():
 
         cat_col1, cat_col2, cat_col3 = st.columns(3)
 
-        bottle_thumb = PROJECT_ROOT / "datasets" / "mvtec_ad" / "bottle" / "test" / "good" / "img_000.png"
-        cable_thumb = PROJECT_ROOT / "datasets" / "mvtec_ad" / "cable" / "test" / "good" / "img_000.png"
-        hazelnut_thumb = PROJECT_ROOT / "datasets" / "mvtec_ad" / "hazelnut" / "test" / "good" / "img_000.png"
+        bottle_thumb = find_sample_image("bottle", "good")
+        cable_thumb = find_sample_image("cable", "good")
+        hazelnut_thumb = find_sample_image("hazelnut", "good")
 
         curr_cat = st.session_state["selected_category"]
 
@@ -798,12 +833,12 @@ def main():
                 <div style="font-size: 0.8rem; color: #94A3B8; margin-bottom: 8px;">MVTec AD • AUROC: <b style="color: #34D399;">99.68%</b> | AUPRC: <b style="color: #34D399;">99.90%</b></div>
             </div>
             """, unsafe_allow_html=True)
-            if bottle_thumb.exists():
+            if bottle_thumb and bottle_thumb.exists():
                 st.image(str(bottle_thumb), use_container_width=True)
             if st.button("Select Bottle Line", key="btn_sel_bottle", use_container_width=True, type="primary" if is_active else "secondary"):
                 st.session_state["selected_category"] = "bottle"
-                p_b = PROJECT_ROOT / "datasets" / "mvtec_ad" / "bottle" / "test" / "broken_large" / "img_000.png"
-                if p_b.exists():
+                p_b = find_sample_image("bottle", "broken_large") or find_sample_image("bottle", "good")
+                if p_b and p_b.exists():
                     st.session_state["active_inspected_img"] = Image.open(p_b).convert("RGB")
                     st.session_state["active_inspected_name"] = "Bottle (Broken Large Fracture)"
                 st.rerun()
@@ -816,12 +851,12 @@ def main():
                 <div style="font-size: 0.8rem; color: #94A3B8; margin-bottom: 8px;">MVTec AD • AUROC: <b style="color: #F59E0B;">83.08%</b> | AUPRC: <b style="color: #F59E0B;">88.28%</b></div>
             </div>
             """, unsafe_allow_html=True)
-            if cable_thumb.exists():
+            if cable_thumb and cable_thumb.exists():
                 st.image(str(cable_thumb), use_container_width=True)
             if st.button("Select Cable Line", key="btn_sel_cable", use_container_width=True, type="primary" if is_active else "secondary"):
                 st.session_state["selected_category"] = "cable"
-                p_c = PROJECT_ROOT / "datasets" / "mvtec_ad" / "cable" / "test" / "cut" / "img_000.png"
-                if p_c.exists():
+                p_c = find_sample_image("cable", "cut") or find_sample_image("cable", "cut_inner_insulation") or find_sample_image("cable", "good")
+                if p_c and p_c.exists():
                     st.session_state["active_inspected_img"] = Image.open(p_c).convert("RGB")
                     st.session_state["active_inspected_name"] = "Cable (Cut Insulation Defect)"
                 st.rerun()
@@ -834,12 +869,12 @@ def main():
                 <div style="font-size: 0.8rem; color: #94A3B8; margin-bottom: 8px;">MVTec AD • AUROC: <b style="color: #34D399;">99.36%</b> | AUPRC: <b style="color: #34D399;">99.58%</b></div>
             </div>
             """, unsafe_allow_html=True)
-            if hazelnut_thumb.exists():
+            if hazelnut_thumb and hazelnut_thumb.exists():
                 st.image(str(hazelnut_thumb), use_container_width=True)
             if st.button("Select Hazelnut Line", key="btn_sel_hazelnut", use_container_width=True, type="primary" if is_active else "secondary"):
                 st.session_state["selected_category"] = "hazelnut"
-                p_h = PROJECT_ROOT / "datasets" / "mvtec_ad" / "hazelnut" / "test" / "crack" / "img_000.png"
-                if p_h.exists():
+                p_h = find_sample_image("hazelnut", "crack") or find_sample_image("hazelnut", "good")
+                if p_h and p_h.exists():
                     st.session_state["active_inspected_img"] = Image.open(p_h).convert("RGB")
                     st.session_state["active_inspected_name"] = "Hazelnut (Shell Crack Defect)"
                 st.rerun()
@@ -871,11 +906,11 @@ def main():
 
         preset_c1, preset_c2, preset_c3, preset_c4, preset_c5 = st.columns(5)
 
-        p1_path = PROJECT_ROOT / "datasets" / "mvtec_ad" / "bottle" / "test" / "good" / "img_000.png"
-        p2_path = PROJECT_ROOT / "datasets" / "mvtec_ad" / "bottle" / "test" / "broken_large" / "img_000.png"
-        p3_path = PROJECT_ROOT / "datasets" / "mvtec_ad" / "bottle" / "test" / "contamination" / "img_000.png"
-        p4_path = PROJECT_ROOT / "datasets" / "mvtec_ad" / "cable" / "test" / "cut" / "img_000.png"
-        p5_path = PROJECT_ROOT / "datasets" / "mvtec_ad" / "hazelnut" / "test" / "crack" / "img_000.png"
+        p1_path = find_sample_image("bottle", "good")
+        p2_path = find_sample_image("bottle", "broken_large")
+        p3_path = find_sample_image("bottle", "contamination")
+        p4_path = find_sample_image("cable", "cut_inner_insulation") or find_sample_image("cable", "cut")
+        p5_path = find_sample_image("hazelnut", "crack")
 
         with preset_c1:
             st.markdown("""
@@ -884,12 +919,13 @@ def main():
                 <div style="font-size: 0.82rem; font-weight: 600; color: #E2E8F0; margin-top: 2px;">Pristine Bottle</div>
             </div>
             """, unsafe_allow_html=True)
-            if p1_path.exists():
+            if p1_path and p1_path.exists():
                 st.image(str(p1_path), use_container_width=True)
             if st.button("Inspect Normal", key="p_btn_1", use_container_width=True):
                 st.session_state["selected_category"] = "bottle"
-                st.session_state["active_inspected_img"] = Image.open(p1_path).convert("RGB")
-                st.session_state["active_inspected_name"] = "Pristine Normal Bottle (test/good)"
+                if p1_path and p1_path.exists():
+                    st.session_state["active_inspected_img"] = Image.open(p1_path).convert("RGB")
+                    st.session_state["active_inspected_name"] = "Pristine Normal Bottle (test/good)"
                 st.rerun()
 
         with preset_c2:
@@ -899,12 +935,13 @@ def main():
                 <div style="font-size: 0.82rem; font-weight: 600; color: #E2E8F0; margin-top: 2px;">Glass Fracture</div>
             </div>
             """, unsafe_allow_html=True)
-            if p2_path.exists():
+            if p2_path and p2_path.exists():
                 st.image(str(p2_path), use_container_width=True)
             if st.button("Inspect Fracture", key="p_btn_2", use_container_width=True):
                 st.session_state["selected_category"] = "bottle"
-                st.session_state["active_inspected_img"] = Image.open(p2_path).convert("RGB")
-                st.session_state["active_inspected_name"] = "Bottle (Broken Large Fracture)"
+                if p2_path and p2_path.exists():
+                    st.session_state["active_inspected_img"] = Image.open(p2_path).convert("RGB")
+                    st.session_state["active_inspected_name"] = "Bottle (Broken Large Fracture)"
                 st.rerun()
 
         with preset_c3:
@@ -914,12 +951,13 @@ def main():
                 <div style="font-size: 0.82rem; font-weight: 600; color: #E2E8F0; margin-top: 2px;">Contamination</div>
             </div>
             """, unsafe_allow_html=True)
-            if p3_path.exists():
+            if p3_path and p3_path.exists():
                 st.image(str(p3_path), use_container_width=True)
             if st.button("Inspect Dirt", key="p_btn_3", use_container_width=True):
                 st.session_state["selected_category"] = "bottle"
-                st.session_state["active_inspected_img"] = Image.open(p3_path).convert("RGB")
-                st.session_state["active_inspected_name"] = "Bottle (Chemical Dirt Blotch)"
+                if p3_path and p3_path.exists():
+                    st.session_state["active_inspected_img"] = Image.open(p3_path).convert("RGB")
+                    st.session_state["active_inspected_name"] = "Bottle (Chemical Dirt Blotch)"
                 st.rerun()
 
         with preset_c4:
@@ -929,12 +967,13 @@ def main():
                 <div style="font-size: 0.82rem; font-weight: 600; color: #E2E8F0; margin-top: 2px;">Cut Cable Wire</div>
             </div>
             """, unsafe_allow_html=True)
-            if p4_path.exists():
+            if p4_path and p4_path.exists():
                 st.image(str(p4_path), use_container_width=True)
             if st.button("Inspect Cable", key="p_btn_4", use_container_width=True):
                 st.session_state["selected_category"] = "cable"
-                st.session_state["active_inspected_img"] = Image.open(p4_path).convert("RGB")
-                st.session_state["active_inspected_name"] = "Cable (Cut Insulation Defect)"
+                if p4_path and p4_path.exists():
+                    st.session_state["active_inspected_img"] = Image.open(p4_path).convert("RGB")
+                    st.session_state["active_inspected_name"] = "Cable (Cut Insulation Defect)"
                 st.rerun()
 
         with preset_c5:
@@ -944,12 +983,13 @@ def main():
                 <div style="font-size: 0.82rem; font-weight: 600; color: #E2E8F0; margin-top: 2px;">Shell Crack</div>
             </div>
             """, unsafe_allow_html=True)
-            if p5_path.exists():
+            if p5_path and p5_path.exists():
                 st.image(str(p5_path), use_container_width=True)
             if st.button("Inspect Nut", key="p_btn_5", use_container_width=True):
                 st.session_state["selected_category"] = "hazelnut"
-                st.session_state["active_inspected_img"] = Image.open(p5_path).convert("RGB")
-                st.session_state["active_inspected_name"] = "Hazelnut (Shell Crack Defect)"
+                if p5_path and p5_path.exists():
+                    st.session_state["active_inspected_img"] = Image.open(p5_path).convert("RGB")
+                    st.session_state["active_inspected_name"] = "Hazelnut (Shell Crack Defect)"
                 st.rerun()
 
         st.markdown("<br>", unsafe_allow_html=True)
@@ -1000,6 +1040,14 @@ def main():
                             st.info(f"No catalog entries for {category}.")
 
             with col_display:
+                if selected_image_pil is None:
+                    fallback_p = find_sample_image(category, "broken_large") or find_sample_image(category, "good")
+                    if fallback_p and fallback_p.exists():
+                        selected_image_pil = Image.open(fallback_p).convert("RGB")
+                        selected_image_name = f"{category.capitalize()} ({fallback_p.parent.name})"
+                        st.session_state["active_inspected_img"] = selected_image_pil
+                        st.session_state["active_inspected_name"] = selected_image_name
+
                 if selected_image_pil is not None:
                     img_np = np.array(selected_image_pil)
                     H, W = img_np.shape[0], img_np.shape[1]
@@ -1391,12 +1439,7 @@ def main():
                         caption_text = f"**{cat_str.upper()}**\n{def_str}"
 
                         if not img_p or not img_p.exists():
-                            cat_fallback_map = {
-                                "bottle": PROJECT_ROOT / "datasets" / "mvtec_ad" / "bottle" / "test" / "good" / "img_000.png",
-                                "cable": PROJECT_ROOT / "datasets" / "mvtec_ad" / "cable" / "test" / "good" / "img_000.png",
-                                "hazelnut": PROJECT_ROOT / "datasets" / "mvtec_ad" / "hazelnut" / "test" / "good" / "img_000.png",
-                            }
-                            img_p = cat_fallback_map.get(cat_str)
+                            img_p = find_sample_image(cat_str, "good")
 
                         if img_p and img_p.exists():
                             st.image(str(img_p), caption=caption_text, use_container_width=True)
