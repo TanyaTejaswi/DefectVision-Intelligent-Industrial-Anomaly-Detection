@@ -349,6 +349,61 @@ st.markdown("""
         transform: translateY(-1px);
         box-shadow: 0 6px 20px rgba(0, 242, 254, 0.3);
     }
+
+    /* ── Responsive Mobile & Tablet Breakpoints ── */
+    @media (max-width: 768px) {
+        .brand-container {
+            padding: 16px 18px !important;
+            border-radius: 12px !important;
+        }
+        .brand-title {
+            font-size: 1.6rem !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+        }
+        .brand-subtitle {
+            font-size: 0.85rem !important;
+        }
+        .metric-card {
+            padding: 12px 14px !important;
+        }
+        .metric-value {
+            font-size: 1.4rem !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            font-size: 0.82rem !important;
+            padding: 8px 12px !important;
+        }
+        .stTabs [data-baseweb="tab-list"] {
+            overflow-x: auto !important;
+            flex-wrap: nowrap !important;
+        }
+        .product-cat-card, .preset-card {
+            padding: 10px !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .brand-title {
+            font-size: 1.35rem !important;
+        }
+        .telemetry-bar {
+            gap: 6px !important;
+        }
+        .hud-chip {
+            font-size: 0.7rem !important;
+            padding: 3px 8px !important;
+        }
+        .metric-title {
+            font-size: 0.7rem !important;
+        }
+        .metric-value {
+            font-size: 1.2rem !important;
+        }
+        .verdict-box-normal, .verdict-box-defect {
+            padding: 12px 14px !important;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 

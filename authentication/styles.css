@@ -348,9 +348,12 @@ header { display: none !important; }
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 600px) {
-    .block-container { padding: 1rem 0.5rem !important; }
-    .dv-card { padding: 1.5rem 1.2rem 1.2rem; }
-    .dv-kpi-grid { grid-template-columns: 1fr 1fr; }
+    .block-container { padding: 1rem 0.75rem !important; width: 100% !important; max-width: 100% !important; }
+    .dv-card { padding: 1.25rem 1rem 1rem !important; border-radius: 14px !important; }
+    .dv-title { font-size: 1.5rem !important; }
+    .dv-subtitle { font-size: 0.8rem !important; }
+    .dv-status { font-size: 0.65rem !important; padding: 3px 10px !important; }
+    .dv-kpi-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
 }
 
 /* ── Hide 'Press Enter to apply' Instructions ────────────── */
