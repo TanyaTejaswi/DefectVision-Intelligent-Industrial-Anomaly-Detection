@@ -1,7 +1,7 @@
 """
 End-to-End Pipeline Runner
 Unsupervised Visual Anomaly Discovery for Industrial Quality Inspection
-Lead: Gayathri & Tanya
+Lead: Gayatri U & Tanya Tejaswi
 
 This script ties together all core modules:
 1. Feature Scaling & Dimensionality Reduction (PCA)
@@ -244,3 +244,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -1,6 +1,6 @@
 """
 Dimensionality Reduction Module
-Responsibility: Gayathri
+Responsibility: Gayatri U
 
 This module handles projection and dimensionality reduction of high-dimensional
 feature embeddings (e.g., ResNet50 features), including Principal Component
@@ -103,3 +103,4 @@ def find_optimal_components(cumulative_variance: np.ndarray, threshold: float = 
     if len(indices) == 0:
         return len(cumulative_variance)
     return int(indices[0] + 1)
+

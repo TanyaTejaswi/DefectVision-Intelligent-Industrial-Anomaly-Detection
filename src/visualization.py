@@ -1,6 +1,6 @@
 """
 Visualization Module
-Responsibility: Gayathri
+Responsibility: Gayatri U
 
 This module handles 2D visual projections (t-SNE), PCA scree plots,
 elbow curves, and cluster distribution diagrams for visual anomaly discovery.
@@ -305,3 +305,4 @@ def plot_anomaly_comparison(
         print(f"Saved comparison plot to {save_path}")
 
     return fig
+

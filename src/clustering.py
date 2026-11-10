@@ -1,6 +1,6 @@
 """
 Clustering Module
-Responsibility: Gayathri
+Responsibility: Gayatri U
 
 This module provides unsupervised clustering implementations (K-Means,
 DBSCAN, HDBSCAN) to discover groupings and flag anomalous or out-of-distribution
@@ -179,3 +179,4 @@ def get_cluster_summary(labels: np.ndarray) -> Dict[str, Any]:
         "anomaly_percentage": float((num_anomalies / total_samples) * 100.0) if total_samples > 0 else 0.0,
         "cluster_distribution": counts_map
     }
+

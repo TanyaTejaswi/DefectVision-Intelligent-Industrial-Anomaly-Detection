@@ -1,6 +1,6 @@
 """
 Evaluation Module
-Responsibility: Gayathri (Clustering Metrics) & Tanya (Anomaly Metrics)
+Responsibility: Gayatri U (Clustering Metrics) & Tanya (Anomaly Metrics)
 
 This module is strictly organized into two distinct evaluation categories:
 1. Clustering Evaluation Metrics (Unsupervised / Intrinsic)
@@ -192,3 +192,4 @@ def compute_posthoc_cluster_alignment(
         "adjusted_rand_index": ari,
         "normalized_mutual_info": nmi
     }
+
