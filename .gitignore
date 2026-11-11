@@ -96,3 +96,7 @@ DefectVision_Master_Project_Blueprint.pdf
 generate_master_blueprint_pdf.py
 DefectVision_Complete_Viva_Defense_Compendium.pdf
 generate_viva_defense_pdf.py
+
+# Auth SQLite database (local only - contains user accounts)
+authentication/database/auth_users.db
+authentication/database/*.db
