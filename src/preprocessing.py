@@ -200,6 +200,6 @@ if __name__ == "__main__":
     # Test metadata builder
     sample_root = Path("data/mvtec")
     if sample_root.exists():
-        df = build_mvtec_metadata(sample_root, categories=["bottle", "cable", "hazelnut"])
+        df = build_mvtec_metadata(sample_root, categories=["bottle", "cable"])
         print(f"Metadata created with {len(df)} total samples.")
         print(df.groupby(["category", "split", "is_anomaly"]).size())

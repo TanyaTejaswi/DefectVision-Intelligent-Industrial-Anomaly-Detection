@@ -1,13 +1,21 @@
 # ==============================
 # Raw Dataset and Archives
 # ==============================
-data/mvtec/
+mvtec-ad/
+mvtec_ad/
+datasets/
 datasets/*
 !datasets/.gitkeep
+datasets_new/
+data/mvtec/
+data/steel/
+data/datasets/
 *.tar.xz
 *.tar.gz
 *.tar
 *.zip
+node_modules/
+frontend/node_modules/
 
 # ==============================
 # Python Cache and Compiled Files
