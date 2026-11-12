@@ -140,11 +140,36 @@ INDUSTRIAL_SUITE = [
         "name": "steel (Hot-Rolled Strips)",
         "icon": "🔩",
         "defects": "Hot-rolled steel strip abrasions, scale oxide indentations",
-        "threshold": 37.40,
+        "threshold": 42.19,
         "auroc": 0.9620,
         "f1": 0.9430
     }
 ]
+
+# Sync suite thresholds & benchmarks dynamically from ML team's reports/anomaly_detection_summary.csv
+def sync_suite_with_ml_reports():
+    summary_csv = PROJECT_ROOT / "reports" / "anomaly_detection_summary.csv"
+    if summary_csv.exists():
+        import csv
+        try:
+            with open(summary_csv, "r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    cat = row.get("category", "").strip().lower()
+                    if not cat:
+                        continue
+                    thresh = float(row.get("optimal_threshold", 50.0))
+                    auroc = float(row.get("auroc", 0.95))
+                    f1 = float(row.get("f1_score", 0.90))
+                    for line in INDUSTRIAL_SUITE:
+                        if line["id"] == cat:
+                            line["threshold"] = round(thresh, 2)
+                            line["auroc"] = round(auroc, 4)
+                            line["f1"] = round(f1, 4)
+        except Exception as e:
+            print(f"Warning: Could not sync ML reports: {e}")
+
+sync_suite_with_ml_reports()
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
