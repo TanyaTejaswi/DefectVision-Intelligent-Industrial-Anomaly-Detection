@@ -1210,11 +1210,6 @@ function renderBenchmarkTable() {
       </td>
       <td class="py-4 px-5 text-right font-bold text-gray-900 font-mono">${line.f1.toFixed(4)}</td>
       <td class="py-4 px-5 text-right text-gray-700 font-mono font-semibold">${line.threshold.toFixed(2)}</td>
-      <td class="py-4 px-5 text-center">
-        <button onclick="selectLineAndInspect('${line.id}')" class="btn-instrumental px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
-          Inspect Line
-        </button>
-      </td>
     `;
     tbody.appendChild(tr);
   });
