@@ -51,9 +51,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   await loadLines();
   await loadPresets();
-  
+
+  // Initialize SPA browser history routing (enables Chrome back/undo and forward buttons)
+  const initialPage = window.location.hash.replace(/^#/, '') || 'home';
+  history.replaceState({ page: initialPage }, '', '#' + initialPage);
+  if (initialPage !== 'home') {
+    navigateTo(initialPage, false);
+  }
+
   // Initial inspection pre-load
   await triggerInspection(state.activePresetId, state.selectedLine);
+});
+
+// Chrome Back / Forward / Undo Arrow Listener
+window.addEventListener('popstate', (e) => {
+  const targetPage = (e.state && e.state.page) || window.location.hash.replace(/^#/, '') || 'home';
+  if (typeof closeLineIngestModal === 'function') {
+    closeLineIngestModal();
+  }
+  navigateTo(targetPage, false);
 });
 
 function setupEventListeners() {
@@ -93,7 +109,7 @@ function setupEventListeners() {
 /**
  * Multi-Page Navigation (Clean Corporate Instrumental Tabs)
  */
-function navigateTo(pageId) {
+function navigateTo(pageId, pushHistory = true) {
   state.currentPage = pageId;
 
   // 1. Hide all pages
@@ -117,7 +133,6 @@ function navigateTo(pageId) {
   const navBtns = [
     { id: 'navBtnHome', page: 'home' },
     { id: 'navBtnLines', page: 'lines' },
-    { id: 'navBtnInspect', page: 'inspect' },
     { id: 'navBtnBenchmarks', page: 'benchmarks' }
   ];
 
@@ -133,6 +148,14 @@ function navigateTo(pageId) {
 
   if (pageId === 'lines') renderLinesCatalog();
   if (pageId === 'benchmarks') renderBenchmarkTable();
+
+  // 4. Update Browser History so Chrome's Back / Undo arrow works seamlessly
+  if (pushHistory) {
+    const currentHash = window.location.hash.replace(/^#/, '');
+    if (currentHash !== pageId) {
+      history.pushState({ page: pageId }, '', '#' + pageId);
+    }
+  }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (window.lucide) lucide.createIcons();
