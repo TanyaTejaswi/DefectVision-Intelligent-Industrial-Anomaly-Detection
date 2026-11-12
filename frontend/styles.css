@@ -1,0 +1,139 @@
+/* ==========================================================================
+   DEFECTVISION 2.0 - INSTRUMENTAL.COM ENTERPRISE INDUSTRIAL STYLING
+   Clean Corporate Palette: Crisp Whites (#FFFFFF), Light Greys (#F9FAFB),
+   Deep Charcoal (#111827, #1E1E1E), Instrumental Green (#00B050)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --inst-black: #111111;
+  --inst-charcoal: #181818;
+  --inst-dark-card: #222222;
+  --inst-white: #FFFFFF;
+  --inst-light-bg: #F8F9FA;
+  --inst-light-card: #FFFFFF;
+  --inst-border-light: #E5E7EB;
+  --inst-border-dark: rgba(255, 255, 255, 0.12);
+  --inst-green: #00B050;
+  --inst-green-hover: #009945;
+  --inst-red: #DC2626;
+  --inst-amber: #D97706;
+}
+
+body {
+  background-color: var(--inst-light-bg);
+  color: #1F2937;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Instrumental Logo Round Icon */
+.inst-logo-badge {
+  background-color: #111111;
+  color: #FFFFFF;
+  font-weight: 900;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Instrumental Primary Green Button */
+.btn-instrumental {
+  background-color: var(--inst-green);
+  color: #FFFFFF;
+  font-weight: 700;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-instrumental:hover {
+  background-color: var(--inst-green-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 176, 80, 0.25);
+}
+
+/* Instrumental Secondary Button */
+.btn-instrumental-secondary {
+  background-color: #FFFFFF;
+  color: #111827;
+  font-weight: 600;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-instrumental-secondary:hover {
+  background-color: #F3F4F6;
+  border-color: #9CA3AF;
+}
+
+/* Crisp Clean White Cards */
+.clean-card {
+  background-color: #FFFFFF;
+  border: 1px solid var(--inst-border-light);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+.clean-card:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  border-color: #D1D5DB;
+}
+
+/* Dark Console Studio Card */
+.console-card {
+  background-color: #181818;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+}
+
+/* Instrumental Inspection Bounding Boxes */
+.bbox-green {
+  border: 2.5px solid #00B050;
+  background-color: rgba(0, 176, 80, 0.15);
+  box-shadow: 0 0 10px rgba(0, 176, 80, 0.3);
+}
+
+.bbox-amber {
+  border: 2.5px solid #D97706;
+  background-color: rgba(217, 119, 6, 0.15);
+  box-shadow: 0 0 10px rgba(217, 119, 6, 0.3);
+}
+
+.bbox-red {
+  border: 2.5px solid #DC2626;
+  background-color: rgba(220, 38, 38, 0.2);
+  box-shadow: 0 0 14px rgba(220, 38, 38, 0.5);
+  animation: pulse-red-box 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-red-box {
+  0%, 100% { border-color: #DC2626; box-shadow: 0 0 14px rgba(220, 38, 38, 0.6); }
+  50% { border-color: #F87171; box-shadow: 0 0 6px rgba(220, 38, 38, 0.2); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F3F4F6;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}

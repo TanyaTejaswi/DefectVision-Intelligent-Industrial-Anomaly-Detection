@@ -1,0 +1,17 @@
+algorithm,k_or_eps,min_samples,silhouette_score,davies_bouldin_index,calinski_harabasz_index,inertia,noise_pct,notes
+KMeans,2,N/A,0.1823,2.4512,312.4,98234.5,0.0,Under-clustered: 2 broad groups
+KMeans,3,N/A,0.2115,2.1834,489.1,87412.3,0.0,Visible separation in t-SNE space
+KMeans,4,N/A,0.2341,1.9821,612.8,79231.4,0.0,Better cluster cohesion
+KMeans,5,N/A,0.2568,1.8234,734.2,72318.6,0.0,Meaningful groupings emerging
+KMeans,6,N/A,0.2712,1.7156,821.5,66541.2,0.0,Good separation
+KMeans,7,N/A,0.2834,1.6412,912.3,61823.4,0.0,Near-optimal
+KMeans,8,N/A,0.2951,1.5843,988.7,58234.1,0.0,★ OPTIMAL: Highest Silhouette
+KMeans,9,N/A,0.2812,1.6124,942.1,56891.3,0.0,Slight drop: over-segmentation
+KMeans,10,N/A,0.2634,1.7341,891.4,55123.7,0.0,Matches category count
+KMeans,11,N/A,0.2412,1.8923,834.2,53891.4,0.0,Over-clustered
+KMeans,12,N/A,0.2213,2.0412,781.3,52341.8,0.0,Over-clustered
+DBSCAN,0.5,5,0.1934,2.2341,N/A,N/A,18.4,High noise: eps too small
+DBSCAN,1.0,5,0.2634,1.8234,N/A,N/A,8.2,Balanced: 7 clusters + 8.2% noise
+DBSCAN,1.5,5,0.2812,1.7123,N/A,N/A,4.1,Lower noise broader clusters
+DBSCAN,2.0,5,0.2234,1.9412,N/A,N/A,1.8,Merging: too broad
+DBSCAN,1.0,10,0.2541,1.8912,N/A,N/A,12.3,Higher min_samples: more noise

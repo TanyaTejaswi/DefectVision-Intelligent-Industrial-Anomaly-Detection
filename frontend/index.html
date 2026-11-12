@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DefectVision | Manufacturing Acceleration for Industrial QA</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            inst: {
+              black: '#111111',
+              charcoal: '#181818',
+              card: '#222222',
+              green: '#00B050',
+              'green-hover': '#009945',
+              red: '#DC2626',
+              amber: '#D97706',
+              light: '#F8F9FA'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-[#F8F9FA] text-gray-900 min-h-screen flex flex-col font-sans antialiased selection:bg-[#00B050] selection:text-white">
+
+  <!-- ====================================================================
+       1. TOP APPLICATION NAVIGATION BAR (Instrumental Corporate Style)
+       ==================================================================== -->
+  <header class="border-b border-gray-200 bg-white sticky top-0 z-50 px-6 py-3.5 shadow-sm">
+    <div class="max-w-[1600px] mx-auto flex items-center justify-between gap-6">
+      
+      <!-- Logo Branding -->
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="navigateTo('home')">
+        <div class="w-8 h-8 rounded-full bg-[#111111] flex items-center justify-center text-white font-black text-xs tracking-tighter">
+          DV
+        </div>
+        <span class="font-black text-xl tracking-tight text-[#111111] uppercase">DEFECTVISION</span>
+      </div>
+
+      <!-- Clean Corporate Navigation (No duplicate 1 vs 2 steps) -->
+      <nav class="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-gray-600">
+        <button id="navBtnHome" onclick="navigateTo('home')" class="text-gray-900 font-extrabold border-b-2 border-[#00B050] pb-1 transition">
+          PRODUCT & OVERVIEW
+        </button>
+
+        <button id="navBtnLines" onclick="navigateTo('lines')" class="hover:text-gray-900 transition">
+          8-LINE SUITE
+        </button>
+
+        <button id="navBtnInspect" onclick="navigateTo('inspect')" class="hover:text-gray-900 transition flex items-center gap-1">
+          <i data-lucide="scan" class="w-3.5 h-3.5 text-[#00B050]"></i>
+          <span>LIVE INSPECTION STUDIO</span>
+        </button>
+
+        <button id="navBtnBenchmarks" onclick="navigateTo('benchmarks')" class="hover:text-gray-900 transition">
+          BENCHMARKS
+        </button>
+      </nav>
+
+      <!-- Right Operator Profile & Live CTA -->
+      <div class="flex items-center gap-4">
+        <button onclick="toggleAuthModal()" class="text-xs font-mono text-gray-600 hover:text-gray-900 transition flex items-center gap-1.5">
+          <i data-lucide="user-check" class="w-4 h-4 text-[#00B050]"></i>
+          <span id="navOperatorText">Operator: Admin</span>
+        </button>
+
+        <button onclick="navigateTo('inspect')" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider">
+          TEST LIVE AOI STUDIO
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       PAGE 1: PRODUCT & OVERVIEW (Clean Corporate Instrumental Style)
+       ==================================================================== -->
+  <section id="pageHome" class="page-container flex-1">
+    
+    <!-- Hero Section: Premium Dark Corporate Section (Matches Instrumental Screenshot 2) -->
+    <div class="bg-[#181818] text-white py-16 lg:py-24 px-6 border-b border-gray-800">
+      <div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Left Hero Text -->
+        <div class="lg:col-span-7 flex flex-col items-start gap-6">
+          <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] bg-[#00B050]/15 px-3 py-1 rounded border border-[#00B050]/30 font-mono">
+            MANUFACTURING ACCELERATION PLATFORM
+          </span>
+
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
+            Manufacturing acceleration for complex industrial electronics
+          </h1>
+
+          <p class="text-lg text-gray-300 leading-relaxed max-w-2xl font-normal">
+            DefectVision turns automated optical inspection data into actionable defect intelligence to maximize yield, throughput, and zero-defect ramp across 8 critical manufacturing lines.
+          </p>
+
+          <div class="flex flex-wrap items-center gap-4 pt-2">
+            <button onclick="navigateTo('inspect')" class="btn-instrumental px-6 py-3.5 text-sm uppercase tracking-wider flex items-center gap-2">
+              <span>LAUNCH LIVE AOI STUDIO</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+            
+            <button onclick="navigateTo('lines')" class="btn-instrumental-secondary px-6 py-3.5 text-sm uppercase tracking-wider">
+              EXPLORE 8-LINE SUITE
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Hero Visual: Server / PCB Inspection Tray with Live Bounding Boxes (Matches Screenshot 2) -->
+        <div class="lg:col-span-5 relative">
+          <div class="rounded-2xl overflow-hidden bg-[#111111] border border-gray-800 p-3 shadow-2xl relative group">
+            <div class="relative rounded-xl overflow-hidden aspect-[4/3] bg-black flex items-center justify-center">
+              <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80" alt="PCB Assembly" class="w-full h-full object-cover opacity-85 group-hover:scale-105 transition duration-700">
+              
+              <!-- Instrumental Green/Amber/Red Bounding Boxes -->
+              <div class="absolute top-[22%] left-[18%] w-[26%] h-[32%] bbox-green rounded flex items-start justify-end p-1">
+                <span class="text-[9px] font-mono font-bold bg-[#00B050] text-black px-1 rounded">PASS</span>
+              </div>
+
+              <div class="absolute top-[35%] right-[20%] w-[22%] h-[28%] bbox-amber rounded flex items-start justify-end p-1">
+                <span class="text-[9px] font-mono font-bold bg-[#D97706] text-black px-1 rounded">WARN: SHIFT</span>
+              </div>
+
+              <div class="absolute bottom-[16%] left-[32%] w-[28%] h-[32%] bbox-red rounded flex items-start justify-end p-1">
+                <span class="text-[9px] font-mono font-bold bg-[#DC2626] text-white px-1 rounded">DEFECT: FRACTURE</span>
+              </div>
+
+              <div class="absolute bottom-4 left-4 right-4 bg-[#111111]/90 backdrop-blur-md rounded-xl p-3 border border-white/10 flex items-center justify-between text-xs font-mono">
+                <span class="text-gray-300">ResNet-50 PatchCore Engine: <strong class="text-[#00B050]">ACTIVE</strong></span>
+                <span class="text-white font-bold">&lt;20ms Latency</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Clean White Brand Trust Strip (Matches Instrumental Screenshot 3) -->
+    <div class="bg-white border-b border-gray-200 py-10 px-6">
+      <div class="max-w-[1600px] mx-auto flex flex-col items-center gap-6">
+        <p class="text-xs uppercase font-extrabold tracking-widest text-gray-500">
+          Trusted & Benchmarked Across Global Industrial Standards
+        </p>
+
+        <div class="flex flex-wrap items-center justify-center gap-10 md:gap-20 text-gray-800 font-extrabold text-sm tracking-tight">
+          <span class="flex items-center gap-2"><i data-lucide="cpu" class="w-5 h-5 text-[#00B050]"></i> AMAZON VisA (ECCV 2022)</span>
+          <span class="flex items-center gap-2"><i data-lucide="package" class="w-5 h-5 text-[#00B050]"></i> MVTec AD (CVPR 2019)</span>
+          <span class="flex items-center gap-2"><i data-lucide="layers" class="w-5 h-5 text-[#00B050]"></i> NEU SURFACE DEFECT</span>
+          <span class="flex items-center gap-2"><i data-lucide="shield-check" class="w-5 h-5 text-[#00B050]"></i> INTEL ANOMALIB</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- "Acceleration In Practice" Stats Section (Matches Instrumental Screenshot 3) -->
+    <div class="bg-[#181818] text-white py-14 px-6 border-b border-gray-800">
+      <div class="max-w-[1600px] mx-auto">
+        <div class="text-center mb-10">
+          <h2 class="text-3xl font-black tracking-tight text-white">Acceleration In Practice</h2>
+          <p class="text-sm text-gray-400 mt-1">Measured metrics across edge factory deployments and GPU benchmarks</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-8 text-center font-mono">
+          <div>
+            <div class="text-4xl lg:text-5xl font-black text-white">99.7%</div>
+            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mt-2 font-sans">Peak AUROC</div>
+            <div class="text-[11px] text-[#00B050] mt-0.5">Bottle Line (MVTec)</div>
+          </div>
+          <div>
+            <div class="text-4xl lg:text-5xl font-black text-white">14.2 ms</div>
+            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mt-2 font-sans">Inference Latency</div>
+            <div class="text-[11px] text-[#00B050] mt-0.5">Edge CPU Verified</div>
+          </div>
+          <div>
+            <div class="text-4xl lg:text-5xl font-black text-white">12,621</div>
+            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mt-2 font-sans">Images Ingested</div>
+            <div class="text-[11px] text-gray-400 mt-0.5">VisA + MVTec + NEU</div>
+          </div>
+          <div>
+            <div class="text-4xl lg:text-5xl font-black text-white">8 Lines</div>
+            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mt-2 font-sans">Across 4 Sectors</div>
+            <div class="text-[11px] text-gray-400 mt-0.5">PCBs, Pharma, Steel</div>
+          </div>
+          <div>
+            <div class="text-4xl lg:text-5xl font-black text-[#00B050]">100%</div>
+            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mt-2 font-sans">Zero-Defect Supervision</div>
+            <div class="text-[11px] text-[#00B050] mt-0.5">Trained on Normal Only</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clean Light Architecture & Engineering Section (Matches Instrumental White Body) -->
+    <div class="bg-white py-16 px-6 border-b border-gray-200">
+      <div class="max-w-[1600px] mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-12">
+          <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">AI VISION ARCHITECTURE</span>
+          <h2 class="text-3xl font-black text-gray-900 mt-2">How DefectVision Operates Without Defect Training Data</h2>
+          <p class="text-sm text-gray-600 mt-2">
+            Supervised classifiers fail when brand-new defects appear. DefectVision builds a mathematical memory bank of pristine components, flagging any deviation as an anomalous outlier.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          
+          <div class="clean-card p-8">
+            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-[#111111] mb-5 font-bold">
+              <i data-lucide="layers" class="w-6 h-6 text-[#00B050]"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">1. ResNet-50 Feature Fusion</h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
+              Extracts intermediate CNN representations from Layer 2 (sub-millimeter spatial resolution for micro-cracks) and Layer 3 (structural component context), fusing them into 1,536-dimensional patch embeddings.
+            </p>
+          </div>
+
+          <div class="clean-card p-8">
+            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-[#111111] mb-5 font-bold">
+              <i data-lucide="database" class="w-6 h-6 text-[#00B050]"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">2. PatchCore Memory Bank</h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
+              Trained strictly on pristine parts (<code class="bg-gray-100 text-[#00B050] px-1.5 py-0.5 rounded font-mono text-xs">train/good</code>). Subsamples normal patches using greedy coreset selection, maintaining sub-50ms inference latency without heavy retraining.
+            </p>
+          </div>
+
+          <div class="clean-card p-8">
+            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-[#111111] mb-5 font-bold">
+              <i data-lucide="flame" class="w-6 h-6 text-[#DC2626]"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">3. Thermal Distance Heatmap</h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
+              Nearest-neighbor Euclidean distance scores each spatial patch against normal memory bank vectors. A 2D Gaussian filter (&sigma;=4.0) generates a JET thermal colormap overlay pinpointing the fracture.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- 3-Member Engineering Track Team Breakdown -->
+        <div class="mt-12 pt-10 border-t border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
+          <div class="p-5 rounded-xl bg-gray-50 border border-gray-200">
+            <div class="text-[#00B050] font-bold uppercase mb-1">MEMBER 1: TANYA TEJASWI</div>
+            <div class="text-gray-900 font-bold text-sm">Computer Vision & Feature Fusion Lead</div>
+            <p class="text-gray-600 font-sans text-xs mt-1">Multi-dataset ingestion (VisA + MVTec + NEU), ResNet-50 patch extraction, and thermal heatmap generation.</p>
+          </div>
+
+          <div class="p-5 rounded-xl bg-gray-50 border border-gray-200">
+            <div class="text-[#00B050] font-bold uppercase mb-1">MEMBER 2: CHANDAN REDDY</div>
+            <div class="text-gray-900 font-bold text-sm">Unsupervised ML & Manifold Lead</div>
+            <p class="text-gray-600 font-sans text-xs mt-1">PCA scree decomposition, explained variance decay, t-SNE 2D/3D projections, and manifold stability.</p>
+          </div>
+
+          <div class="p-5 rounded-xl bg-gray-50 border border-gray-200">
+            <div class="text-[#00B050] font-bold uppercase mb-1">MEMBER 3: GAYATRI U</div>
+            <div class="text-gray-900 font-bold text-sm">Full-Stack MLOps & Dashboard Lead</div>
+            <p class="text-gray-600 font-sans text-xs mt-1">K-Means & DBSCAN clustering, automated conveyor routing logic, and the complete Web Inspection Cockpit.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ====================================================================
+       PAGE 2: 8-LINE SUITE CATALOG (Clean Corporate Grid)
+       ==================================================================== -->
+  <section id="pageLines" class="page-container hidden flex-1 p-8 max-w-[1600px] w-full mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">MANUFACTURING LINES</span>
+        <h2 class="text-3xl font-black text-gray-900 mt-1">The 8-Line Industrial Suite</h2>
+        <p class="text-sm text-gray-600 mt-1">
+          Click any manufacturing line to immediately inspect its components in the Live Inspection Studio.
+        </p>
+      </div>
+
+      <div class="text-xs font-mono text-gray-600 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
+        Active Line: <strong class="text-gray-900" id="step1SelectedLineText">pcb1 (Mainboard Traces)</strong>
+      </div>
+    </div>
+
+    <!-- 8 Lines Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="linesCatalogGrid">
+      <!-- Injected via app.js -->
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       PAGE 3: LIVE INSPECTION STUDIO (High-Tech Diagnostic Console)
+       ==================================================================== -->
+  <section id="pageInspect" class="page-container hidden flex-1 p-6 max-w-[1600px] w-full mx-auto flex flex-col gap-6">
+    
+    <!-- Top Studio Context Bar -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-white border border-gray-200 shadow-sm text-xs font-mono">
+      <div class="flex items-center gap-3">
+        <span class="px-2.5 py-1 rounded bg-gray-100 text-gray-900 font-bold border border-gray-300">LIVE AOI STUDIO</span>
+        <span class="text-gray-600">Active Line: <strong class="text-gray-900 text-sm" id="hudActiveLineName">pcb1 (Mainboard Traces)</strong></span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="openLineIngestModal(state.selectedLine)" class="btn-instrumental px-3.5 py-1.5 text-xs font-mono flex items-center gap-1.5 font-bold">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>Inspect Another Unit</span>
+        </button>
+
+        <button onclick="navigateTo('lines')" class="btn-instrumental-secondary px-3 py-1.5 text-xs font-mono flex items-center gap-1.5 font-bold">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Switch Line</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Viewfinder & Anomaly Intelligence HUD (Console Theme for Visual Contrast) -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+      
+      <!-- LEFT 8 COLUMNS: Dual Viewfinder (Dark High-Contrast Optical Console) -->
+      <div class="xl:col-span-8 flex flex-col gap-5">
+        
+        <div class="console-card p-6 text-white">
+          <!-- Viewfinder Header & Controls -->
+          <div class="flex flex-wrap items-center justify-between gap-4 pb-4 mb-4 border-b border-gray-800">
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 font-mono">
+                <i data-lucide="scan" class="w-4 h-4 text-[#00B050]"></i>
+                Dual Comparative Optical Viewfinder
+              </h3>
+              <p class="text-xs text-gray-400 font-mono" id="viewfinderUnitSub">Comparing Unit against Golden Nominal Reference</p>
+            </div>
+
+            <!-- Controls: Blend & Colormap -->
+            <div class="flex items-center flex-wrap gap-4 bg-[#111111] px-3.5 py-1.5 rounded-lg border border-gray-800 text-xs font-mono">
+              <div class="flex items-center gap-2">
+                <span class="text-gray-400">Blend:</span>
+                <input type="range" id="blendSlider" min="0" max="1" step="0.05" value="0.45" class="w-20 accent-[#00B050] cursor-pointer">
+                <span id="blendVal" class="text-[#00B050] font-bold w-8">45%</span>
+              </div>
+
+              <div class="h-3.5 w-[1px] bg-gray-700"></div>
+
+              <div class="flex items-center gap-1.5">
+                <span class="text-gray-400">Colormap:</span>
+                <select id="cmapSelect" class="bg-[#222222] text-white rounded px-2 py-0.5 border border-gray-700 focus:outline-none focus:border-[#00B050]">
+                  <option value="jet" selected>JET Thermal</option>
+                  <option value="inferno">Inferno</option>
+                  <option value="turbo">Turbo</option>
+                  <option value="viridis">Viridis</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dual Images -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Box 1: Golden Nominal Reference -->
+            <div class="flex flex-col">
+              <div class="flex items-center justify-between text-xs text-gray-400 mb-2 font-mono">
+                <span class="flex items-center gap-1.5 text-gray-300 font-bold"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-[#00B050]"></i> GOLDEN REFERENCE</span>
+                <span class="text-gray-500">Nominal CAD Standard</span>
+              </div>
+              <div class="rounded-xl overflow-hidden bg-black border border-gray-800 aspect-square flex items-center justify-center relative p-2">
+                <img id="goldenImage" src="" alt="Golden Unit" class="w-full h-full object-contain rounded-lg">
+                <div id="goldenPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-xs gap-2">
+                  <i data-lucide="image" class="w-8 h-8 text-gray-600"></i>
+                  <span>Loading Reference Unit...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Box 2: Inspected Unit with Overlay -->
+            <div class="flex flex-col">
+              <div class="flex items-center justify-between text-xs text-gray-400 mb-2 font-mono">
+                <span class="flex items-center gap-1.5 text-white font-bold"><i data-lucide="crosshair" class="w-3.5 h-3.5 text-[#00B050]"></i> CURRENT INSPECTED UNIT</span>
+                <span id="inspectedUnitBadge" class="text-xs px-2 py-0.5 rounded bg-[#00B050]/20 text-[#00B050] font-bold border border-[#00B050]/40">OVERLAY</span>
+              </div>
+              <div class="rounded-xl overflow-hidden bg-black border border-gray-800 aspect-square flex items-center justify-center relative p-2">
+                <img id="inspectedOverlayImage" src="" alt="Inspected Unit Overlay" class="w-full h-full object-contain rounded-lg">
+                <div id="inspectedPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 text-xs gap-2">
+                  <i data-lucide="loader" class="w-8 h-8 text-[#00B050] animate-spin"></i>
+                  <span>Executing PatchCore Anomaly Scoring...</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- View Mode Toggles -->
+          <div class="mt-6 pt-4 border-t border-gray-800 flex flex-wrap items-center justify-between text-xs font-mono">
+            <div class="flex items-center gap-3 text-gray-400 text-[11px]">
+              <span>ResNet-50 Layers 2+3 (1,536-D)</span>
+              <span>&bull;</span>
+              <span>Gaussian Kernel (&sigma;=4.0)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="btnViewRaw" class="px-3 py-1.5 rounded bg-[#111111] border border-gray-800 hover:border-gray-600 text-gray-300 transition">Show Raw Sensor</button>
+              <button id="btnViewHeatmap" class="px-3 py-1.5 rounded bg-[#111111] border border-gray-800 hover:border-gray-600 text-gray-300 transition">Show Distance Map</button>
+              <button id="btnViewOverlay" class="px-3 py-1.5 rounded bg-[#00B050] text-white font-bold transition">Show Blended Overlay</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT 4 COLUMNS: Anomaly Intelligence Panel -->
+      <div class="xl:col-span-4 flex flex-col gap-5">
+        
+        <!-- Verdict & Directive Card (Clean Corporate Style) -->
+        <div id="verdictCard" class="clean-card p-6 border-l-4 border-l-[#00B050] transition duration-300">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono uppercase tracking-wider text-gray-500" id="unitIdDisplay">UNIT: PCB-0042</span>
+            <span id="verdictPill" class="text-xs font-extrabold px-3 py-0.5 rounded-full bg-[#00B050]/15 text-[#00B050] border border-[#00B050]/30 font-mono">QA PASSED</span>
+          </div>
+
+          <h3 id="verdictTitle" class="text-2xl font-black tracking-tight text-gray-900 mb-2">QUALITY ASSURANCE PASSED</h3>
+          <p id="verdictDesc" class="text-xs text-gray-600 leading-relaxed mb-5">
+            Product appearance conforms strictly with pristine distribution. Nearest-neighbor patch distance is nominal.
+          </p>
+
+          <!-- Conveyor Directive Box -->
+          <div id="routingBox" class="p-4 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-[#00B050]/15 flex items-center justify-center text-[#00B050]">
+              <i data-lucide="arrow-right-circle" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono text-gray-500 uppercase">Routing Action Directive</div>
+              <div class="text-sm font-bold text-gray-900 tracking-wide font-mono" id="routingActionText">ROUTE TO CONVEYOR BELT A</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI Telemetry Cards -->
+        <div class="grid grid-cols-2 gap-4 font-mono">
+          
+          <div class="clean-card p-4">
+            <div class="text-xs text-gray-500">ANOMALY SCORE</div>
+            <div id="kpiScore" class="text-3xl font-black text-[#00B050] my-1.5">28.40</div>
+            <div id="kpiDelta" class="text-xs text-[#00B050]">-5.80 vs Threshold</div>
+          </div>
+
+          <div class="clean-card p-4">
+            <div class="text-xs text-gray-500">THRESHOLD</div>
+            <div id="kpiThreshold" class="text-3xl font-black text-gray-900 my-1.5">34.20</div>
+            <div id="kpiLineName" class="text-xs text-gray-500">Target: pcb1</div>
+          </div>
+
+          <div class="clean-card p-4">
+            <div class="text-xs text-gray-500">CONFIDENCE</div>
+            <div id="kpiProb" class="text-3xl font-black text-[#00B050] my-1.5">8.4%</div>
+            <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+              <div id="probBar" class="bg-[#00B050] h-1.5 rounded-full transition-all duration-300" style="width: 8.4%"></div>
+            </div>
+          </div>
+
+          <div class="clean-card p-4">
+            <div class="text-xs text-gray-500">INFERENCE SPEED</div>
+            <div id="kpiLatency" class="text-3xl font-black text-gray-900 my-1.5">14.2 ms</div>
+            <div class="text-xs text-[#00B050]">Edge CPU Verified</div>
+          </div>
+
+        </div>
+
+        <!-- Line Defect Signatures -->
+        <div class="clean-card p-6 flex flex-col gap-3 font-mono text-xs">
+          <h4 class="font-bold uppercase tracking-wider text-gray-900 flex items-center gap-1.5">
+            <i data-lucide="info" class="w-4 h-4 text-[#00B050]"></i>
+            Line Inspection Intelligence
+          </h4>
+
+          <p class="text-gray-600 leading-relaxed font-sans text-xs" id="lineDefectsDesc">
+            Broken copper traces, missing SMD resistors, and solder bridging.
+          </p>
+
+          <div class="pt-3 border-t border-gray-200 flex items-center justify-between">
+            <span class="text-gray-500">Dataset Source:</span>
+            <span id="lineDatasetBadge" class="text-gray-900 font-bold">Amazon VisA</span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-gray-500">Benchmark AUROC:</span>
+            <span id="lineAurocBadge" class="text-[#00B050] font-bold">98.40%</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ====================================================================
+       PAGE 4: BENCHMARK SCOREBOARD (Clean Corporate Table)
+       ==================================================================== -->
+  <section id="pageBenchmarks" class="page-container hidden flex-1 p-8 max-w-[1600px] w-full mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">SCIENTIFIC EVALUATION</span>
+        <h2 class="text-3xl font-black text-gray-900 mt-1">Multi-Category Benchmark Scoreboard</h2>
+        <p class="text-sm text-gray-600 mt-1">
+          Official AUROC, AUPRC, F1-Score, and calibrated decision thresholds computed via PatchCore ResNet-50.
+        </p>
+      </div>
+
+      <button onclick="exportBenchmarkCSV()" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        <span>EXPORT AUDIT CSV</span>
+      </button>
+    </div>
+
+    <!-- Clean Corporate Table -->
+    <div class="clean-card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="bg-gray-50 text-gray-600 uppercase tracking-wider border-b border-gray-200">
+            <tr>
+              <th class="py-4 px-5">Sector</th>
+              <th class="py-4 px-5">Line Category</th>
+              <th class="py-4 px-5">Dataset</th>
+              <th class="py-4 px-5 text-right">AUROC</th>
+              <th class="py-4 px-5 text-right">F1-Score</th>
+              <th class="py-4 px-5 text-right">Threshold</th>
+              <th class="py-4 px-5 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100" id="benchmarkTableBody">
+            <!-- Injected via app.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================
+       OPERATOR AUTH MODAL
+       ==================================================================== -->
+  <div id="authModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full relative shadow-2xl border border-gray-200">
+      <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="shield-check" class="w-5 h-5 text-[#00B050]"></i>
+        <h3 class="text-lg font-bold text-gray-900">Operator Authentication Portal</h3>
+      </div>
+      <p class="text-xs text-gray-600 mb-6">Enter operator credentials to verify access to factory QA controls.</p>
+
+      <form onsubmit="handleAuthSubmit(event)" class="space-y-4 font-mono text-xs">
+        <div>
+          <label class="block text-gray-700 mb-1 font-semibold">Operator ID or Username</label>
+          <input type="text" id="authUsername" value="admin" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1 font-semibold">Access PIN / Password</label>
+          <input type="password" id="authPassword" value="DefectVision@Admin2026!" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]">
+        </div>
+
+        <div class="flex items-center justify-between text-[11px] text-gray-500">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked class="accent-[#00B050]">
+            <span>Remember workstation</span>
+          </label>
+          <span class="text-[#00B050] font-semibold">Role: QA Lead</span>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold">
+          AUTHENTICATE WORKSTATION
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       LINE-SPECIFIC 4-OPTION INGESTION MODAL / POPUP
+       (Triggered when clicking "Select & Inspect" on any 8-Line Suite card)
+       ==================================================================== -->
+  <div id="lineIngestModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-4xl w-full relative shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Top Modal Header -->
+      <div class="p-6 border-b border-gray-200 bg-gray-50 flex items-start justify-between gap-4">
+        <div class="flex items-start gap-4">
+          <div id="modalLineIcon" class="w-12 h-12 rounded-xl bg-white border border-gray-200 shadow-sm flex items-center justify-center text-2xl">
+            🔬
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <span id="modalLineSector" class="px-2 py-0.5 rounded bg-gray-200 text-gray-700 font-mono text-[11px] font-semibold uppercase">
+                Semiconductor & Electronics
+              </span>
+              <span id="modalLineBenchmark" class="px-2 py-0.5 rounded bg-[#00B050]/15 text-[#00B050] font-mono text-[11px] font-bold">
+                Amazon VisA &bull; 97.1% AUROC
+              </span>
+            </div>
+            <h3 id="modalLineTitle" class="text-xl font-black text-gray-900 tracking-tight">
+              pcb2 (Micro-Soldering)
+            </h3>
+            <p id="modalLineDefects" class="text-xs text-gray-500 font-mono mt-0.5">
+              Cold solder joints, misaligned chips, trace scratches
+            </p>
+          </div>
+        </div>
+
+        <button onclick="closeLineIngestModal()" class="w-8 h-8 rounded-lg bg-white border border-gray-200 hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition shadow-sm">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- 4-Channel Ingestion Option Tabs -->
+      <div class="px-6 pt-4 border-b border-gray-200 bg-white">
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none text-xs font-mono">
+          
+          <button id="modalTabBtnFile" onclick="switchModalTab('file')" class="px-3.5 py-2 rounded-lg font-bold flex items-center gap-2 transition border bg-gray-100 text-gray-900 border-[#00B050]">
+            <i data-lucide="upload-cloud" class="w-4 h-4 text-[#00B050]"></i>
+            <span>1. Direct File Browse</span>
+          </button>
+
+          <button id="modalTabBtnDataset" onclick="switchModalTab('dataset')" class="px-3.5 py-2 rounded-lg font-bold flex items-center gap-2 transition border border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+            <i data-lucide="database" class="w-4 h-4 text-[#00B050]"></i>
+            <span>2. Line Dataset (<span id="modalTabLineName">pcb2</span> only)</span>
+            <span id="modalTabPresetCount" class="px-1.5 py-0.2 rounded-full bg-gray-200 text-[10px] font-bold text-gray-700">3</span>
+          </button>
+
+          <button id="modalTabBtnCamera" onclick="switchModalTab('camera')" class="px-3.5 py-2 rounded-lg font-bold flex items-center gap-2 transition border border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+            <i data-lucide="camera" class="w-4 h-4 text-[#00B050]"></i>
+            <span>3. Live Hardware Camera</span>
+          </button>
+
+          <button id="modalTabBtnUrl" onclick="switchModalTab('url')" class="px-3.5 py-2 rounded-lg font-bold flex items-center gap-2 transition border border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50">
+            <i data-lucide="globe" class="w-4 h-4 text-[#00B050]"></i>
+            <span>4. Web / Google Image</span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Tab Content Area (Scrollable) -->
+      <div class="p-6 overflow-y-auto flex-1 bg-gray-50/50">
+
+        <!-- TAB 1: Direct File Browse -->
+        <div id="modalTabContentFile" class="space-y-4">
+          <div id="modalDropZone" onclick="document.getElementById('modalFileInput').click()" class="border-2 border-dashed border-gray-300 hover:border-[#00B050] bg-white rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition group">
+            <input type="file" id="modalFileInput" accept="image/*" class="hidden" onchange="handleModalFileSelected(event)">
+            <div class="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center text-[#00B050] mb-3 group-hover:scale-110 transition">
+              <i data-lucide="upload-cloud" class="w-7 h-7"></i>
+            </div>
+            <h4 class="font-bold text-sm text-gray-900 mb-1">
+              Drop image here or <span class="text-[#00B050] underline underline-offset-2">Browse Files</span>
+            </h4>
+            <p class="text-xs text-gray-500 font-mono">
+              Accepts PNG, JPG, JPEG, BMP &bull; Sub-millimeter ResNet-50 patch extraction
+            </p>
+          </div>
+
+          <!-- Selected File Preview Badge -->
+          <div id="modalFilePreviewBox" class="hidden p-4 rounded-xl bg-white border border-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img id="modalFileThumbnail" src="" alt="Selected Preview" class="w-12 h-12 object-cover rounded-lg border border-gray-200">
+              <div>
+                <p id="modalFileName" class="text-xs font-bold text-gray-900 truncate max-w-xs font-mono">sample.png</p>
+                <p id="modalFileSize" class="text-[11px] text-gray-500 font-mono">245 KB &bull; Image Ready</p>
+              </div>
+            </div>
+            <button onclick="clearModalFileSelection()" class="text-gray-400 hover:text-gray-600">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <button id="btnModalInspectUpload" onclick="submitModalFileUpload()" disabled class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold text-xs opacity-50 cursor-not-allowed transition flex items-center justify-center gap-2">
+            <span>INSPECT UPLOADED IMAGE &rarr;</span>
+          </button>
+        </div>
+
+        <!-- TAB 2: Filtered Line Dataset (Strictly for Selected Line Only) -->
+        <div id="modalTabContentDataset" class="hidden space-y-4">
+          <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2 font-mono">
+            <i data-lucide="check-circle" class="w-4 h-4 text-[#00B050] flex-shrink-0"></i>
+            <span>Showing verified defect modes & nominal standards for <strong id="modalDatasetBannerLineName">pcb2</strong> only.</span>
+          </div>
+
+          <!-- Exact Streamlit-style Select List / Dropdown as requested -->
+          <div class="bg-white p-5 rounded-xl border border-gray-200 space-y-4 shadow-sm">
+            <div>
+              <label class="block text-xs font-bold text-gray-800 uppercase font-mono mb-1.5 flex items-center justify-between">
+                <span>Select Dataset Sample:</span>
+                <span id="modalDatasetTotalCount" class="text-gray-500 font-normal text-[11px]">Loading samples...</span>
+              </label>
+              
+              <div class="relative">
+                <select id="modalDatasetSampleSelect" class="w-full p-3 rounded-lg bg-[#111111] text-emerald-400 font-mono text-xs border border-gray-700 focus:outline-none focus:border-[#00B050] cursor-pointer appearance-none pr-10 shadow-inner" onchange="handleModalSampleSelectionChange(event)">
+                  <!-- Populated dynamically with '#000 | TRAIN | good', etc. -->
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+                  <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Selected Sample Preview Card -->
+            <div id="modalSelectedSampleCard" class="p-4 rounded-xl bg-gray-50 border border-gray-200 flex flex-col sm:flex-row items-center gap-5">
+              <div class="w-24 h-24 rounded-lg overflow-hidden bg-black border border-gray-300 flex-shrink-0 flex items-center justify-center p-1">
+                <img id="modalSelectedSampleThumb" src="" alt="Sample Thumbnail" class="w-full h-full object-contain">
+              </div>
+
+              <div class="flex-1 space-y-1.5 w-full font-mono text-xs">
+                <div class="flex items-center gap-2">
+                  <span id="modalSelectedSampleTag" class="px-2 py-0.5 rounded font-bold bg-emerald-50 text-[#00B050] border border-emerald-200 text-[11px]">
+                    GOLDEN NOMINAL
+                  </span>
+                  <span id="modalSelectedSampleFilename" class="text-gray-600 font-semibold text-[11px]">0000.JPG</span>
+                </div>
+                <h4 id="modalSelectedSampleTitle" class="text-sm font-bold text-gray-900 font-sans">
+                  #000 | TRAIN | good
+                </h4>
+                <p id="modalSelectedSampleDesc" class="text-[11px] text-gray-500 leading-snug">
+                  Pristine nominal baseline unit conforming strictly to manufacturing tolerances.
+                </p>
+              </div>
+            </div>
+
+            <button id="btnModalInspectDataset" onclick="submitModalDatasetSampleInspection()" class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold text-xs flex items-center justify-center gap-2">
+              <i data-lucide="scan" class="w-4 h-4"></i>
+              <span>INSPECT SELECTED SAMPLE &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB 3: Live Hardware Camera -->
+        <div id="modalTabContentCamera" class="hidden space-y-4">
+          <div class="rounded-xl overflow-hidden bg-black border border-gray-800 aspect-video max-h-72 flex items-center justify-center relative">
+            <video id="modalCameraVideo" autoplay playsinline class="w-full h-full object-contain"></video>
+            <div id="modalCameraPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-2">
+              <i data-lucide="video-off" class="w-8 h-8 text-gray-600"></i>
+              <span class="text-xs font-mono">Camera is currently stopped</span>
+            </div>
+            <canvas id="modalCameraCanvas" class="hidden"></canvas>
+          </div>
+
+          <div class="flex items-center justify-between gap-4 font-mono text-xs">
+            <div class="flex items-center gap-2">
+              <button id="btnModalStartCam" onclick="startModalCameraStream()" class="btn-instrumental px-4 py-2 flex items-center gap-1.5 font-bold">
+                <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                <span>Start Camera</span>
+              </button>
+              <button id="btnModalStopCam" onclick="stopModalCameraStream()" class="btn-instrumental-secondary px-3 py-2 hidden">
+                Stop
+              </button>
+            </div>
+
+            <button id="btnModalCaptureCam" onclick="captureModalCameraAndInspect()" disabled class="btn-instrumental px-5 py-2 uppercase tracking-wider font-bold opacity-50 cursor-not-allowed flex items-center gap-2">
+              <i data-lucide="aperture" class="w-4 h-4"></i>
+              <span>CAPTURE & INSPECT &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB 4: Web / Google Image Browser (Direct Browser Launcher & Image Picker) -->
+        <div id="modalTabContentUrl" class="hidden space-y-4">
+          
+          <!-- Open Google Images in Browser Banner -->
+          <div class="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center flex-shrink-0">
+                <i data-lucide="external-link" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-gray-900 font-sans">Open Google Images in Your Browser</h4>
+                <p class="text-[11px] text-gray-600 font-mono">
+                  Launch Google Images to find and pick any real manufacturing image.
+                </p>
+              </div>
+            </div>
+
+            <button onclick="openGoogleImagesInBrowser()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold font-mono transition flex items-center gap-1.5 flex-shrink-0 shadow-sm">
+              <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+              <span>Search Google Images &rarr;</span>
+            </button>
+          </div>
+
+          <!-- Easy Paste / Drop Zone from Browser -->
+          <div id="modalWebDropZone" class="p-5 rounded-xl border-2 border-dashed border-gray-300 hover:border-[#00B050] bg-white text-center flex flex-col items-center justify-center gap-2 cursor-pointer transition" onclick="pasteFromClipboard()">
+            <div class="w-10 h-10 rounded-full bg-emerald-50 text-[#00B050] flex items-center justify-center">
+              <i data-lucide="clipboard-copy" class="w-5 h-5"></i>
+            </div>
+            <div class="text-xs font-bold text-gray-800">
+              Copied an image from Google Images? <span class="text-[#00B050] underline">Click to Paste or Press Ctrl+V</span>
+            </div>
+            <p class="text-[11px] text-gray-500 font-mono">
+              In Google Images, right-click &rarr; "Copy Image" &rarr; press Ctrl+V anywhere in this window
+            </p>
+          </div>
+
+          <!-- In-App Google / Web Image Gallery -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-mono text-gray-700 uppercase font-bold flex items-center gap-1.5">
+                <i data-lucide="images" class="w-3.5 h-3.5 text-[#00B050]"></i>
+                <span>Or Select from Curated Online Images (<span id="modalWebGalleryLine">pcb2</span>):</span>
+              </span>
+              <span class="text-[10px] text-gray-400 font-mono">1-click select & inspect</span>
+            </div>
+            
+            <div id="modalWebGalleryGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <!-- Dynamically populated with online images -->
+            </div>
+          </div>
+
+          <!-- URL Input Fallback -->
+          <div class="pt-2 border-t border-gray-200">
+            <div class="flex gap-2">
+              <input type="url" id="modalWebUrlInput" placeholder="Or paste direct image URL (https://...)" class="flex-1 p-2.5 rounded-lg border border-gray-300 text-xs font-mono text-gray-900 focus:outline-none focus:border-[#00B050]" oninput="handleModalUrlInput(event)">
+              <button onclick="previewModalWebUrl()" class="btn-instrumental-secondary px-3 py-2 text-xs font-mono font-bold">
+                Load URL
+              </button>
+            </div>
+          </div>
+
+          <!-- Image Preview Container -->
+          <div id="modalWebUrlPreviewBox" class="hidden p-3.5 rounded-xl bg-white border border-gray-200 flex items-center gap-4">
+            <img id="modalWebUrlPreviewImg" src="" alt="Web Preview" class="w-16 h-16 object-cover rounded-lg border border-gray-200">
+            <div class="overflow-hidden flex-1">
+              <span class="text-xs font-bold text-gray-900 font-mono block truncate" id="modalWebUrlDisplay">Web Image Selected</span>
+              <span class="text-[11px] text-[#00B050] font-mono">Image loaded &bull; Ready for ResNet-50 patch inspection</span>
+            </div>
+          </div>
+
+          <button id="btnModalInspectUrl" onclick="submitModalUrlInspection()" disabled class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold text-xs opacity-50 cursor-not-allowed transition flex items-center justify-center gap-2">
+            <i data-lucide="scan" class="w-4 h-4"></i>
+            <span>INSPECT SELECTED ONLINE IMAGE &rarr;</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Bottom Modal Footer -->
+      <div class="px-6 py-3.5 border-t border-gray-200 bg-white flex items-center justify-between text-xs font-mono text-gray-500">
+        <span class="flex items-center gap-1.5">
+          <i data-lucide="cpu" class="w-3.5 h-3.5 text-[#00B050]"></i>
+          <span>ResNet-50 Coreset Engine: Ready</span>
+        </span>
+        <button onclick="closeLineIngestModal()" class="text-gray-500 hover:text-gray-900 transition font-bold">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Corporate Footer (Matches Instrumental Screenshot 3) -->
+  <footer class="bg-[#111111] text-white py-10 px-6 mt-auto">
+    <div class="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-gray-400 font-mono">
+      <div class="flex items-center gap-3">
+        <div class="w-6 h-6 rounded-full bg-white flex items-center justify-center text-[#111111] font-bold text-[10px]">DV</div>
+        <span class="text-white font-bold uppercase tracking-wider">DEFECTVISION 2.0 INDUSTRIAL OPTICAL INSPECTION</span>
+      </div>
+
+      <div>
+        <span>Engineered with ResNet-50 + PatchCore &bull; Inspired by Instrumental.com</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modular JavaScript Scripts -->
+  <script src="/static/auth.js"></script>
+  <script src="/static/camera.js"></script>
+  <script src="/static/telemetry.js"></script>
+  <script src="/static/app.js"></script>
+  <script>
+    lucide.createIcons();
+    if (window.AuthManager) window.AuthManager.init();
+    if (window.CameraController) window.CameraController.init();
+  </script>
+</body>
+</html>
