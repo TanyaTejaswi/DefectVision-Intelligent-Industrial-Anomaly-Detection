@@ -1194,24 +1194,24 @@ function renderBenchmarkTable() {
 
   state.lines.forEach(line => {
     const tr = document.createElement('tr');
-    tr.className = 'hover:bg-white/[0.03] transition';
+    tr.className = 'hover:bg-gray-50/80 transition border-b border-gray-100';
 
     tr.innerHTML = `
-      <td class="py-4 px-4 font-sans font-medium text-slate-300">${line.sector}</td>
-      <td class="py-4 px-4 font-bold text-white flex items-center gap-2">
-        <span>${line.icon}</span>
+      <td class="py-4 px-5 font-sans font-medium text-gray-700">${line.sector}</td>
+      <td class="py-4 px-5 font-bold text-gray-900 flex items-center gap-2">
+        <span class="text-base">${line.icon}</span>
         <span>${line.name}</span>
       </td>
-      <td class="py-4 px-4 text-cyan-300">${line.dataset}</td>
-      <td class="py-4 px-4 text-right">
-        <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">
+      <td class="py-4 px-5 text-blue-700 font-semibold underline underline-offset-2">${line.dataset}</td>
+      <td class="py-4 px-5 text-right">
+        <span class="px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-[#00B050] border border-emerald-200 text-xs">
           ${(line.auroc * 100).toFixed(2)}%
         </span>
       </td>
-      <td class="py-4 px-4 text-right font-bold text-white">${line.f1.toFixed(4)}</td>
-      <td class="py-4 px-4 text-right text-slate-300 font-mono">${line.threshold.toFixed(2)}</td>
-      <td class="py-4 px-4 text-center">
-        <button onclick="selectLineAndInspect('${line.id}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-cyan-600 hover:text-black text-cyan-300 text-xs font-bold border border-slate-700 transition">
+      <td class="py-4 px-5 text-right font-bold text-gray-900 font-mono">${line.f1.toFixed(4)}</td>
+      <td class="py-4 px-5 text-right text-gray-700 font-mono font-semibold">${line.threshold.toFixed(2)}</td>
+      <td class="py-4 px-5 text-center">
+        <button onclick="selectLineAndInspect('${line.id}')" class="btn-instrumental px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
           Inspect Line
         </button>
       </td>
