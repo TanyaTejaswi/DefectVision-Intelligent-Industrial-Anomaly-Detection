@@ -49,7 +49,7 @@
       </div>
 
       <!-- Clean Corporate Navigation (No duplicate 1 vs 2 steps) -->
-      <nav class="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-gray-600">
+      <nav class="hidden md:flex items-center gap-7 text-xs font-bold uppercase tracking-wider text-gray-600">
         <button id="navBtnHome" onclick="navigateTo('home')" class="text-gray-900 font-extrabold border-b-2 border-[#00B050] pb-1 transition">
           PRODUCT & OVERVIEW
         </button>
@@ -61,17 +61,22 @@
         <button id="navBtnBenchmarks" onclick="navigateTo('benchmarks')" class="hover:text-gray-900 transition">
           BENCHMARKS
         </button>
+
+        <button id="navBtnAnalytics" onclick="navigateTo('analytics')" class="hover:text-gray-900 transition flex items-center gap-1.5 font-bold">
+          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-[#00B050]"></i>
+          <span>COMPLETE PROJECT ANALYSIS GRAPHS</span>
+        </button>
       </nav>
 
       <!-- Right Operator Profile & Live CTA -->
       <div class="flex items-center gap-4">
         <button onclick="toggleAuthModal()" class="text-xs font-mono text-gray-600 hover:text-gray-900 transition flex items-center gap-1.5">
           <i data-lucide="user-check" class="w-4 h-4 text-[#00B050]"></i>
-          <span id="navOperatorText">Operator: Admin</span>
+          <span id="navOperatorText">Sign In / Register</span>
         </button>
 
-        <button onclick="navigateTo('inspect')" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider">
-          TEST LIVE AOI STUDIO
+        <button onclick="handleNavInspectClick()" id="navInspectCtaBtn" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider font-mono font-bold">
+          OPERATOR LOGIN
         </button>
       </div>
 
@@ -94,21 +99,24 @@
           </span>
 
           <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
-            Manufacturing acceleration for complex industrial electronics
+            Autonomous Optical Inspection & Defect Discovery Cockpit
           </h1>
 
-          <p class="text-lg text-gray-300 leading-relaxed max-w-2xl font-normal">
-            DefectVision turns automated optical inspection data into actionable defect intelligence to maximize yield, throughput, and zero-defect ramp across 8 critical manufacturing lines.
+          <p class="text-lg text-gray-300 leading-relaxed max-w-2xl font-normal font-sans">
+            Real-time sub-millimeter anomaly detection, intermediate feature coreset extraction, and automated conveyor defect routing across 8 critical manufacturing lines.
           </p>
 
           <div class="flex flex-wrap items-center gap-4 pt-2">
-            <button onclick="navigateTo('inspect')" class="btn-instrumental px-6 py-3.5 text-sm uppercase tracking-wider flex items-center gap-2">
-              <span>LAUNCH LIVE AOI STUDIO</span>
-              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            <!-- 1st Button: Meaningful Green Auth / Login CTA (Becomes Enter Studio once authenticated) -->
+            <button onclick="handlePrimaryHeroAuth()" id="heroPrimaryActionBtn" class="btn-instrumental px-6 py-3.5 text-sm uppercase tracking-wider flex items-center gap-2 shadow-lg font-bold">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+              <span id="heroAuthBtnText">LOGIN / CREATE ACCOUNT &rarr;</span>
             </button>
             
-            <button onclick="navigateTo('lines')" class="btn-instrumental-secondary px-6 py-3.5 text-sm uppercase tracking-wider">
-              EXPLORE 8-LINE SUITE
+            <!-- 2nd Button: Explore All 8 Product Lines -->
+            <button onclick="navigateTo('lines')" class="btn-instrumental-secondary px-6 py-3.5 text-sm uppercase tracking-wider flex items-center gap-2 bg-white text-gray-900 border border-gray-300 hover:bg-gray-100 font-bold">
+              <i data-lucide="eye" class="w-4 h-4 text-gray-700"></i>
+              <span>EXPLORE ALL 8 PRODUCT LINES</span>
             </button>
           </div>
         </div>
@@ -170,7 +178,7 @@
         <div class="grid grid-cols-2 md:grid-cols-5 gap-8 text-center font-mono">
           <div>
             <div class="text-4xl lg:text-5xl font-black text-white">99.7%</div>
-            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mt-2 font-sans">Peak AUROC</div>
+            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mt-2 font-sans">Peak Accuracy (AUROC)</div>
             <div class="text-[11px] text-[#00B050] mt-0.5">Bottle Line (MVTec)</div>
           </div>
           <div>
@@ -242,31 +250,12 @@
 
         </div>
 
-        <!-- 3-Member Engineering Track Team Breakdown -->
-        <div class="mt-12 pt-10 border-t border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
-          <div class="p-5 rounded-xl bg-gray-50 border border-gray-200">
-            <div class="text-[#00B050] font-bold uppercase mb-1">MEMBER 1: TANYA TEJASWI</div>
-            <div class="text-gray-900 font-bold text-sm">Computer Vision & Feature Fusion Lead</div>
-            <p class="text-gray-600 font-sans text-xs mt-1">Multi-dataset ingestion (VisA + MVTec + NEU), ResNet-50 patch extraction, and thermal heatmap generation.</p>
-          </div>
-
-          <div class="p-5 rounded-xl bg-gray-50 border border-gray-200">
-            <div class="text-[#00B050] font-bold uppercase mb-1">MEMBER 2: CHANDAN REDDY</div>
-            <div class="text-gray-900 font-bold text-sm">Unsupervised ML & Manifold Lead</div>
-            <p class="text-gray-600 font-sans text-xs mt-1">PCA scree decomposition, explained variance decay, t-SNE 2D/3D projections, and manifold stability.</p>
-          </div>
-
-          <div class="p-5 rounded-xl bg-gray-50 border border-gray-200">
-            <div class="text-[#00B050] font-bold uppercase mb-1">MEMBER 3: GAYATRI U</div>
-            <div class="text-gray-900 font-bold text-sm">Full-Stack MLOps & Dashboard Lead</div>
-            <p class="text-gray-600 font-sans text-xs mt-1">K-Means & DBSCAN clustering, automated conveyor routing logic, and the complete Web Inspection Cockpit.</p>
-          </div>
-        </div>
-
       </div>
     </div>
 
   </section>
+
+  
 
   <!-- ====================================================================
        PAGE 2: 8-LINE SUITE CATALOG (Clean Corporate Grid)
@@ -274,10 +263,10 @@
   <section id="pageLines" class="page-container hidden flex-1 p-8 max-w-[1600px] w-full mx-auto">
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
       <div>
-        <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">MANUFACTURING LINES</span>
-        <h2 class="text-3xl font-black text-gray-900 mt-1">The 8-Line Industrial Suite</h2>
+        <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">DETECTABLE DEFECT CATALOG</span>
+        <h2 class="text-3xl font-black text-gray-900 mt-1">Industrial Defect Detection Capability Catalog</h2>
         <p class="text-sm text-gray-600 mt-1">
-          Click any manufacturing line to immediately inspect its components in the Live Inspection Studio.
+          Explore detectable anomaly categories across 8 industrial manufacturing lines. Sign in or create an operator account to select images and run live inspections.
         </p>
       </div>
 
@@ -291,6 +280,8 @@
       <!-- Injected via app.js -->
     </div>
   </section>
+
+  
 
   <!-- ====================================================================
        PAGE 3: LIVE INSPECTION STUDIO (High-Tech Diagnostic Console)
@@ -329,9 +320,9 @@
             <div>
               <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 font-mono">
                 <i data-lucide="scan" class="w-4 h-4 text-[#00B050]"></i>
-                Dual Comparative Optical Viewfinder
+                Triple Comparative Optical Viewfinder
               </h3>
-              <p class="text-xs text-gray-400 font-mono" id="viewfinderUnitSub">Comparing Unit against Golden Nominal Reference</p>
+              <p class="text-xs text-gray-400 font-mono" id="viewfinderUnitSub">Comparing Golden Reference vs. Raw Inspected Unit vs. AI Anomaly Heatmap</p>
             </div>
 
             <!-- Controls: Blend & Colormap -->
@@ -356,16 +347,16 @@
             </div>
           </div>
 
-          <!-- Dual Images -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Triple Comparative Images (Golden Reference, Current Raw Unit, Thermal Heatmap) -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             
             <!-- Box 1: Golden Nominal Reference -->
             <div class="flex flex-col">
               <div class="flex items-center justify-between text-xs text-gray-400 mb-2 font-mono">
-                <span class="flex items-center gap-1.5 text-gray-300 font-bold"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-[#00B050]"></i> GOLDEN REFERENCE</span>
-                <span class="text-gray-500">Nominal CAD Standard</span>
+                <span class="flex items-center gap-1.5 text-gray-300 font-bold"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-[#00B050]"></i> 1. GOLDEN REFERENCE</span>
+                <span class="text-gray-500 text-[10px]">Nominal CAD Standard</span>
               </div>
-              <div class="rounded-xl overflow-hidden bg-black border border-gray-800 aspect-square flex items-center justify-center relative p-2">
+              <div class="rounded-xl overflow-hidden bg-black border border-gray-800 aspect-square flex items-center justify-center relative p-2 shadow-inner">
                 <img id="goldenImage" src="" alt="Golden Unit" class="w-full h-full object-contain rounded-lg">
                 <div id="goldenPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-xs gap-2">
                   <i data-lucide="image" class="w-8 h-8 text-gray-600"></i>
@@ -374,13 +365,52 @@
               </div>
             </div>
 
-            <!-- Box 2: Inspected Unit with Overlay -->
+            <!-- Box 2: Current Selected Image (RAW with AI Bounding Boxes) -->
             <div class="flex flex-col">
               <div class="flex items-center justify-between text-xs text-gray-400 mb-2 font-mono">
-                <span class="flex items-center gap-1.5 text-white font-bold"><i data-lucide="crosshair" class="w-3.5 h-3.5 text-[#00B050]"></i> CURRENT INSPECTED UNIT</span>
-                <span id="inspectedUnitBadge" class="text-xs px-2 py-0.5 rounded bg-[#00B050]/20 text-[#00B050] font-bold border border-[#00B050]/40">OVERLAY</span>
+                <span class="flex items-center gap-1.5 text-blue-400 font-bold"><i data-lucide="camera" class="w-3.5 h-3.5 text-blue-400"></i> 2. CURRENT RAW UNIT</span>
+                <div class="flex items-center gap-1.5">
+                  <button id="btnToggleBoxes" onclick="toggleBoundingBoxes()" class="text-[10px] px-2 py-0.5 rounded bg-blue-950/80 text-blue-300 font-bold border border-blue-700/60 font-mono hover:bg-blue-900 transition flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                    <span id="btnToggleBoxesText">AI BOXES: ON</span>
+                  </button>
+                  <span class="text-[10px] px-2 py-0.5 rounded bg-gray-800 text-gray-400 font-bold border border-gray-700 font-mono">RAW SENSOR</span>
+                </div>
               </div>
-              <div class="rounded-xl overflow-hidden bg-black border border-gray-800 aspect-square flex items-center justify-center relative p-2">
+              <div class="rounded-xl overflow-hidden bg-black border border-gray-800 aspect-square flex items-center justify-center relative p-2 shadow-inner group">
+                <img id="inspectedRawImage" src="" alt="Current Selected Unit Raw" class="w-full h-full object-contain rounded-lg">
+                
+                <!-- AI Smart Bounding Box Overlay Layer (Exact match to reference image) -->
+                <div id="aiBoundingBoxesOverlay" class="absolute inset-2 pointer-events-none flex flex-col justify-between hidden">
+                  <!-- Dynamic Bounding Boxes -->
+                  <div id="aiBoxesContainer" class="relative w-full flex-1">
+                    <!-- Injected dynamically via renderBoundingBoxes() -->
+                  </div>
+
+                  <!-- Bottom HUD Status Strip (Identical to reference screenshot) -->
+                  <div class="bg-black/90 backdrop-blur-md rounded-lg px-3 py-1.5 border border-white/10 flex items-center justify-between text-[11px] font-mono text-white shadow-xl mx-0.5 mb-0.5">
+                    <div class="flex items-center gap-1.5">
+                      <span class="w-2 h-2 rounded-full bg-[#00B050] animate-pulse"></span>
+                      <span>ResNet-50 PatchCore Engine: <strong class="text-[#00B050]">ACTIVE</strong></span>
+                    </div>
+                    <span class="text-gray-300 font-mono text-[10px]" id="hudBoxLatency">&lt;20ms Latency</span>
+                  </div>
+                </div>
+
+                <div id="rawPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 text-xs gap-2">
+                  <i data-lucide="loader" class="w-8 h-8 text-blue-400 animate-spin"></i>
+                  <span>Loading Raw Capture...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Box 3: Thermal Defect Anomaly Heatmap / Overlay -->
+            <div class="flex flex-col">
+              <div class="flex items-center justify-between text-xs text-gray-400 mb-2 font-mono">
+                <span class="flex items-center gap-1.5 text-white font-bold"><i data-lucide="crosshair" class="w-3.5 h-3.5 text-[#00B050]"></i> 3. DEFECT LOCALIZATION</span>
+                <span id="inspectedUnitBadge" class="text-[10px] px-2 py-0.5 rounded bg-[#00B050]/20 text-[#00B050] font-bold border border-[#00B050]/40 font-mono">OVERLAY (JET)</span>
+              </div>
+              <div class="rounded-xl overflow-hidden bg-black border border-gray-800 aspect-square flex items-center justify-center relative p-2 shadow-inner">
                 <img id="inspectedOverlayImage" src="" alt="Inspected Unit Overlay" class="w-full h-full object-contain rounded-lg">
                 <div id="inspectedPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 text-xs gap-2">
                   <i data-lucide="loader" class="w-8 h-8 text-[#00B050] animate-spin"></i>
@@ -402,6 +432,10 @@
               <button id="btnViewRaw" class="px-3 py-1.5 rounded bg-[#111111] border border-gray-800 hover:border-gray-600 text-gray-300 transition">Show Raw Sensor</button>
               <button id="btnViewHeatmap" class="px-3 py-1.5 rounded bg-[#111111] border border-gray-800 hover:border-gray-600 text-gray-300 transition">Show Distance Map</button>
               <button id="btnViewOverlay" class="px-3 py-1.5 rounded bg-[#00B050] text-white font-bold transition">Show Blended Overlay</button>
+              <button onclick="navigateTo('unitDiagnostics')" class="px-3 py-1.5 rounded bg-[#111111] border border-[#00B050]/40 hover:border-[#00B050] text-[#00B050] hover:text-emerald-300 font-bold transition flex items-center gap-1.5 ml-2 shadow-sm" title="View optical telemetry and diagnostic graphs for this inspected image">
+                <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+                <span>Unit Inspection Diagnostics &rarr;</span>
+              </button>
             </div>
           </div>
 
@@ -484,7 +518,7 @@
           </div>
 
           <div class="flex items-center justify-between">
-            <span class="text-gray-500">Benchmark AUROC:</span>
+            <span class="text-gray-500">Benchmark Accuracy (AUROC):</span>
             <span id="lineAurocBadge" class="text-[#00B050] font-bold">98.40%</span>
           </div>
         </div>
@@ -494,6 +528,218 @@
     </div>
 
   </section>
+
+  <!-- ====================================================================
+       PAGE 3.5: SINGLE-UNIT OPTICAL DIAGNOSTIC TELEMETRY & GRAPHS
+       (Dedicated telemetry strictly for the currently inspected unit)
+       ==================================================================== -->
+  <section id="pageUnitDiagnostics" class="page-container hidden flex-1 p-8 max-w-[1600px] w-full mx-auto space-y-8">
+    
+    <!-- Top Header & Navigation -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">SINGLE-UNIT OPTICAL TELEMETRY</span>
+          <span class="text-gray-400">&bull;</span>
+          <span id="diagLineBadge" class="text-xs font-mono font-bold text-gray-700 bg-gray-200 px-2 py-0.5 rounded">pcb2 (Micro-Soldering)</span>
+        </div>
+        <h2 class="text-3xl font-black text-gray-900 mt-1 flex items-center gap-3">
+          <span>Unit Diagnostic Graphs:</span>
+          <span id="diagUnitTitle" class="text-[#00B050] font-mono">PCB-0042</span>
+        </h2>
+        <p class="text-sm text-gray-600 mt-1 max-w-3xl">
+          Detailed individual image inspection analytics: decision threshold delta gauge, 784-patch spatial euclidean distance distribution, optical bounding box diagnostics, and operating position on the line model curve.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <button onclick="navigateTo('inspect')" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono shadow-md">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span>Return to Viewfinder</span>
+        </button>
+        <button onclick="openLineIngestModal(state.selectedLine)" class="btn-instrumental-secondary px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono bg-white text-gray-800 border border-gray-300 hover:bg-gray-100">
+          <i data-lucide="scan" class="w-4 h-4"></i>
+          <span>Inspect Another Unit</span>
+        </button>
+        <button onclick="navigateTo('analytics')" class="px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono bg-[#111111] text-emerald-400 border border-gray-700 hover:border-[#00B050] rounded-lg transition font-bold" title="View overall project-wide graphs">
+          <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          <span>Project Research Graphs &rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Telemetry Metric HUD Cards (Current Unit Only) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
+      <div class="clean-card p-5 border-l-4 border-l-[#00B050]" id="diagScoreCard">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Unit Anomaly Score</div>
+        <div class="text-2xl font-black text-gray-900 mt-1 flex items-baseline gap-2">
+          <span id="diagScoreVal">28.40</span>
+          <span class="text-xs text-gray-400 font-normal">/ <span id="diagThresholdVal">34.20</span></span>
+        </div>
+        <div class="text-[11px] font-bold mt-1" id="diagDeltaBadge">
+          <span class="text-[#00B050] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">-5.80 vs Threshold (PASS)</span>
+        </div>
+      </div>
+
+      <div class="clean-card p-5 border-l-4 border-l-sky-500">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Spatial Patch Grid</div>
+        <div class="text-2xl font-black text-gray-900 mt-1">784 Patches</div>
+        <div class="text-[11px] text-gray-600 font-sans mt-0.5" id="diagPatchesBreakdown">
+          <strong class="text-[#00B050]">752</strong> Nominal &bull; <strong class="text-amber-600">32</strong> Shift
+        </div>
+      </div>
+
+      <div class="clean-card p-5 border-l-4 border-l-purple-500">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Defect Confidence</div>
+        <div class="text-2xl font-black text-gray-900 mt-1" id="diagConfidenceVal">8.4%</div>
+        <div class="text-[11px] text-purple-600 font-sans mt-0.5" id="diagDefectTypeDesc">Nominal Pristine Unit</div>
+      </div>
+
+      <div class="clean-card p-5 border-l-4 border-l-amber-500">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Conveyor Routing Directive</div>
+        <div class="text-lg font-black text-gray-900 mt-1 truncate" id="diagRoutingDirective">ROUTE TO CONVEYOR A</div>
+        <div class="text-[11px] text-gray-500 font-sans mt-0.5">
+          Inference: <strong class="text-gray-900 font-mono" id="diagLatencyVal">14.2 ms</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnostic Visual Graphs Grid for THIS Unit -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Graph 1: Anomaly Score vs Calibrated Decision Threshold Gauge -->
+      <div class="clean-card p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between text-xs font-mono mb-2">
+            <span class="px-2 py-0.5 rounded bg-emerald-50 text-[#00B050] font-bold border border-emerald-200">OPERATING GAUGE</span>
+            <span class="text-gray-500" id="diagGaugeStatus">Under Rejection Threshold</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900">Unit Anomaly Score vs Decision Threshold</h3>
+          <p class="text-xs text-gray-600 mt-1 mb-5">
+            Shows this component's Euclidean distance relative to the factory calibrated rejection limit.
+          </p>
+        </div>
+
+        <!-- Horizontal Graduated Range Gauge Bar -->
+        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 space-y-3 font-mono">
+          <div class="flex items-center justify-between text-xs font-bold text-gray-700">
+            <span>0.0 (Nominal CAD Standard)</span>
+            <span class="text-amber-600">Threshold: <span id="diagGaugeThreshold">34.20</span></span>
+            <span class="text-rose-600">100.0 (Gross Defect)</span>
+          </div>
+
+          <!-- Color Track -->
+          <div class="h-6 w-full rounded-lg bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-500 relative shadow-inner overflow-hidden">
+            <div id="diagGaugeNeedle" class="absolute top-0 bottom-0 w-2.5 bg-black border-2 border-white shadow-xl -ml-1 transition-all duration-700" style="left: 28%;"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] text-gray-500 pt-1">
+            <span class="text-emerald-700 font-bold">&bull; Pristine Zone (0 - 24)</span>
+            <span class="text-amber-700 font-bold">&bull; Marginal Shift (24 - 34)</span>
+            <span class="text-rose-700 font-bold">&bull; Critical Reject (&gt;34)</span>
+          </div>
+
+          <div id="diagGaugeVerdictCallout" class="mt-4 p-3 rounded-lg bg-white border border-gray-200 text-xs flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-4 h-4 text-[#00B050] flex-shrink-0"></i>
+            <span class="text-gray-800" id="diagGaugeVerdictText">Unit score conforms strictly to pristine distribution envelope. Automated pass verified.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Graph 2: Spatial Patch Distance Distribution Histogram (784 Patches) -->
+      <div class="clean-card p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between text-xs font-mono mb-2">
+            <span class="px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold border border-sky-200">SPATIAL EMBEDDINGS</span>
+            <span class="text-gray-500">28 &times; 28 Grid (784 Total Patches)</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900">Spatial Patch Distance Distribution</h3>
+          <p class="text-xs text-gray-600 mt-1 mb-5">
+            Histogram of nearest-neighbor Euclidean distances across all 784 spatial patches extracted by ResNet-50 for this unit.
+          </p>
+        </div>
+
+        <!-- Dynamic Histogram Chart Container -->
+        <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 font-mono text-xs space-y-4">
+          <div class="h-44 flex items-end justify-between gap-2 pt-4 px-2 border-b border-gray-300" id="diagHistogramBars">
+            <!-- 7 Distribution Bars Injected via app.js -->
+          </div>
+
+          <div class="flex items-center justify-between text-[10px] text-gray-500 text-center">
+            <span class="w-1/7">0-10<br><span class="text-emerald-600">Nominal</span></span>
+            <span class="w-1/7">10-20<br><span class="text-emerald-600">Nominal</span></span>
+            <span class="w-1/7">20-30<br><span class="text-emerald-600">Baseline</span></span>
+            <span class="w-1/7">30-40<br><span class="text-amber-600">Shift</span></span>
+            <span class="w-1/7">40-50<br><span class="text-amber-600">Warn</span></span>
+            <span class="w-1/7">50-70<br><span class="text-rose-600">Defect</span></span>
+            <span class="w-1/7">&gt;70<br><span class="text-rose-600">Anomaly</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Graph 3: Active Production Line ROC Curve with THIS Unit's Operating Point -->
+      <div class="clean-card p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between text-xs font-mono mb-2">
+            <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-bold border border-purple-200">ROC OPERATING POINT</span>
+            <span class="text-gray-500 font-mono" id="diagRocLineName">pcb2 (Micro-Soldering)</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900">Line Benchmark ROC Curve & Operating Position</h3>
+          <p class="text-xs text-gray-600 mt-1 mb-4">
+            Demonstrates where this unit operates on the production line's receiver operating characteristic envelope.
+          </p>
+        </div>
+
+        <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2 relative group">
+          <img id="diagRocImg" src="/static/plots/bottle_roc_pr.png" alt="ROC PR Curve" class="w-full h-auto object-contain rounded-lg">
+          <div class="absolute bottom-4 right-4 bg-[#111111]/90 text-white p-2.5 rounded-lg text-xs font-mono border border-white/20 shadow-lg" id="diagRocCallout">
+            <span class="text-[#00B050] font-bold">&bull; This Unit:</span> Operating Point on Calibrated Envelope
+          </div>
+        </div>
+      </div>
+
+      <!-- Graph 4: Triple Visual Comparison for THIS Unit -->
+      <div class="clean-card p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between text-xs font-mono mb-2">
+            <span class="px-2 py-0.5 rounded bg-gray-100 text-gray-800 font-bold border border-gray-200">OPTICAL COMPARISON</span>
+            <span class="text-gray-500 font-mono">ResNet-50 Layers 2+3</span>
+          </div>
+          <h3 class="text-base font-bold text-gray-900">Triple Comparative Sensor Alignment</h3>
+          <p class="text-xs text-gray-600 mt-1 mb-4">
+            Direct comparison: Golden Reference standard vs Current Sensor Frame vs 2D Gaussian thermal overlay.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 bg-[#111111] p-3 rounded-xl border border-gray-800">
+          <div class="text-center font-mono">
+            <div class="rounded-lg overflow-hidden aspect-square bg-black border border-gray-700 flex items-center justify-center p-1">
+              <img id="diagThumbGolden" src="" alt="Golden CAD" class="w-full h-full object-contain">
+            </div>
+            <span class="text-[10px] text-gray-400 mt-1 block">1. Golden CAD</span>
+          </div>
+
+          <div class="text-center font-mono">
+            <div class="rounded-lg overflow-hidden aspect-square bg-black border border-gray-700 flex items-center justify-center p-1">
+              <img id="diagThumbRaw" src="" alt="Raw Sensor" class="w-full h-full object-contain">
+            </div>
+            <span class="text-[10px] text-gray-400 mt-1 block">2. Raw Sensor</span>
+          </div>
+
+          <div class="text-center font-mono">
+            <div class="rounded-lg overflow-hidden aspect-square bg-black border border-gray-700 flex items-center justify-center p-1">
+              <img id="diagThumbHeatmap" src="" alt="Localization" class="w-full h-full object-contain">
+            </div>
+            <span class="text-[10px] text-emerald-400 font-bold mt-1 block">3. Defect Overlay</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  
 
   <!-- ====================================================================
        PAGE 4: BENCHMARK SCOREBOARD (Clean Corporate Table)
@@ -508,10 +754,17 @@
         </p>
       </div>
 
-      <button onclick="exportBenchmarkCSV()" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono">
-        <i data-lucide="download" class="w-4 h-4"></i>
-        <span>EXPORT AUDIT CSV</span>
-      </button>
+      <div class="flex flex-wrap items-center gap-3">
+        <button onclick="navigateTo('analytics')" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono shadow-md">
+          <i data-lucide="line-chart" class="w-4 h-4"></i>
+          <span>COMPLETE PROJECT ANALYSIS GRAPHS &rarr;</span>
+        </button>
+
+        <button onclick="exportBenchmarkCSV()" class="btn-instrumental-secondary px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono border border-gray-300 bg-white text-gray-800 hover:bg-gray-100">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>EXPORT AUDIT CSV</span>
+        </button>
+      </div>
     </div>
 
     <!-- Clean Corporate Table -->
@@ -523,7 +776,7 @@
               <th class="py-4 px-5">Sector</th>
               <th class="py-4 px-5">Line Category</th>
               <th class="py-4 px-5">Dataset</th>
-              <th class="py-4 px-5 text-right">AUROC</th>
+              <th class="py-4 px-5 text-right">Accuracy (AUROC)</th>
               <th class="py-4 px-5 text-right">F1-Score</th>
               <th class="py-4 px-5 text-right">Threshold</th>
             </tr>
@@ -537,41 +790,417 @@
   </section>
 
   <!-- ====================================================================
-       OPERATOR AUTH MODAL
+       PAGE 5: GRAPH COMPARISON & MANIFOLD ANALYTICS (Streamlit Parity)
        ==================================================================== -->
-  <div id="authModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl p-8 max-w-md w-full relative shadow-2xl border border-gray-200">
-      <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+  <section id="pageAnalytics" class="page-container hidden flex-1 p-8 max-w-[1600px] w-full mx-auto space-y-8">
+    
+    <!-- Top Header & Navigation -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">COMPLETE PROJECT RESEARCH ANALYTICS</span>
+        <h2 class="text-3xl font-black text-gray-900 mt-1">Complete Project Analysis & Research Graphs</h2>
+        <p class="text-sm text-gray-600 mt-1 max-w-3xl">
+          Comprehensive project-wide visual analytics across all manufacturing lines and deep features: PCA scree decomposition, 2D/3D t-SNE manifolds, K-Means elbow optimization, and multi-line ROC / PR benchmark curves.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <button onclick="navigateTo('inspect')" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono">
+          <i data-lucide="scan" class="w-4 h-4"></i>
+          <span>Live AOI Studio &rarr;</span>
+        </button>
+        <button onclick="navigateTo('benchmarks')" class="btn-instrumental-secondary px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono bg-white text-gray-800 border border-gray-300 hover:bg-gray-100">
+          <i data-lucide="table" class="w-4 h-4"></i>
+          <span>Scoreboard</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Telemetry Metric HUD Cards (Streamlit / Instrumental Style) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
+      <div class="clean-card p-5 border-l-4 border-l-sky-500">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Manifold Vectors</div>
+        <div class="text-2xl font-black text-gray-900 mt-1">977 Vectors</div>
+        <div class="text-[11px] text-sky-600 font-sans mt-0.5">ResNet-50 Layers 2+3 Embeddings</div>
+      </div>
+
+      <div class="clean-card p-5 border-l-4 border-l-[#00B050]">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">PCA Retained Variance</div>
+        <div class="text-2xl font-black text-gray-900 mt-1">95.14%</div>
+        <div class="text-[11px] text-[#00B050] font-sans mt-0.5">120 Principal Components Retained</div>
+      </div>
+
+      <div class="clean-card p-5 border-l-4 border-l-purple-500">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Optimal Discovered Clusters</div>
+        <div class="text-2xl font-black text-gray-900 mt-1">K = 8 Clusters</div>
+        <div class="text-[11px] text-purple-600 font-sans mt-0.5">Peak Silhouette: 0.2951 (K-Means)</div>
+      </div>
+
+      <div class="clean-card p-5 border-l-4 border-l-amber-500">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">DBSCAN Anomaly Noise</div>
+        <div class="text-2xl font-black text-gray-900 mt-1">8.2% Outliers</div>
+        <div class="text-[11px] text-amber-600 font-sans mt-0.5">Density-flagged defect vectors (&epsilon;=1.0)</div>
+      </div>
+    </div>
+
+    <!-- Analytics View Switcher Sub-Tabs -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-mono">
+      <button id="analyticsTabBtn_manifold" onclick="switchAnalyticsTab('manifold')" class="px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition bg-[#111111] text-white border border-gray-800 shadow-sm">
+        <i data-lucide="git-merge" class="w-4 h-4 text-[#00B050]"></i>
+        <span>1. Manifold & Clustering (PCA, t-SNE, Elbow)</span>
+      </button>
+
+      <button id="analyticsTabBtn_rocpr" onclick="switchAnalyticsTab('rocpr')" class="px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition bg-white text-gray-600 hover:text-gray-900 border border-gray-200 hover:bg-gray-50">
+        <i data-lucide="line-chart" class="w-4 h-4 text-[#00B050]"></i>
+        <span>2. Benchmark ROC & PR Curves</span>
+      </button>
+
+      <button id="analyticsTabBtn_table" onclick="switchAnalyticsTab('table')" class="px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition bg-white text-gray-600 hover:text-gray-900 border border-gray-200 hover:bg-gray-50">
+        <i data-lucide="layout-grid" class="w-4 h-4 text-[#00B050]"></i>
+        <span>3. Clustering Algorithm Benchmark</span>
+      </button>
+
+      <button id="analyticsTabBtn_samples" onclick="switchAnalyticsTab('samples')" class="px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 transition bg-white text-gray-600 hover:text-gray-900 border border-gray-200 hover:bg-gray-50">
+        <i data-lucide="images" class="w-4 h-4 text-[#00B050]"></i>
+        <span>4. Discovered Defect Exemplars</span>
+      </button>
+    </div>
+
+    <!-- SUB-TAB 1: MANIFOLD & CLUSTERING PLOTS (PCA, t-SNE, Elbow, DBSCAN) -->
+    <div id="analyticsTabContent_manifold" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Plot 1: PCA Scree & Cumulative Variance -->
+        <div class="clean-card p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold border border-sky-200">EIGEN-DECOMPOSITION</span>
+              <span class="text-gray-500">120 Components = 95.14%</span>
+            </div>
+            <h3 class="text-base font-bold text-gray-900">PCA Scree & Cumulative Explained Variance</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-4">
+              Demonstrates variance retention across high-dimensional ResNet-50 patch vectors, indicating sufficient dimensionality reduction while preserving 95.14% of defect representation variance.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
+            <img src="/static/plots/pca_scree.png" alt="PCA Scree Plot" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+        <!-- Plot 2: K-Means Inertia Elbow Curve -->
+        <div class="clean-card p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-emerald-50 text-[#00B050] font-bold border border-emerald-200">OPTIMAL CLUSTERS</span>
+              <span class="text-gray-500">Evaluated K &isin; [2, 12]</span>
+            </div>
+            <h3 class="text-base font-bold text-gray-900">K-Means Inertia Elbow Curve Optimization</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-4">
+              Within-cluster sum of squares (WCSS / Inertia) plotted against cluster counts. Highlights the prominent elbow inflection at K=3 and mathematically optimal cohesion at K=8.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
+            <img src="/static/plots/kmeans_elbow.png" alt="K-Means Elbow Plot" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+        <!-- Plot 3: t-SNE 2D Manifold with K-Means (K=3) -->
+        <div class="clean-card p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-bold border border-purple-200">2D NON-LINEAR MANIFOLD</span>
+              <span class="text-gray-500">t-SNE Perplexity: 30</span>
+            </div>
+            <h3 class="text-base font-bold text-gray-900">t-SNE 2D Feature Manifold (K-Means K=3)</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-4">
+              Unsupervised clustering mapped to non-linear 2D manifold space. Clean geometric separation reveals distinct component topologies and defect cluster segregation.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
+            <img src="/static/plots/tsne_kmeans.png" alt="t-SNE K-Means Plot" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+        <!-- Plot 4: DBSCAN Density-Based Outlier Discovery -->
+        <div class="clean-card p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200">DENSITY OUTLIERS</span>
+              <span class="text-gray-500">&epsilon;=1.0 &bull; min_samples=5</span>
+            </div>
+            <h3 class="text-base font-bold text-gray-900">DBSCAN Density Anomaly Discovery</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-4">
+              Isolates irregular defect points as density outliers (noise points, -1 label) without requiring prior supervision or defect labels.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
+            <img src="/static/plots/tsne_dbscan.png" alt="t-SNE DBSCAN Plot" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SUB-TAB 2: ROC & PRECISION-RECALL PERFORMANCE CURVES -->
+    <div id="analyticsTabContent_rocpr" class="hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Curve 1: Bottle Line -->
+        <div class="clean-card p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-emerald-50 text-[#00B050] font-bold border border-emerald-200">PACKAGING LINE</span>
+              <span class="text-gray-900 font-bold">99.68% AUROC</span>
+            </div>
+            <h3 class="text-base font-bold text-gray-900">Bottle Line ROC & PR Curves</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-4">
+              Calibrated optimal decision threshold: <strong>52.41</strong>. Demonstrates near-perfect separation (AUPRC: 99.90%, F1: 0.9756) across glass fractures, contaminations, and sealing flaws.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
+            <img src="/static/plots/bottle_roc_pr.png" alt="Bottle ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+        <!-- Curve 2: Cable Wiring Harness Line -->
+        <div class="clean-card p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold border border-sky-200">WIRING HARNESS</span>
+              <span class="text-gray-900 font-bold">83.08% AUROC</span>
+            </div>
+            <h3 class="text-base font-bold text-gray-900">Cable Line ROC & PR Curves</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-4">
+              Calibrated optimal decision threshold: <strong>65.13</strong>. Evaluates complex deformable wiring geometry, missing strands, swapped color codes, and cut insulation sleeves.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
+            <img src="/static/plots/cable_roc_pr.png" alt="Cable ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+        <!-- Curve 3: Hazelnut Agricultural Line -->
+        <div class="clean-card p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200">AGRICULTURAL AOI</span>
+              <span class="text-gray-900 font-bold">High Precision</span>
+            </div>
+            <h3 class="text-base font-bold text-gray-900">Hazelnut Line ROC & PR Curves</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-4">
+              Evaluates non-rigid organic texture variations, crack defects, hole perforations, and mold discoloration with tight true-positive confidence bounds.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
+            <img src="/static/plots/hazelnut_roc_pr.png" alt="Hazelnut ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SUB-TAB 3: MULTI-ALGORITHM BENCHMARK TABLE (KMeans vs DBSCAN) -->
+    <div id="analyticsTabContent_table" class="hidden space-y-4">
+      <div class="clean-card p-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <div>
+            <h3 class="text-base font-bold text-gray-900">Clustering Algorithm Evaluation & Benchmarking</h3>
+            <p class="text-xs text-gray-500 font-mono mt-0.5">
+              Empirical metric evaluation directly from member research across Silhouette Score, Davies-Bouldin, Calinski-Harabasz, and WCSS Inertia.
+            </p>
+          </div>
+          <div class="text-xs font-mono px-3 py-1.5 rounded-lg bg-emerald-50 text-[#00B050] border border-emerald-200 font-bold">
+            ★ Peak Metric: KMeans K=8 (Silhouette 0.2951)
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-gray-50 text-gray-600 uppercase tracking-wider border-b border-gray-200">
+              <tr>
+                <th class="py-3.5 px-4">Algorithm</th>
+                <th class="py-3.5 px-4">Parameter (K or &epsilon;)</th>
+                <th class="py-3.5 px-4">Min Samples</th>
+                <th class="py-3.5 px-4 text-right">Silhouette Score</th>
+                <th class="py-3.5 px-4 text-right">Davies-Bouldin</th>
+                <th class="py-3.5 px-4 text-right">Calinski-Harabasz</th>
+                <th class="py-3.5 px-4 text-right">Inertia (WCSS)</th>
+                <th class="py-3.5 px-4 text-right">Noise %</th>
+                <th class="py-3.5 px-4">Engineering Evaluation & Notes</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100" id="clusteringTableBody">
+              <!-- Injected via app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB-TAB 4: DISCOVERED DEFECT EXEMPLARS GALLERY (Streamlit Tab 3 Parity) -->
+    <div id="analyticsTabContent_samples" class="hidden space-y-6">
+      
+      <!-- Section 1: Bottle Exemplars -->
+      <div class="clean-card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-base font-bold text-gray-900 font-sans">Bottle Inspection Line &bull; Exemplar Cluster Modes</h3>
+            <p class="text-xs text-gray-500 font-mono">Visual comparison of representative test units against nominal standards.</p>
+          </div>
+          <span class="px-2.5 py-1 rounded bg-[#00B050]/15 text-[#00B050] font-mono text-xs font-bold">99.7% Accuracy</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/bottle_sample_0.png" alt="Bottle Sample 0" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Bottle Exemplar #0 (Nominal)</span>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/bottle_sample_1.png" alt="Bottle Sample 1" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Bottle Exemplar #1 (Contamination)</span>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/bottle_sample_2.png" alt="Bottle Sample 2" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Bottle Exemplar #2 (Glass Fracture)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Cable Exemplars -->
+      <div class="clean-card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-base font-bold text-gray-900 font-sans">Cable Wiring Harness Line &bull; Exemplar Modes</h3>
+            <p class="text-xs text-gray-500 font-mono">Exemplars demonstrating insulation incisions, core conductor exposure, and swapped lines.</p>
+          </div>
+          <span class="px-2.5 py-1 rounded bg-sky-50 text-sky-700 font-mono text-xs font-bold border border-sky-200">Wiring Harness</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/cable_sample_0.png" alt="Cable Sample 0" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Cable Exemplar #0 (Pristine)</span>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/cable_sample_1.png" alt="Cable Sample 1" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Cable Exemplar #1 (Cut Braid)</span>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/cable_sample_2.png" alt="Cable Sample 2" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Cable Exemplar #2 (Bent Terminal)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Hazelnut Exemplars -->
+      <div class="clean-card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-base font-bold text-gray-900 font-sans">Hazelnut Agricultural Line &bull; Exemplar Modes</h3>
+            <p class="text-xs text-gray-500 font-mono">Natural surface variations vs cracked shells, hole punctures, and organic rot.</p>
+          </div>
+          <span class="px-2.5 py-1 rounded bg-amber-50 text-amber-700 font-mono text-xs font-bold border border-amber-200">Organic Line</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/hazelnut_sample_0.png" alt="Hazelnut Sample 0" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Hazelnut Exemplar #0 (Pristine Shell)</span>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/hazelnut_sample_1.png" alt="Hazelnut Sample 1" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Hazelnut Exemplar #1 (Cracked Hull)</span>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/hazelnut_sample_2.png" alt="Hazelnut Sample 2" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Hazelnut Exemplar #2 (Perforation Hole)</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  
+
+  <!-- ====================================================================
+       OPERATOR AUTH & ACCOUNT REGISTRATION PORTAL
+       (Required before selecting images or executing detection)
+       ==================================================================== -->
+  <div id="authModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full relative shadow-2xl border border-gray-200 animate-in fade-in zoom-in-95 duration-200">
+      <button onclick="toggleAuthModal(false)" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <div class="flex items-center gap-2 mb-2">
+      <div class="flex items-center gap-2 mb-1">
         <i data-lucide="shield-check" class="w-5 h-5 text-[#00B050]"></i>
         <h3 class="text-lg font-bold text-gray-900">Operator Authentication Portal</h3>
       </div>
-      <p class="text-xs text-gray-600 mb-6">Enter operator credentials to verify access to factory QA controls.</p>
+      <p class="text-xs text-gray-500 font-sans mb-4">Secure workstation access required to select components and execute live inspection.</p>
 
-      <form onsubmit="handleAuthSubmit(event)" class="space-y-4 font-mono text-xs">
+      <!-- Dynamic Notice Banner when gated action was attempted -->
+      <div id="authNoticeBanner" class="hidden p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 font-mono mb-4 flex items-start gap-2">
+        <i data-lucide="lock" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
+        <span id="authNoticeText">Please authenticate to inspect components on this production line.</span>
+      </div>
+
+      <!-- Tabs: 1. Sign In / 2. Create Account -->
+      <div class="flex border-b border-gray-200 mb-5 text-xs font-mono">
+        <button id="authTabSignIn" onclick="switchAuthTab('login')" class="flex-1 pb-2.5 font-bold text-gray-900 border-b-2 border-[#00B050] transition">
+          1. Sign In
+        </button>
+        <button id="authTabRegister" onclick="switchAuthTab('register')" class="flex-1 pb-2.5 font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition">
+          2. Create Account
+        </button>
+      </div>
+
+      <!-- Form 1: Sign In -->
+      <form id="authLoginForm" onsubmit="handleAuthSubmit(event, 'login')" class="space-y-4 font-mono text-xs">
         <div>
           <label class="block text-gray-700 mb-1 font-semibold">Operator ID or Username</label>
-          <input type="text" id="authUsername" value="admin" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]">
+          <input type="text" id="authUsername" value="admin" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
         </div>
 
         <div>
           <label class="block text-gray-700 mb-1 font-semibold">Access PIN / Password</label>
-          <input type="password" id="authPassword" value="DefectVision@Admin2026!" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]">
+          <input type="password" id="authPassword" value="DefectVision@Admin2026!" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
         </div>
 
         <div class="flex items-center justify-between text-[11px] text-gray-500">
           <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked class="accent-[#00B050]">
+            <input type="checkbox" id="authRemember" checked class="accent-[#00B050]">
             <span>Remember workstation</span>
           </label>
           <span class="text-[#00B050] font-semibold">Role: QA Lead</span>
         </div>
 
-        <button type="submit" class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold">
-          AUTHENTICATE WORKSTATION
+        <button type="submit" class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold shadow-md">
+          AUTHENTICATE & ENTER
+        </button>
+      </form>
+
+      <!-- Form 2: Create Operator Account -->
+      <form id="authRegisterForm" onsubmit="handleAuthSubmit(event, 'register')" class="hidden space-y-4 font-mono text-xs">
+        <div>
+          <label class="block text-gray-700 mb-1 font-semibold">Full Name / Operator ID</label>
+          <input type="text" id="regUsername" placeholder="e.g. John_Doe (Inspector 04)" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1 font-semibold">Factory Role</label>
+          <select id="regRole" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]">
+            <option value="Conveyor Quality Inspector">Conveyor Quality Inspector</option>
+            <option value="QA Operations Lead">QA Operations Lead</option>
+            <option value="Production Supervisor">Production Supervisor</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1 font-semibold">Create Workstation PIN</label>
+          <input type="password" id="regPassword" placeholder="Enter secure PIN" value="Inspector123!" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold shadow-md">
+          CREATE ACCOUNT & INGEST
         </button>
       </form>
     </div>
@@ -596,7 +1225,7 @@
                 Semiconductor & Electronics
               </span>
               <span id="modalLineBenchmark" class="px-2 py-0.5 rounded bg-[#00B050]/15 text-[#00B050] font-mono text-[11px] font-bold">
-                Amazon VisA &bull; 97.1% AUROC
+                Amazon VisA &bull; 97.1% Accuracy (AUROC)
               </span>
             </div>
             <h3 id="modalLineTitle" class="text-xl font-black text-gray-900 tracking-tight">
@@ -850,25 +1479,158 @@
     </div>
   </div>
 
-  <!-- Corporate Footer (Matches Instrumental Screenshot 3) -->
-  <footer class="bg-[#111111] text-white py-10 px-6 mt-auto">
-    <div class="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-gray-400 font-mono">
-      <div class="flex items-center gap-3">
-        <div class="w-6 h-6 rounded-full bg-white flex items-center justify-center text-[#111111] font-bold text-[10px]">DV</div>
-        <span class="text-white font-bold uppercase tracking-wider">DEFECTVISION 2.0 INDUSTRIAL OPTICAL INSPECTION</span>
+  <!-- ====================================================================
+       CORPORATE INDUSTRIAL FOOTER (Styled after Instrumental.com)
+       ==================================================================== -->
+  <footer class="bg-[#111111] text-white pt-16 pb-12 px-8 mt-auto border-t border-gray-800">
+    <div class="max-w-[1600px] mx-auto">
+      
+      <!-- Top Multi-Column Grid (Outcomes, Platform, Datasets, Engineering Track Team) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-gray-800 text-xs">
+        
+        <!-- Column 1: OUTCOMES -->
+        <div>
+          <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4">Outcomes</h4>
+          <div class="text-gray-400 space-y-2.5 font-sans">
+            <p class="font-bold text-gray-300 font-mono text-[11px] uppercase">By Use Cases</p>
+            <ul class="space-y-2 pl-3 list-disc marker:text-[#00B050]">
+              <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('home')">New Product Introduction</span></li>
+              <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('lines')">Mass Production AOI</span></li>
+              <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('inspect')">Automated Conveyor Routing</span></li>
+              <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('benchmarks')">Sub-Millimeter Quality Auditing</span></li>
+            </ul>
+            <p class="font-bold text-gray-300 font-mono text-[11px] uppercase pt-2">By Industry</p>
+            <ul class="space-y-1.5 pl-3 list-disc marker:text-gray-600">
+              <li class="hover:text-gray-300">Consumer Electronics & SMT</li>
+              <li class="hover:text-gray-300">Semiconductor Packaging</li>
+              <li class="hover:text-gray-300">Automotive Wiring Harnesses</li>
+              <li class="hover:text-gray-300">Metallurgy Hot-Rolled Steel</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Column 2: PLATFORM -->
+        <div>
+          <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4">Platform</h4>
+          <ul class="space-y-2.5 text-gray-400 font-sans">
+            <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('home')">ResNet-50 PatchCore Engine</span></li>
+            <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('lines')">8-Line Industrial Suite</span></li>
+            <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('inspect')">Triple Comparative Viewfinder</span></li>
+            <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('benchmarks')">Multi-Category Scoreboard</span></li>
+            <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('analytics')">Manifold & Clustering Graphs</span></li>
+            <li><span class="hover:text-white transition cursor-pointer" onclick="openLineIngestModal('pcb1')">Direct Hardware Camera Ingestion</span></li>
+            <li><span class="hover:text-white transition cursor-pointer" onclick="openLineIngestModal('pcb2')">Web & Clipboard Ingestion</span></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: DATASETS -->
+        <div>
+          <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4">Datasets</h4>
+          <ul class="space-y-2.5 text-gray-400 font-sans">
+            <li class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span>
+              <span>Amazon VisA (4 PCB Lines, Capsules)</span>
+            </li>
+            <li class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span>
+              <span>MVTec AD (Bottle, Cable Lines)</span>
+            </li>
+            <li class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span>
+              <span>NEU Surface Defect (Hot-Rolled Steel)</span>
+            </li>
+            <li class="pt-2">
+              <button onclick="navigateTo('analytics')" class="text-xs font-mono text-[#00B050] hover:underline flex items-center gap-1">
+                <i data-lucide="line-chart" class="w-3.5 h-3.5"></i>
+                <span>Explore Research Plots &rarr;</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+            <li class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span>
+              <span>MVTec AD (Bottles, Cables, Nuts)</span>
+            </li>
+            <li class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span>
+              <span>NEU Surface Defect (Strip Steel)</span>
+            </li>
+            <li class="pt-2">
+              <button onclick="exportBenchmarkCSV()" class="btn-instrumental px-3 py-1.5 rounded text-[11px] font-mono font-bold flex items-center gap-1.5 uppercase">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>Export Audit CSV</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Column 4 & 5: ENGINEERING TEAM TRACK LEADS (2-Column Span) -->
+        <div class="lg:col-span-2">
+          <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4 flex items-center justify-between">
+            <span>Engineering Track Team</span>
+            <span class="text-[10px] text-[#00B050] font-normal lowercase">project-contributors</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+            
+            <div class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#00B050]/50 transition">
+              <div class="text-[#00B050] font-bold text-[10px] uppercase mb-0.5">Member 1</div>
+              <div class="text-white font-bold text-xs truncate">Tanya Tejaswi</div>
+              <div class="text-gray-400 text-[11px] font-sans mt-0.5 font-medium">CV & Feature Fusion</div>
+              <p class="text-gray-500 font-sans text-[10px] mt-1.5 leading-snug">Multi-dataset ingestion, ResNet-50 patch extraction & thermal heatmap engine.</p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#00B050]/50 transition">
+              <div class="text-[#00B050] font-bold text-[10px] uppercase mb-0.5">Member 2</div>
+              <div class="text-white font-bold text-xs truncate">Chandan Reddy</div>
+              <div class="text-gray-400 text-[11px] font-sans mt-0.5 font-medium">Unsupervised ML Lead</div>
+              <p class="text-gray-500 font-sans text-[10px] mt-1.5 leading-snug">PCA scree decomposition, explained variance decay & manifold stability.</p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#00B050]/50 transition">
+              <div class="text-[#00B050] font-bold text-[10px] uppercase mb-0.5">Member 3</div>
+              <div class="text-white font-bold text-xs truncate">Gayatri U</div>
+              <div class="text-gray-400 text-[11px] font-sans mt-0.5 font-medium">Full-Stack MLOps</div>
+              <p class="text-gray-500 font-sans text-[10px] mt-1.5 leading-snug">K-Means & DBSCAN clustering, conveyor routing logic & Instrumental cockpit UI.</p>
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
-      <div>
-        <span>Engineered with ResNet-50 + PatchCore &bull; Inspired by Instrumental.com</span>
+      <!-- Bottom Sub-Footer Bar (Matches Instrumental Reference Design) -->
+      <div class="pt-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-gray-500 font-mono">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 text-white font-bold tracking-tight">
+            <div class="w-6 h-6 rounded bg-[#00B050] flex items-center justify-center text-black font-black text-xs font-mono">DV</div>
+            <span>DEFECTVISION 2.0</span>
+          </div>
+          <span class="text-gray-700">|</span>
+          <span>Instrumental-Grade Autonomous Optical Inspection Platform</span>
+        </div>
+
+        <div class="flex items-center gap-6 text-[11px]">
+          <span class="hover:text-gray-300 cursor-pointer">Privacy Policy</span>
+          <span class="hover:text-gray-300 cursor-pointer">Security Standards</span>
+          <span class="hover:text-gray-300 cursor-pointer">IPC-A-610 Compliant</span>
+          <span class="flex items-center gap-1.5 text-gray-400">
+            <span class="w-2 h-2 rounded-full bg-[#00B050]"></span>
+            <span>All 8 Lines Calibrated</span>
+          </span>
+          <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 flex items-center justify-center text-white transition ml-2" title="Back to top">
+            <i data-lucide="arrow-up" class="w-4 h-4"></i>
+          </button>
+        </div>
       </div>
+
     </div>
   </footer>
 
   <!-- Modular JavaScript Scripts with Cache Busting -->
-  <script src="/static/auth.js?v=20261112_v6"></script>
-  <script src="/static/camera.js?v=20261112_v6"></script>
-  <script src="/static/telemetry.js?v=20261112_v6"></script>
-  <script src="/static/app.js?v=20261112_v6"></script>
+  <script src="/static/auth.js?v=20261112_v14"></script>
+  <script src="/static/camera.js?v=20261112_v14"></script>
+  <script src="/static/telemetry.js?v=20261112_v14"></script>
+  <script src="/static/app.js?v=20261112_v14"></script>
   <script>
     lucide.createIcons();
     if (window.AuthManager) window.AuthManager.init();

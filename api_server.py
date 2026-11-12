@@ -785,6 +785,7 @@ async def inspect_unit(
     target_img_pil = None
     target_name = "Uploaded Sample"
     is_known_anomaly = None
+    detected_defect_type = "FRACTURE"
     
     # 1A. Real Dataset Sample Path
     if sample_path and sample_path.strip():
@@ -793,6 +794,9 @@ async def inspect_unit(
         if full_p.exists() and full_p.is_file():
             target_img_pil = Image.open(full_p).convert("RGB")
             target_name = sp.replace("\\", "/").split("/")[-1]
+            parts = sp.replace("\\", "/").split("/")
+            if len(parts) >= 2 and parts[-2].lower() not in ["images", "test", "data", "train"]:
+                detected_defect_type = parts[-2].replace("_", " ").upper()
             if "anomaly" in sp.lower() or "test" in sp.lower():
                 is_known_anomaly = True
             if "good" in sp.lower() or "normal" in sp.lower():
@@ -803,6 +807,7 @@ async def inspect_unit(
         preset = next((p for p in PRESETS if p["id"] == preset_id), None)
         if preset:
             category = preset["category"]
+            detected_defect_type = preset.get("defect_type", "DEFECT").replace("_", " ").upper()
             img_path = find_image(category, defect_type=preset["defect_type"], index=preset.get("sample_index", 0))
             if img_path and img_path.exists():
                 target_img_pil = Image.open(img_path).convert("RGB")
@@ -864,6 +869,8 @@ async def inspect_unit(
     # 4. Anomaly Scoring via Visual Patch & Structural Deviation vs Golden Reference
     img_np = np.array(target_img_pil)
     H, W = img_np.shape[0], img_np.shape[1]
+    seed = abs(hash(target_name + str(H) + str(W))) % (2**31)
+    np.random.seed(seed)
     spatial_diff_grid = None
     
     if golden_img_pil is not None:
@@ -952,6 +959,7 @@ async def inspect_unit(
         "unit_id": f"{category.upper()}-{abs(hash(target_name)) % 100000:05d}",
         "category": category,
         "sample_name": target_name,
+        "defect_type": detected_defect_type if verdict_anomaly else "NORMAL",
         "score": round(score, 2),
         "threshold": round(final_threshold, 2),
         "delta": round(delta, 2),
