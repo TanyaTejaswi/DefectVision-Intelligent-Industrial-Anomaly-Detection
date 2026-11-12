@@ -514,18 +514,12 @@ function updateSelectedSampleCard(idx) {
   if (!sample) return;
 
   const thumb = document.getElementById('modalSelectedSampleThumb');
-  const tag = document.getElementById('modalSelectedSampleTag');
   const filename = document.getElementById('modalSelectedSampleFilename');
   const title = document.getElementById('modalSelectedSampleTitle');
   const desc = document.getElementById('modalSelectedSampleDesc');
 
   if (thumb) {
     thumb.src = `/api/sample-image?path=${encodeURIComponent(sample.rel_path)}`;
-  }
-
-  if (tag) {
-    tag.className = 'px-2 py-0.5 rounded font-bold bg-slate-100 text-slate-700 border border-slate-300 text-[11px] font-mono flex items-center gap-1';
-    tag.innerHTML = '<span>⏳</span><span>PENDING INSPECTION</span>';
   }
 
   if (filename) filename.innerText = sample.filename;
