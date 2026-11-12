@@ -524,21 +524,14 @@ function updateSelectedSampleCard(idx) {
   }
 
   if (tag) {
-    if (sample.is_anomaly) {
-      tag.className = 'px-2 py-0.5 rounded font-bold bg-red-50 text-red-700 border border-red-200 text-[11px] font-mono';
-      tag.innerText = 'DEFECT ANOMALY';
-    } else {
-      tag.className = 'px-2 py-0.5 rounded font-bold bg-emerald-50 text-[#00B050] border border-emerald-200 text-[11px] font-mono';
-      tag.innerText = 'GOLDEN NOMINAL';
-    }
+    tag.className = 'px-2 py-0.5 rounded font-bold bg-slate-100 text-slate-700 border border-slate-300 text-[11px] font-mono flex items-center gap-1';
+    tag.innerHTML = '<span>⏳</span><span>PENDING INSPECTION</span>';
   }
 
   if (filename) filename.innerText = sample.filename;
   if (title) title.innerText = sample.display;
   if (desc) {
-    desc.innerText = sample.is_anomaly
-      ? `Sample unit exhibits anomalous surface deviation corresponding to ${sample.defect_type}.`
-      : 'Pristine golden reference unit conforming strictly to manufacturing tolerances.';
+    desc.innerText = 'Raw component image loaded from line buffer. Click "Inspect Selected Sample" below to run optical anomaly detection and compute thermal heatmap.';
   }
 }
 
