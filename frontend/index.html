@@ -62,9 +62,9 @@
           BENCHMARKS
         </button>
 
-        <button id="navBtnAnalytics" onclick="navigateTo('analytics')" class="hover:text-gray-900 transition flex items-center gap-1.5 font-bold">
-          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-[#00B050]"></i>
-          <span>COMPLETE PROJECT ANALYSIS GRAPHS</span>
+        <button id="navBtnAuditLog" onclick="navigateTo('auditLog')" class="hover:text-gray-900 transition flex items-center gap-1.5 font-bold">
+          <i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-[#00B050]"></i>
+          <span>INSPECTION AUDIT LOG</span>
         </button>
       </nav>
 
@@ -755,9 +755,9 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <button onclick="navigateTo('analytics')" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono shadow-md">
+        <button onclick="scrollToProjectAnalysis()" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono shadow-md" title="Scroll down to Complete Project Research Graphs">
           <i data-lucide="line-chart" class="w-4 h-4"></i>
-          <span>COMPLETE PROJECT ANALYSIS GRAPHS &rarr;</span>
+          <span>COMPLETE PROJECT RESEARCH GRAPHS &darr;</span>
         </button>
 
         <button onclick="exportBenchmarkCSV()" class="btn-instrumental-secondary px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono border border-gray-300 bg-white text-gray-800 hover:bg-gray-100">
@@ -787,34 +787,33 @@
         </table>
       </div>
     </div>
-  </section>
 
-  <!-- ====================================================================
-       PAGE 5: GRAPH COMPARISON & MANIFOLD ANALYTICS (Streamlit Parity)
-       ==================================================================== -->
-  <section id="pageAnalytics" class="page-container hidden flex-1 p-8 max-w-[1600px] w-full mx-auto space-y-8">
-    
-    <!-- Top Header & Navigation -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-      <div>
-        <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">COMPLETE PROJECT RESEARCH ANALYTICS</span>
-        <h2 class="text-3xl font-black text-gray-900 mt-1">Complete Project Analysis & Research Graphs</h2>
-        <p class="text-sm text-gray-600 mt-1 max-w-3xl">
-          Comprehensive project-wide visual analytics across all manufacturing lines and deep features: PCA scree decomposition, 2D/3D t-SNE manifolds, K-Means elbow optimization, and multi-line ROC / PR benchmark curves.
-        </p>
-      </div>
+    <!-- ====================================================================
+         COMPLETE PROJECT ANALYSIS & RESEARCH GRAPHS (Placed Directly Under Scoreboard Table)
+         ==================================================================== -->
+    <div id="projectAnalysisSection" class="mt-14 pt-10 border-t border-gray-200 space-y-8">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">COMPLETE PROJECT RESEARCH ANALYTICS</span>
+          <h3 class="text-2xl sm:text-3xl font-black text-gray-900 mt-1">Complete Project Analysis & Research Graphs</h3>
+          <p class="text-sm text-gray-600 mt-1 max-w-3xl">
+            Comprehensive project-wide visual analytics across all manufacturing lines and deep features: PCA scree decomposition, 2D/3D t-SNE manifolds, K-Means elbow optimization, and multi-line ROC / PR benchmark curves.
+          </p>
+        </div>
 
-      <div class="flex flex-wrap items-center gap-3">
-        <button onclick="navigateTo('inspect')" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono">
-          <i data-lucide="scan" class="w-4 h-4"></i>
-          <span>Live AOI Studio &rarr;</span>
-        </button>
-        <button onclick="navigateTo('benchmarks')" class="btn-instrumental-secondary px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono bg-white text-gray-800 border border-gray-300 hover:bg-gray-100">
-          <i data-lucide="table" class="w-4 h-4"></i>
-          <span>Scoreboard</span>
-        </button>
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="navigateTo('inspect')" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono">
+            <i data-lucide="scan" class="w-4 h-4"></i>
+            <span>Live AOI Studio &rarr;</span>
+          </button>
+          <button onclick="window.scrollTo({ top: 0, behavior: 'smooth' })" class="btn-instrumental-secondary px-4 py-2 text-xs uppercase tracking-wider flex items-center gap-2 font-mono bg-white text-gray-800 border border-gray-300 hover:bg-gray-100" title="Back to Multi-Category Scoreboard">
+            <i data-lucide="arrow-up" class="w-4 h-4"></i>
+            <span>Top Scoreboard &uarr;</span>
+          </button>
+        </div>
       </div>
-    </div>
 
     <!-- Telemetry Metric HUD Cards (Streamlit / Instrumental Style) -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
@@ -1116,6 +1115,128 @@
       </div>
 
     </div>
+    <!-- End of projectAnalysisSection -->
+
+  </section>
+
+  <!-- ====================================================================
+       PAGE 5: INSPECTION AUDIT LOG & OPERATIONAL METADATA LEDGER
+       (Keeps real-time tabs on up to 20 detected items and their metadata)
+       ==================================================================== -->
+  <section id="pageAuditLog" class="page-container hidden flex-1 p-8 max-w-[1600px] w-full mx-auto space-y-8">
+    
+    <!-- Top Header & Action Controls -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">OPERATIONAL TELEMETRY & QUALITY LEDGER</span>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-[#00B050] text-[10px] font-mono font-bold animate-pulse flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span> LIVE BUFFER
+          </span>
+        </div>
+        <h2 class="text-3xl font-black text-gray-900 mt-1">Inspection Audit Log & Defect Metadata</h2>
+        <p class="text-sm text-gray-600 mt-1 max-w-3xl">
+          Real-time FIFO ledger tracking the last 10–20 detected items across all 8 manufacturing lines. Logs sub-millimeter anomaly scores, decision thresholds, localized defect classes, operator IDs, and automated conveyor routing actions.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 font-mono text-xs">
+        <button onclick="navigateTo('inspect')" class="btn-instrumental px-4 py-2 uppercase tracking-wider flex items-center gap-2 shadow-sm font-bold">
+          <i data-lucide="scan" class="w-4 h-4"></i>
+          <span>Inspect New Unit &rarr;</span>
+        </button>
+
+        <button onclick="exportAuditLogCSV()" class="btn-instrumental-secondary px-3.5 py-2 uppercase tracking-wider flex items-center gap-2 border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 font-bold" title="Download CSV Audit Log">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Export CSV</span>
+        </button>
+
+        <button onclick="exportAuditLogJSON()" class="btn-instrumental-secondary px-3.5 py-2 uppercase tracking-wider flex items-center gap-2 border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 font-bold" title="Download Machine-Readable JSON">
+          <i data-lucide="file-code" class="w-4 h-4"></i>
+          <span>Export JSON</span>
+        </button>
+
+        <button onclick="clearAuditLog()" class="px-3 py-2 uppercase tracking-wider flex items-center gap-1.5 text-gray-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Clear current session buffer">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Clear</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Telemetry Summary Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
+      <div class="clean-card p-5 border-l-4 border-l-slate-600">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Units in Buffer</div>
+        <div class="text-2xl font-black text-gray-900 mt-1" id="auditMetricTotal">0 / 20</div>
+        <div class="text-[11px] text-gray-500 font-sans mt-0.5">Rolling FIFO Buffer (Max 20 Items)</div>
+      </div>
+
+      <div class="clean-card p-5 border-l-4 border-l-rose-500">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Critical Defects Quarantined</div>
+        <div class="text-2xl font-black text-rose-600 mt-1" id="auditMetricDefects">0 Units</div>
+        <div class="text-[11px] text-rose-500 font-sans mt-0.5">Diverted to Quarantine Bin B</div>
+      </div>
+
+      <div class="clean-card p-5 border-l-4 border-l-[#00B050]">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">QA Approved Normal</div>
+        <div class="text-2xl font-black text-[#00B050] mt-1" id="auditMetricPassed">0 Units</div>
+        <div class="text-[11px] text-[#00B050] font-sans mt-0.5">Routed to Main Conveyor Belt A</div>
+      </div>
+
+      <div class="clean-card p-5 border-l-4 border-l-amber-500">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">First-Pass Yield</div>
+        <div class="text-2xl font-black text-amber-600 mt-1" id="auditMetricYield">100.0%</div>
+        <div class="text-[11px] text-amber-600 font-sans mt-0.5">Operational Line Compliance</div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+      <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto">
+        <span class="text-gray-500 font-bold uppercase text-[11px]">Filter:</span>
+        <button id="auditFilterBtn_all" onclick="filterAuditLog('all')" class="px-3 py-1.5 rounded-lg bg-[#111111] text-white font-bold transition flex items-center gap-1.5">
+          <span>All Detected Units</span>
+          <span id="auditFilterCount_all" class="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px]">0</span>
+        </button>
+        <button id="auditFilterBtn_defects" onclick="filterAuditLog('defects')" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold transition flex items-center gap-1.5">
+          <span>Quarantined Defects</span>
+          <span id="auditFilterCount_defects" class="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 text-[10px]">0</span>
+        </button>
+        <button id="auditFilterBtn_passed" onclick="filterAuditLog('passed')" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold transition flex items-center gap-1.5">
+          <span>Passed Nominal</span>
+          <span id="auditFilterCount_passed" class="px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-700 text-[10px]">0</span>
+        </button>
+      </div>
+
+      <div class="relative w-full sm:w-72">
+        <input type="text" id="auditSearchInput" oninput="handleAuditSearch(this.value)" placeholder="Search Unit ID, Line, Defect Type..." class="w-full px-3 py-2 pl-9 rounded-lg bg-white border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050] text-xs font-sans shadow-sm">
+        <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-2.5"></i>
+      </div>
+    </div>
+
+    <!-- Audit Ledger Table -->
+    <div class="clean-card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="bg-gray-50 text-gray-600 uppercase tracking-wider border-b border-gray-200">
+            <tr>
+              <th class="py-3.5 px-4">Preview</th>
+              <th class="py-3.5 px-4">Unit ID & Time</th>
+              <th class="py-3.5 px-4">Line & Sector</th>
+              <th class="py-3.5 px-4">Verdict & Conveyor Action</th>
+              <th class="py-3.5 px-4">Detected Defect Type</th>
+              <th class="py-3.5 px-4 text-right">Anomaly Score vs Thresh</th>
+              <th class="py-3.5 px-4 text-right">Confidence & Latency</th>
+              <th class="py-3.5 px-4 text-center">Operator & Station</th>
+              <th class="py-3.5 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100" id="auditLogTableBody">
+            <!-- Dynamically populated via app.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
 
   </section>
 
@@ -1135,7 +1256,7 @@
         <i data-lucide="shield-check" class="w-5 h-5 text-[#00B050]"></i>
         <h3 class="text-lg font-bold text-gray-900">Operator Authentication Portal</h3>
       </div>
-      <p class="text-xs text-gray-500 font-sans mb-4">Secure workstation access required to select components and execute live inspection.</p>
+      <p id="authModalSubtitle" class="text-xs text-gray-500 font-sans mb-4">Secure workstation access required to select components and execute live inspection.</p>
 
       <!-- Dynamic Notice Banner when gated action was attempted -->
       <div id="authNoticeBanner" class="hidden p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 font-mono mb-4 flex items-start gap-2">
@@ -1143,29 +1264,49 @@
         <span id="authNoticeText">Please authenticate to inspect components on this production line.</span>
       </div>
 
-      <!-- Tabs: 1. Sign In / 2. Create Account -->
-      <div class="flex border-b border-gray-200 mb-5 text-xs font-mono">
-        <button id="authTabSignIn" onclick="switchAuthTab('login')" class="flex-1 pb-2.5 font-bold text-gray-900 border-b-2 border-[#00B050] transition">
+      <!-- Clean 2-Tab Navigation: 1. Sign In / 2. Create Account (No 3rd tab) -->
+      <div id="authTabBar" class="flex border-b border-gray-200 mb-5 text-xs font-mono">
+        <button id="authTabSignIn" onclick="switchAuthTab('login')" class="flex-1 pb-2.5 font-bold text-gray-900 border-b-2 border-[#00B050] transition text-center">
           1. Sign In
         </button>
-        <button id="authTabRegister" onclick="switchAuthTab('register')" class="flex-1 pb-2.5 font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition">
+        <button id="authTabRegister" onclick="switchAuthTab('register')" class="flex-1 pb-2.5 font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition text-center">
           2. Create Account
         </button>
+      </div>
+
+      <!-- Forgot Password / Recovery Navigation (Shown inside popup when "Forgot Password?" is clicked) -->
+      <div id="authForgotNav" class="hidden flex items-center justify-between pb-3 mb-5 border-b border-gray-200 text-xs font-mono">
+        <button type="button" onclick="switchAuthTab('login')" class="text-gray-600 hover:text-gray-900 font-bold flex items-center gap-1.5 transition group">
+          <i data-lucide="arrow-left" class="w-4 h-4 text-[#00B050] group-hover:-translate-x-0.5 transition-transform"></i>
+          <span>Back to Sign In</span>
+        </button>
+        <span class="text-[#00B050] font-bold uppercase tracking-wider text-[11px] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+          Reset PIN / Password
+        </span>
       </div>
 
       <!-- Form 1: Sign In -->
       <form id="authLoginForm" onsubmit="handleAuthSubmit(event, 'login')" class="space-y-4 font-mono text-xs">
         <div>
-          <label class="block text-gray-700 mb-1 font-semibold">Operator ID or Username</label>
-          <input type="text" id="authUsername" value="admin" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+          <label class="block text-gray-700 mb-1 font-semibold">Operator User ID or Work Email</label>
+          <div class="relative">
+            <input type="text" id="authUsername" value="admin" placeholder="e.g. admin or operator@defectvision.com" class="w-full p-2.5 pl-9 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+            <i data-lucide="user" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+          </div>
         </div>
 
         <div>
-          <label class="block text-gray-700 mb-1 font-semibold">Access PIN / Password</label>
-          <input type="password" id="authPassword" value="DefectVision@Admin2026!" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-gray-700 font-semibold">Access PIN / Password</label>
+            <button type="button" onclick="switchAuthTab('forgot')" class="text-[11px] text-[#00B050] hover:underline font-bold">Forgot Password?</button>
+          </div>
+          <div class="relative">
+            <input type="password" id="authPassword" value="DefectVision@Admin2026!" placeholder="Enter secure password or PIN" class="w-full p-2.5 pl-9 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+            <i data-lucide="lock" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+          </div>
         </div>
 
-        <div class="flex items-center justify-between text-[11px] text-gray-500">
+        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-0.5">
           <label class="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" id="authRemember" checked class="accent-[#00B050]">
             <span>Remember workstation</span>
@@ -1173,35 +1314,111 @@
           <span class="text-[#00B050] font-semibold">Role: QA Lead</span>
         </div>
 
-        <button type="submit" class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold shadow-md">
-          AUTHENTICATE & ENTER
+        <button type="submit" class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold shadow-md flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>AUTHENTICATE & ENTER</span>
         </button>
+
+        <div class="text-center pt-1 border-t border-gray-100 text-[11px] text-gray-500">
+          <span>Need a new workstation ID?</span>
+          <button type="button" onclick="switchAuthTab('register')" class="text-[#00B050] hover:underline font-bold ml-1">Create Account &rarr;</button>
+        </div>
       </form>
 
-      <!-- Form 2: Create Operator Account -->
-      <form id="authRegisterForm" onsubmit="handleAuthSubmit(event, 'register')" class="hidden space-y-4 font-mono text-xs">
+      <!-- Form 2: Create Operator Account (Includes User ID, Email, Role, Password) -->
+      <form id="authRegisterForm" onsubmit="handleAuthSubmit(event, 'register')" class="hidden space-y-3 font-mono text-xs">
         <div>
-          <label class="block text-gray-700 mb-1 font-semibold">Full Name / Operator ID</label>
-          <input type="text" id="regUsername" placeholder="e.g. John_Doe (Inspector 04)" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+          <label class="block text-gray-700 mb-1 font-semibold">Operator User ID / Username</label>
+          <div class="relative">
+            <input type="text" id="regUsername" placeholder="e.g. OP-4029 or John_Doe" class="w-full p-2.5 pl-9 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+            <i data-lucide="user-plus" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+          </div>
         </div>
 
         <div>
-          <label class="block text-gray-700 mb-1 font-semibold">Factory Role</label>
+          <label class="block text-gray-700 mb-1 font-semibold">Work Email Address</label>
+          <div class="relative">
+            <input type="email" id="regEmail" placeholder="e.g. operator@defectvision.industrial" class="w-full p-2.5 pl-9 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+            <i data-lucide="mail" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1 font-semibold">Factory Operations Role</label>
           <select id="regRole" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]">
             <option value="Conveyor Quality Inspector">Conveyor Quality Inspector</option>
             <option value="QA Operations Lead">QA Operations Lead</option>
+            <option value="Quality Systems Engineer">Quality Systems Engineer</option>
             <option value="Production Supervisor">Production Supervisor</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-gray-700 mb-1 font-semibold">Create Workstation PIN</label>
-          <input type="password" id="regPassword" placeholder="Enter secure PIN" value="Inspector123!" class="w-full p-2.5 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+          <label class="block text-gray-700 mb-1 font-semibold">Create Workstation PIN / Password</label>
+          <div class="relative">
+            <input type="password" id="regPassword" placeholder="Enter secure password" value="Inspector123!" class="w-full p-2.5 pl-9 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+            <i data-lucide="key" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+          </div>
         </div>
 
-        <button type="submit" class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold shadow-md">
-          CREATE ACCOUNT & INGEST
+        <div>
+          <label class="block text-gray-700 mb-1 font-semibold">Confirm Password / PIN</label>
+          <div class="relative">
+            <input type="password" id="regPasswordConfirm" placeholder="Re-enter password to confirm" value="Inspector123!" class="w-full p-2.5 pl-9 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+            <i data-lucide="check" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold shadow-md flex items-center justify-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>CREATE ACCOUNT & INGEST</span>
         </button>
+
+        <div class="text-center pt-1 border-t border-gray-100 text-[11px] text-gray-500">
+          <span>Already have an account?</span>
+          <button type="button" onclick="switchAuthTab('login')" class="text-[#00B050] hover:underline font-bold ml-1">Sign In &rarr;</button>
+        </div>
+      </form>
+
+      <!-- Form 3: Forgot Password / Workstation PIN Reset -->
+      <form id="authForgotForm" onsubmit="handleAuthSubmit(event, 'forgot')" class="hidden space-y-3.5 font-mono text-xs">
+        <div class="p-3 rounded-lg bg-sky-50 border border-sky-200 text-sky-900 text-[11px] flex items-start gap-2">
+          <i data-lucide="key-round" class="w-4 h-4 text-sky-600 flex-shrink-0 mt-0.5"></i>
+          <span>Enter your Operator User ID or registered work email to reset your workstation PIN / password.</span>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1 font-semibold">Operator User ID or Work Email</label>
+          <div class="relative">
+            <input type="text" id="forgotIdentifier" placeholder="e.g. admin or operator@defectvision.industrial" class="w-full p-2.5 pl-9 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+            <i data-lucide="at-sign" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1 font-semibold">New Access PIN / Password</label>
+          <div class="relative">
+            <input type="password" id="forgotNewPassword" placeholder="Enter new secure password" class="w-full p-2.5 pl-9 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+            <i data-lucide="key" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1 font-semibold">Confirm New Password</label>
+          <div class="relative">
+            <input type="password" id="forgotNewPasswordConfirm" placeholder="Re-enter new password" class="w-full p-2.5 pl-9 rounded-lg bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:border-[#00B050]" required>
+            <i data-lucide="check" class="w-4 h-4 text-gray-400 absolute left-3 top-3"></i>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-lg btn-instrumental uppercase tracking-wider font-bold shadow-md flex items-center justify-center gap-2">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          <span>RESET PASSWORD & SIGN IN</span>
+        </button>
+
+        <div class="text-center pt-1 border-t border-gray-100 text-[11px] text-gray-500">
+          <button type="button" onclick="switchAuthTab('login')" class="text-gray-600 hover:text-gray-900 underline font-bold">&larr; Return to Sign In</button>
+        </div>
       </form>
     </div>
   </div>

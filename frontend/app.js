@@ -16,7 +16,10 @@ let state = {
   showBoundingBoxes: true,
   ingestMode: 'upload',      // 'upload', 'catalog', 'camera'
   cameraStream: null,
-  pendingLineIdAfterAuth: null
+  pendingLineIdAfterAuth: null,
+  auditLog: [],
+  auditFilter: 'all',        // 'all', 'defects', 'passed'
+  auditSearchQuery: ''
 };
 
 let modalState = {
@@ -56,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   await loadLines();
   await loadPresets();
+  initAuditLog();
 
   // Initialize SPA browser history routing (enables Chrome back/undo and forward buttons)
   const isAuth = window.AuthManager && window.AuthManager.isAuthenticated();
@@ -138,10 +142,19 @@ function navigateTo(pageId, pushHistory = true, isInitialLoad = false) {
     }
   }
 
+  // If navigating to analytics, redirect seamlessly to the integrated Research Graphs section in Benchmarks
+  if (pageId === 'analytics') {
+    navigateTo('benchmarks', pushHistory, isInitialLoad);
+    setTimeout(() => {
+      scrollToProjectAnalysis();
+    }, 120);
+    return;
+  }
+
   state.currentPage = pageId;
 
   // 1. Hide all pages
-  const pages = ['pageHome', 'pageLines', 'pageInspect', 'pageUnitDiagnostics', 'pageBenchmarks', 'pageAnalytics'];
+  const pages = ['pageHome', 'pageLines', 'pageInspect', 'pageUnitDiagnostics', 'pageBenchmarks', 'pageAuditLog'];
   pages.forEach(p => {
     const el = document.getElementById(p);
     if (el) el.classList.add('hidden');
@@ -154,7 +167,7 @@ function navigateTo(pageId, pushHistory = true, isInitialLoad = false) {
     'inspect': 'pageInspect',
     'unitDiagnostics': 'pageUnitDiagnostics',
     'benchmarks': 'pageBenchmarks',
-    'analytics': 'pageAnalytics'
+    'auditLog': 'pageAuditLog'
   };
   const activePage = document.getElementById(targetMap[pageId]);
   if (activePage) activePage.classList.remove('hidden');
@@ -164,7 +177,7 @@ function navigateTo(pageId, pushHistory = true, isInitialLoad = false) {
     { id: 'navBtnHome', page: 'home' },
     { id: 'navBtnLines', page: 'lines' },
     { id: 'navBtnBenchmarks', page: 'benchmarks' },
-    { id: 'navBtnAnalytics', page: 'analytics' }
+    { id: 'navBtnAuditLog', page: 'auditLog' }
   ];
 
   navBtns.forEach(b => {
@@ -178,8 +191,11 @@ function navigateTo(pageId, pushHistory = true, isInitialLoad = false) {
   });
 
   if (pageId === 'lines') renderLinesCatalog();
-  if (pageId === 'benchmarks') renderBenchmarkTable();
-  if (pageId === 'analytics') renderClusteringBenchmarkTable();
+  if (pageId === 'benchmarks') {
+    renderBenchmarkTable();
+    renderClusteringBenchmarkTable();
+  }
+  if (pageId === 'auditLog') renderAuditLogPage();
   if (pageId === 'unitDiagnostics') renderUnitDiagnosticsPage();
 
   // 4. Update Browser History so Chrome's Back / Undo arrow works seamlessly
@@ -1390,6 +1406,9 @@ function updateTelemetry(data) {
   }
 
   if (window.lucide) lucide.createIcons();
+
+  // Record this unit inspection in the rolling 20-item Audit Ledger
+  recordInspectionAudit(data);
 }
 
 /**
@@ -1461,23 +1480,46 @@ function handleNavInspectClick() {
 }
 
 function switchAuthTab(tab) {
+  const tabBar = document.getElementById('authTabBar');
+  const forgotNav = document.getElementById('authForgotNav');
   const tabSignIn = document.getElementById('authTabSignIn');
   const tabRegister = document.getElementById('authTabRegister');
   const formLogin = document.getElementById('authLoginForm');
   const formReg = document.getElementById('authRegisterForm');
-  if (!tabSignIn || !tabRegister || !formLogin || !formReg) return;
+  const formForgot = document.getElementById('authForgotForm');
+  const modalSub = document.getElementById('authModalSubtitle');
 
-  if (tab === 'login') {
-    tabSignIn.className = 'flex-1 pb-2.5 font-bold text-gray-900 border-b-2 border-[#00B050] transition';
-    tabRegister.className = 'flex-1 pb-2.5 font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition';
-    formLogin.classList.remove('hidden');
-    formReg.classList.add('hidden');
+  if (tab === 'forgot') {
+    // When "Forgot Password?" is clicked: hides the 2-tab bar and opens dedicated reset view inside popup
+    if (tabBar) tabBar.classList.add('hidden');
+    if (forgotNav) forgotNav.classList.remove('hidden');
+    if (formLogin) formLogin.classList.add('hidden');
+    if (formReg) formReg.classList.add('hidden');
+    if (formForgot) formForgot.classList.remove('hidden');
+    if (modalSub) modalSub.innerText = 'Reset your workstation access credentials using your registered User ID or work email.';
+  } else if (tab === 'register') {
+    // 2-tab bar is visible: "2. Create Account" active
+    if (tabBar) tabBar.classList.remove('hidden');
+    if (forgotNav) forgotNav.classList.add('hidden');
+    if (tabSignIn) tabSignIn.className = 'flex-1 pb-2.5 font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition text-center';
+    if (tabRegister) tabRegister.className = 'flex-1 pb-2.5 font-bold text-gray-900 border-b-2 border-[#00B050] transition text-center';
+    if (formLogin) formLogin.classList.add('hidden');
+    if (formReg) formReg.classList.remove('hidden');
+    if (formForgot) formForgot.classList.add('hidden');
+    if (modalSub) modalSub.innerText = 'Register a new operator profile with User ID, work email, and access PIN.';
   } else {
-    tabRegister.className = 'flex-1 pb-2.5 font-bold text-gray-900 border-b-2 border-[#00B050] transition';
-    tabSignIn.className = 'flex-1 pb-2.5 font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition';
-    formReg.classList.remove('hidden');
-    formLogin.classList.add('hidden');
+    // 2-tab bar is visible: "1. Sign In" active
+    if (tabBar) tabBar.classList.remove('hidden');
+    if (forgotNav) forgotNav.classList.add('hidden');
+    if (tabSignIn) tabSignIn.className = 'flex-1 pb-2.5 font-bold text-gray-900 border-b-2 border-[#00B050] transition text-center';
+    if (tabRegister) tabRegister.className = 'flex-1 pb-2.5 font-bold text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition text-center';
+    if (formLogin) formLogin.classList.remove('hidden');
+    if (formReg) formReg.classList.add('hidden');
+    if (formForgot) formForgot.classList.add('hidden');
+    if (modalSub) modalSub.innerText = 'Secure workstation access required to select components and execute live inspection.';
   }
+
+  if (window.lucide) lucide.createIcons();
 }
 
 function toggleAuthModal(forceOpen = null, noticeMessage = null) {
@@ -1488,10 +1530,15 @@ function toggleAuthModal(forceOpen = null, noticeMessage = null) {
 
   if (forceOpen === true) {
     modal.classList.remove('hidden');
+    switchAuthTab('login');
   } else if (forceOpen === false) {
     modal.classList.add('hidden');
   } else {
+    const isOpening = modal.classList.contains('hidden');
     modal.classList.toggle('hidden');
+    if (isOpening) {
+      switchAuthTab('login');
+    }
   }
 
   if (noticeMessage && banner && noticeText) {
@@ -1500,6 +1547,8 @@ function toggleAuthModal(forceOpen = null, noticeMessage = null) {
   } else if (banner && (forceOpen === false || (!noticeMessage && modal.classList.contains('hidden')))) {
     banner.classList.add('hidden');
   }
+
+  if (window.lucide) lucide.createIcons();
 }
 
 function handleAuthSubmit(e, mode) {
@@ -1507,16 +1556,39 @@ function handleAuthSubmit(e, mode) {
 
   if (mode === 'register') {
     const user = (document.getElementById('regUsername') && document.getElementById('regUsername').value) || 'Operator_New';
+    const email = (document.getElementById('regEmail') && document.getElementById('regEmail').value) || `${user.toLowerCase()}@defectvision.industrial`;
+    const pass = (document.getElementById('regPassword') && document.getElementById('regPassword').value) || 'Inspector123!';
+    const passConfirm = (document.getElementById('regPasswordConfirm') && document.getElementById('regPasswordConfirm').value) || '';
     const role = (document.getElementById('regRole') && document.getElementById('regRole').value) || 'Conveyor Quality Inspector';
+
+    if (passConfirm && pass !== passConfirm) {
+      alert('Password confirmation does not match. Please verify both passwords.');
+      return;
+    }
+
     if (window.AuthManager) {
-      window.AuthManager.register(user, role, true);
+      window.AuthManager.register(user, email, pass, role, true);
+    }
+  } else if (mode === 'forgot') {
+    const identifier = (document.getElementById('forgotIdentifier') && document.getElementById('forgotIdentifier').value) || 'admin';
+    const newPass = (document.getElementById('forgotNewPassword') && document.getElementById('forgotNewPassword').value) || 'DefectVision@Admin2026!';
+    const newPassConfirm = (document.getElementById('forgotNewPasswordConfirm') && document.getElementById('forgotNewPasswordConfirm').value) || '';
+
+    if (newPassConfirm && newPass !== newPassConfirm) {
+      alert('New password and confirmation do not match.');
+      return;
+    }
+
+    if (window.AuthManager) {
+      window.AuthManager.resetPassword(identifier, newPass);
     }
   } else {
-    const user = (document.getElementById('authUsername') && document.getElementById('authUsername').value) || 'admin';
+    // Mode === 'login'
+    const identifier = (document.getElementById('authUsername') && document.getElementById('authUsername').value) || 'admin';
     const pass = (document.getElementById('authPassword') && document.getElementById('authPassword').value) || '';
     const remember = document.getElementById('authRemember') ? document.getElementById('authRemember').checked : true;
     if (window.AuthManager) {
-      window.AuthManager.login(user, pass, remember);
+      window.AuthManager.login(identifier, pass, remember);
     }
   }
 
@@ -1770,4 +1842,698 @@ function renderUnitDiagnosticsPage() {
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (window.lucide) lucide.createIcons();
+}
+
+/**
+ * ====================================================================
+ * COMPLETE PROJECT RESEARCH ANALYTICS (In-Page Navigation)
+ * ====================================================================
+ */
+function scrollToProjectAnalysis() {
+  const el = document.getElementById('projectAnalysisSection');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+/**
+ * ====================================================================
+ * INSPECTION AUDIT LOG & OPERATIONAL METADATA LEDGER (Max 20 Items)
+ * ====================================================================
+ */
+function initAuditLog() {
+  const saved = localStorage.getItem('defectvision_audit_log');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        state.auditLog = parsed.slice(0, 20);
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to parse saved audit log:', e);
+    }
+  }
+
+  // Pre-populate with 12 realistic recent detection records across production lines
+  state.auditLog = generateSeedAuditLog();
+  try {
+    localStorage.setItem('defectvision_audit_log', JSON.stringify(state.auditLog));
+  } catch (e) {}
+}
+
+function generateSeedAuditLog() {
+  const now = Date.now();
+  const formatTimeAgo = (minutesAgo) => {
+    const d = new Date(now - minutesAgo * 60 * 1000);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  };
+  const dateStr = new Date().toISOString().split('T')[0];
+
+  return [
+    {
+      id: 'PCB2-94821',
+      timestamp: formatTimeAgo(2),
+      date: dateStr,
+      category: 'pcb2',
+      lineName: 'pcb2 (Micro-Soldering)',
+      lineIcon: '🔬',
+      sector: 'Semiconductor & Electronics',
+      sample_name: 'PCB2_IC_PinArray_081',
+      defect_type: 'COLD SOLDER JOINTS',
+      verdict: 'CRITICAL_DEFECT',
+      verdict_title: 'CRITICAL DEFECT DETECTED',
+      conveyor_action: 'DIVERT TO QUARANTINE BIN B',
+      score: 48.20,
+      threshold: 36.10,
+      delta: 12.10,
+      confidence: 99.2,
+      latency_ms: 14.8,
+      operator: 'admin (QA Lead)',
+      workstation: 'WS-104',
+      images: {
+        raw: '/static/plots/tsne_kmeans.png',
+        overlay: '/static/plots/tsne_kmeans.png',
+        heatmap: '/static/plots/tsne_kmeans.png',
+        golden: ''
+      }
+    },
+    {
+      id: 'PCB1-84192',
+      timestamp: formatTimeAgo(5),
+      date: dateStr,
+      category: 'pcb1',
+      lineName: 'pcb1 (Mainboard Traces)',
+      lineIcon: '🖥️',
+      sector: 'Semiconductor & Electronics',
+      sample_name: 'PCB1_TraceLayer_042',
+      defect_type: 'BROKEN COPPER TRACES',
+      verdict: 'CRITICAL_DEFECT',
+      verdict_title: 'CRITICAL DEFECT DETECTED',
+      conveyor_action: 'DIVERT TO QUARANTINE BIN B',
+      score: 45.60,
+      threshold: 34.20,
+      delta: 11.40,
+      confidence: 98.4,
+      latency_ms: 13.9,
+      operator: 'admin (QA Lead)',
+      workstation: 'WS-104',
+      images: {
+        raw: '/static/plots/pca_scree.png',
+        overlay: '/static/plots/pca_scree.png',
+        heatmap: '/static/plots/pca_scree.png',
+        golden: ''
+      }
+    },
+    {
+      id: 'BOTTLE-31092',
+      timestamp: formatTimeAgo(9),
+      date: dateStr,
+      category: 'bottle',
+      lineName: 'bottle (Bottling & Cap Line)',
+      lineIcon: '🍾',
+      sector: 'Industrial Packaging',
+      sample_name: 'MVTec_Bottle_BrokenLarge_019',
+      defect_type: 'GLASS FRACTURE',
+      verdict: 'CRITICAL_DEFECT',
+      verdict_title: 'CRITICAL DEFECT DETECTED',
+      conveyor_action: 'DIVERT TO QUARANTINE BIN B',
+      score: 56.40,
+      threshold: 35.88,
+      delta: 20.52,
+      confidence: 99.7,
+      latency_ms: 15.2,
+      operator: 'chandan_m (Inspector)',
+      workstation: 'WS-102',
+      images: {
+        raw: '/static/plots/bottle_sample_2.png',
+        overlay: '/static/plots/bottle_sample_2.png',
+        heatmap: '/static/plots/bottle_sample_2.png',
+        golden: '/static/plots/bottle_sample_0.png'
+      }
+    },
+    {
+      id: 'CAPSULES-29104',
+      timestamp: formatTimeAgo(14),
+      date: dateStr,
+      category: 'capsules',
+      lineName: 'capsules (Medical Capsules)',
+      lineIcon: '💊',
+      sector: 'Pharmaceutical & Medical',
+      sample_name: 'VisA_Capsule_CrackedShell_007',
+      defect_type: 'CRACKED GELATIN SHELL',
+      verdict: 'CRITICAL_DEFECT',
+      verdict_title: 'CRITICAL DEFECT DETECTED',
+      conveyor_action: 'DIVERT TO QUARANTINE BIN B',
+      score: 42.10,
+      threshold: 33.70,
+      delta: 8.40,
+      confidence: 98.9,
+      latency_ms: 14.1,
+      operator: 'gayatri_u (MLOps)',
+      workstation: 'WS-103',
+      images: {
+        raw: '/static/plots/kmeans_elbow.png',
+        overlay: '/static/plots/kmeans_elbow.png',
+        heatmap: '/static/plots/kmeans_elbow.png',
+        golden: ''
+      }
+    },
+    {
+      id: 'PCB4-18471',
+      timestamp: formatTimeAgo(18),
+      date: dateStr,
+      category: 'pcb4',
+      lineName: 'pcb4 (High-Density Board)',
+      lineIcon: '⚡',
+      sector: 'Semiconductor & Electronics',
+      sample_name: 'PCB4_HD_NominalBatch_114',
+      defect_type: 'PRISTINE / NORMAL',
+      verdict: 'NORMAL_PASS',
+      verdict_title: 'QUALITY ASSURANCE PASSED',
+      conveyor_action: 'ROUTE TO CONVEYOR BELT A',
+      score: 22.40,
+      threshold: 34.80,
+      delta: -12.40,
+      confidence: 97.9,
+      latency_ms: 13.5,
+      operator: 'admin (QA Lead)',
+      workstation: 'WS-104',
+      images: {
+        raw: '/static/plots/tsne_dbscan.png',
+        overlay: '/static/plots/tsne_dbscan.png',
+        heatmap: '/static/plots/tsne_dbscan.png',
+        golden: ''
+      }
+    },
+    {
+      id: 'CABLE-77218',
+      timestamp: formatTimeAgo(22),
+      date: dateStr,
+      category: 'cable',
+      lineName: 'cable (Wiring Harness)',
+      lineIcon: '🔌',
+      sector: 'Automotive & Electrical',
+      sample_name: 'MVTec_Cable_CutOuterBraid_012',
+      defect_type: 'EXPOSED CONDUCTOR BRAIDS',
+      verdict: 'CRITICAL_DEFECT',
+      verdict_title: 'CRITICAL DEFECT DETECTED',
+      conveyor_action: 'DIVERT TO QUARANTINE BIN B',
+      score: 47.90,
+      threshold: 39.54,
+      delta: 8.36,
+      confidence: 83.1,
+      latency_ms: 16.4,
+      operator: 'chandan_m (Inspector)',
+      workstation: 'WS-102',
+      images: {
+        raw: '/static/plots/cable_sample_1.png',
+        overlay: '/static/plots/cable_sample_1.png',
+        heatmap: '/static/plots/cable_sample_1.png',
+        golden: '/static/plots/cable_sample_0.png'
+      }
+    },
+    {
+      id: 'STEEL-64019',
+      timestamp: formatTimeAgo(28),
+      date: dateStr,
+      category: 'steel',
+      lineName: 'steel (Hot-Rolled Strips)',
+      lineIcon: '🔩',
+      sector: 'Metallurgy & Steel Mills',
+      sample_name: 'NEU_Steel_RolledInScale_055',
+      defect_type: 'SCALE OXIDE INDENTATIONS',
+      verdict: 'CRITICAL_DEFECT',
+      verdict_title: 'CRITICAL DEFECT DETECTED',
+      conveyor_action: 'DIVERT TO QUARANTINE BIN B',
+      score: 51.30,
+      threshold: 42.19,
+      delta: 9.11,
+      confidence: 96.2,
+      latency_ms: 14.7,
+      operator: 'tanya_t (CV Lead)',
+      workstation: 'WS-101',
+      images: {
+        raw: '/static/plots/tsne_hdbscan.png',
+        overlay: '/static/plots/tsne_hdbscan.png',
+        heatmap: '/static/plots/tsne_hdbscan.png',
+        golden: ''
+      }
+    },
+    {
+      id: 'PCB3-55912',
+      timestamp: formatTimeAgo(35),
+      date: dateStr,
+      category: 'pcb3',
+      lineName: 'pcb3 (IC Component Array)',
+      lineIcon: '🔲',
+      sector: 'Semiconductor & Electronics',
+      sample_name: 'PCB3_IC_Nominal_009',
+      defect_type: 'PRISTINE / NORMAL',
+      verdict: 'NORMAL_PASS',
+      verdict_title: 'QUALITY ASSURANCE PASSED',
+      conveyor_action: 'ROUTE TO CONVEYOR BELT A',
+      score: 26.80,
+      threshold: 35.50,
+      delta: -8.70,
+      confidence: 96.8,
+      latency_ms: 13.8,
+      operator: 'admin (QA Lead)',
+      workstation: 'WS-104',
+      images: {
+        raw: '/static/plots/pca_scree.png',
+        overlay: '/static/plots/pca_scree.png',
+        heatmap: '/static/plots/pca_scree.png',
+        golden: ''
+      }
+    },
+    {
+      id: 'BOTTLE-31088',
+      timestamp: formatTimeAgo(42),
+      date: dateStr,
+      category: 'bottle',
+      lineName: 'bottle (Bottling & Cap Line)',
+      lineIcon: '🍾',
+      sector: 'Industrial Packaging',
+      sample_name: 'MVTec_Bottle_Contamination_003',
+      defect_type: 'CHEMICAL CONTAMINATION',
+      verdict: 'CRITICAL_DEFECT',
+      verdict_title: 'CRITICAL DEFECT DETECTED',
+      conveyor_action: 'DIVERT TO QUARANTINE BIN B',
+      score: 49.80,
+      threshold: 35.88,
+      delta: 13.92,
+      confidence: 99.7,
+      latency_ms: 15.0,
+      operator: 'gayatri_u (MLOps)',
+      workstation: 'WS-103',
+      images: {
+        raw: '/static/plots/bottle_sample_1.png',
+        overlay: '/static/plots/bottle_sample_1.png',
+        heatmap: '/static/plots/bottle_sample_1.png',
+        golden: '/static/plots/bottle_sample_0.png'
+      }
+    },
+    {
+      id: 'CAPSULES-29098',
+      timestamp: formatTimeAgo(50),
+      date: dateStr,
+      category: 'capsules',
+      lineName: 'capsules (Medical Capsules)',
+      lineIcon: '💊',
+      sector: 'Pharmaceutical & Medical',
+      sample_name: 'VisA_Capsule_NominalPristine_014',
+      defect_type: 'PRISTINE / NORMAL',
+      verdict: 'NORMAL_PASS',
+      verdict_title: 'QUALITY ASSURANCE PASSED',
+      conveyor_action: 'ROUTE TO CONVEYOR BELT A',
+      score: 21.10,
+      threshold: 33.70,
+      delta: -12.60,
+      confidence: 98.9,
+      latency_ms: 14.2,
+      operator: 'admin (QA Lead)',
+      workstation: 'WS-104',
+      images: {
+        raw: '/static/plots/hazelnut_sample_0.png',
+        overlay: '/static/plots/hazelnut_sample_0.png',
+        heatmap: '/static/plots/hazelnut_sample_0.png',
+        golden: ''
+      }
+    },
+    {
+      id: 'PCB2-94815',
+      timestamp: formatTimeAgo(58),
+      date: dateStr,
+      category: 'pcb2',
+      lineName: 'pcb2 (Micro-Soldering)',
+      lineIcon: '🔬',
+      sector: 'Semiconductor & Electronics',
+      sample_name: 'PCB2_Misalignment_SOIC8_022',
+      defect_type: 'MISALIGNED CHIP',
+      verdict: 'CRITICAL_DEFECT',
+      verdict_title: 'CRITICAL DEFECT DETECTED',
+      conveyor_action: 'DIVERT TO QUARANTINE BIN B',
+      score: 46.75,
+      threshold: 36.10,
+      delta: 10.65,
+      confidence: 97.1,
+      latency_ms: 14.5,
+      operator: 'tanya_t (CV Lead)',
+      workstation: 'WS-101',
+      images: {
+        raw: '/static/plots/tsne_kmeans.png',
+        overlay: '/static/plots/tsne_kmeans.png',
+        heatmap: '/static/plots/tsne_kmeans.png',
+        golden: ''
+      }
+    },
+    {
+      id: 'PCB1-84180',
+      timestamp: formatTimeAgo(65),
+      date: dateStr,
+      category: 'pcb1',
+      lineName: 'pcb1 (Mainboard Traces)',
+      lineIcon: '🖥️',
+      sector: 'Semiconductor & Electronics',
+      sample_name: 'PCB1_NominalTrace_001',
+      defect_type: 'PRISTINE / NORMAL',
+      verdict: 'NORMAL_PASS',
+      verdict_title: 'QUALITY ASSURANCE PASSED',
+      conveyor_action: 'ROUTE TO CONVEYOR BELT A',
+      score: 24.30,
+      threshold: 34.20,
+      delta: -9.90,
+      confidence: 98.4,
+      latency_ms: 13.7,
+      operator: 'admin (QA Lead)',
+      workstation: 'WS-104',
+      images: {
+        raw: '/static/plots/pca_scree.png',
+        overlay: '/static/plots/pca_scree.png',
+        heatmap: '/static/plots/pca_scree.png',
+        golden: ''
+      }
+    }
+  ];
+}
+
+function recordInspectionAudit(data) {
+  if (!data) return;
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dateStr = now.toISOString().split('T')[0];
+
+  const lineMeta = state.lines.find(l => l.id === data.category) || {
+    id: data.category,
+    name: data.category,
+    icon: '⚙️',
+    sector: 'Manufacturing'
+  };
+
+  const isAnomaly = data.verdict && (
+    data.verdict.includes('DEFECT') || 
+    data.verdict.includes('ANOMALY') || 
+    data.verdict.includes('QUARANTINE') || 
+    (typeof data.score === 'number' && typeof data.threshold === 'number' && data.score >= data.threshold)
+  );
+
+  const rawScore = typeof data.score === 'number' ? data.score : parseFloat(data.score || 0);
+  const rawThresh = typeof data.threshold === 'number' ? data.threshold : parseFloat(data.threshold || 50);
+  const rawDelta = typeof data.delta === 'number' ? data.delta : (rawScore - rawThresh);
+  const rawConf = typeof data.confidence === 'number' ? data.confidence : parseFloat(data.confidence || 95);
+
+  const entry = {
+    id: data.unit_id || `${(data.category || 'UNIT').toUpperCase()}-${Math.floor(10000 + Math.random() * 90000)}`,
+    timestamp: timeStr,
+    date: dateStr,
+    category: data.category || state.selectedLine,
+    lineName: lineMeta.name,
+    lineIcon: lineMeta.icon,
+    sector: lineMeta.sector,
+    sample_name: data.sample_name || 'Component Sample',
+    defect_type: data.defect_type || (isAnomaly ? 'SURFACE ANOMALY' : 'PRISTINE / NORMAL'),
+    verdict: isAnomaly ? 'CRITICAL_DEFECT' : 'NORMAL_PASS',
+    verdict_title: isAnomaly ? 'CRITICAL DEFECT DETECTED' : 'QUALITY ASSURANCE PASSED',
+    conveyor_action: data.conveyor_action || (isAnomaly ? 'DIVERT TO QUARANTINE BIN B' : 'ROUTE TO CONVEYOR BELT A'),
+    score: parseFloat(rawScore.toFixed(2)),
+    threshold: parseFloat(rawThresh.toFixed(2)),
+    delta: parseFloat(rawDelta.toFixed(2)),
+    confidence: parseFloat(rawConf.toFixed(1)),
+    latency_ms: data.latency_ms || 14.2,
+    operator: (window.AuthManager && window.AuthManager.currentUser) ? window.AuthManager.currentUser.username : 'admin (QA Lead)',
+    workstation: (window.AuthManager && window.AuthManager.currentUser) ? window.AuthManager.currentUser.workstationId : 'WS-104',
+    images: {
+      raw: data.images?.inspected_raw || '',
+      overlay: data.images?.overlay || data.images?.heatmap || data.images?.inspected_raw || '',
+      heatmap: data.images?.heatmap || '',
+      golden: data.images?.golden_reference || ''
+    }
+  };
+
+  // Avoid duplicate adjacent unshifts of exact same unit ID
+  if (state.auditLog.length > 0 && state.auditLog[0].id === entry.id) {
+    state.auditLog[0] = entry;
+  } else {
+    state.auditLog.unshift(entry);
+  }
+
+  // Cap at 20 items (Rolling FIFO Buffer)
+  if (state.auditLog.length > 20) {
+    state.auditLog = state.auditLog.slice(0, 20);
+  }
+
+  try {
+    localStorage.setItem('defectvision_audit_log', JSON.stringify(state.auditLog));
+  } catch (e) {
+    console.warn('Could not save audit log:', e);
+  }
+
+  // If currently active, refresh UI
+  if (state.currentPage === 'auditLog') {
+    renderAuditLogPage();
+  }
+}
+
+function renderAuditLogPage() {
+  const total = state.auditLog.length;
+  const defects = state.auditLog.filter(x => x.verdict === 'CRITICAL_DEFECT').length;
+  const passed = state.auditLog.filter(x => x.verdict !== 'CRITICAL_DEFECT').length;
+  const yieldRate = total > 0 ? ((passed / total) * 100).toFixed(1) : '100.0';
+
+  const elTotal = document.getElementById('auditMetricTotal');
+  const elDefects = document.getElementById('auditMetricDefects');
+  const elPassed = document.getElementById('auditMetricPassed');
+  const elYield = document.getElementById('auditMetricYield');
+
+  if (elTotal) elTotal.innerText = `${total} / 20`;
+  if (elDefects) elDefects.innerText = `${defects} Units`;
+  if (elPassed) elPassed.innerText = `${passed} Units`;
+  if (elYield) elYield.innerText = `${yieldRate}%`;
+
+  const countAll = document.getElementById('auditFilterCount_all');
+  const countDefects = document.getElementById('auditFilterCount_defects');
+  const countPassed = document.getElementById('auditFilterCount_passed');
+
+  if (countAll) countAll.innerText = total;
+  if (countDefects) countDefects.innerText = defects;
+  if (countPassed) countPassed.innerText = passed;
+
+  renderAuditLogTable();
+}
+
+function renderAuditLogTable() {
+  const tbody = document.getElementById('auditLogTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  const q = (state.auditSearchQuery || '').toLowerCase().trim();
+  const filtered = state.auditLog.filter(item => {
+    // 1. Filter type check
+    if (state.auditFilter === 'defects' && item.verdict !== 'CRITICAL_DEFECT') return false;
+    if (state.auditFilter === 'passed' && item.verdict === 'CRITICAL_DEFECT') return false;
+
+    // 2. Search check
+    if (q) {
+      const match = 
+        item.id.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q) ||
+        (item.lineName || '').toLowerCase().includes(q) ||
+        (item.defect_type || '').toLowerCase().includes(q) ||
+        (item.operator || '').toLowerCase().includes(q) ||
+        (item.sector || '').toLowerCase().includes(q);
+      if (!match) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td colspan="9" class="py-12 text-center text-gray-500 font-sans">
+        <div class="flex flex-col items-center justify-center gap-2">
+          <i data-lucide="clipboard-x" class="w-8 h-8 text-gray-400"></i>
+          <p class="font-bold text-gray-700">No detection events match the current filter.</p>
+          <p class="text-xs text-gray-400">Run an inspection in the Live Studio to add items to the audit buffer.</p>
+          <button onclick="navigateTo('inspect')" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider font-mono font-bold mt-2">
+            Inspect Unit Now &rarr;
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  filtered.forEach(item => {
+    const isAnomaly = item.verdict === 'CRITICAL_DEFECT';
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-gray-50/80 transition border-b border-gray-100 group';
+
+    const imgSrc = item.images?.overlay || item.images?.raw || '';
+    const imgHtml = imgSrc 
+      ? `<img src="${imgSrc}" class="w-10 h-10 object-contain rounded-lg border border-gray-200 bg-black cursor-pointer hover:scale-110 transition shadow-sm" onclick="diagnoseFromAudit('${item.id}')" title="Inspect details for ${item.id}">`
+      : `<div class="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-sm">${item.lineIcon || '⚙️'}</div>`;
+
+    tr.innerHTML = `
+      <td class="py-3 px-4">${imgHtml}</td>
+      <td class="py-3 px-4">
+        <div class="font-bold text-gray-900 flex items-center gap-1.5">
+          <span class="hover:text-[#00B050] cursor-pointer" onclick="diagnoseFromAudit('${item.id}')">${item.id}</span>
+          <span class="text-[10px] px-1.5 py-0.2 rounded bg-gray-100 text-gray-600 font-mono font-normal">${item.category}</span>
+        </div>
+        <div class="text-[11px] text-gray-400 font-sans mt-0.5">${item.timestamp} &bull; ${item.date}</div>
+      </td>
+      <td class="py-3 px-4">
+        <div class="font-bold text-gray-800 flex items-center gap-1">
+          <span>${item.lineIcon || ''}</span>
+          <span>${item.lineName || item.category}</span>
+        </div>
+        <div class="text-[10px] text-gray-400 truncate max-w-[150px] font-sans">${item.sector || 'Industrial AOI'}</div>
+      </td>
+      <td class="py-3 px-4">
+        <div class="flex flex-col gap-1 items-start">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+            isAnomaly ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-emerald-50 text-[#00B050] border border-emerald-200'
+          }">
+            ${isAnomaly ? 'CRITICAL DEFECT' : 'QA NOMINAL PASS'}
+          </span>
+          <span class="text-[9px] font-mono ${isAnomaly ? 'text-amber-700' : 'text-gray-500'}">
+            &bull; ${item.conveyor_action}
+          </span>
+        </div>
+      </td>
+      <td class="py-3 px-4">
+        <span class="font-bold text-gray-900 ${isAnomaly ? 'text-rose-600' : 'text-emerald-700'} uppercase text-xs">
+          ${item.defect_type}
+        </span>
+        <div class="text-[10px] text-gray-400 truncate max-w-[140px] font-sans">${item.sample_name || ''}</div>
+      </td>
+      <td class="py-3 px-4 text-right">
+        <div class="font-bold font-mono text-gray-900">${item.score.toFixed(2)} <span class="text-gray-400 font-normal text-[10px]">/ ${item.threshold.toFixed(2)}</span></div>
+        <div class="text-[10px] font-mono font-bold ${isAnomaly ? 'text-rose-600' : 'text-emerald-600'}">
+          &Delta; ${item.delta >= 0 ? '+' : ''}${item.delta.toFixed(2)}
+        </div>
+      </td>
+      <td class="py-3 px-4 text-right font-mono">
+        <div class="text-xs font-bold text-gray-800">${item.confidence.toFixed(1)}%</div>
+        <div class="text-[10px] text-gray-400">${item.latency_ms} ms</div>
+      </td>
+      <td class="py-3 px-4 text-center">
+        <div class="text-xs font-bold text-gray-800 truncate max-w-[110px] mx-auto">${item.operator}</div>
+        <div class="text-[10px] text-gray-400 font-mono">${item.workstation}</div>
+      </td>
+      <td class="py-3 px-4 text-right">
+        <div class="flex items-center justify-end gap-1.5 font-mono">
+          <button onclick="diagnoseFromAudit('${item.id}')" class="px-2 py-1 rounded bg-[#00B050]/10 hover:bg-[#00B050] text-[#00B050] hover:text-white border border-[#00B050]/30 font-bold transition text-[11px] shadow-sm" title="View unit operating gauge and patch histogram">
+            Diag &rarr;
+          </button>
+          <button onclick="reInspectFromAudit('${item.id}')" class="px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold transition text-[11px]" title="Re-inspect unit in live viewfinder">
+            Studio
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function filterAuditLog(filterType) {
+  state.auditFilter = filterType;
+  const btns = ['all', 'defects', 'passed'];
+  btns.forEach(b => {
+    const el = document.getElementById('auditFilterBtn_' + b);
+    if (!el) return;
+    if (b === filterType) {
+      el.className = 'px-3 py-1.5 rounded-lg bg-[#111111] text-white font-bold transition flex items-center gap-1.5 shadow-sm';
+    } else {
+      el.className = 'px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-bold transition flex items-center gap-1.5';
+    }
+  });
+  renderAuditLogTable();
+}
+
+function handleAuditSearch(val) {
+  state.auditSearchQuery = val || '';
+  renderAuditLogTable();
+}
+
+function exportAuditLogCSV() {
+  if (!state.auditLog || state.auditLog.length === 0) {
+    alert('Inspection audit buffer is currently empty.');
+    return;
+  }
+  let csv = 'Unit_ID,Timestamp,Date,Category,Line,Sector,Defect_Type,Verdict,Conveyor_Action,Score,Threshold,Delta,Confidence_Pct,Latency_ms,Operator,Workstation\n';
+  state.auditLog.forEach(row => {
+    csv += `"${row.id}","${row.timestamp}","${row.date}","${row.category}","${row.lineName || ''}","${row.sector || ''}","${row.defect_type}","${row.verdict}","${row.conveyor_action}",${row.score},${row.threshold},${row.delta},${row.confidence},${row.latency_ms},"${row.operator}","${row.workstation}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  a.setAttribute('download', `DefectVision_Inspection_Audit_Log_${new Date().toISOString().split('T')[0]}.csv`);
+  a.click();
+}
+
+function exportAuditLogJSON() {
+  if (!state.auditLog || state.auditLog.length === 0) {
+    alert('Inspection audit buffer is currently empty.');
+    return;
+  }
+  const cleanData = state.auditLog.map(item => ({
+    id: item.id,
+    timestamp: item.timestamp,
+    date: item.date,
+    category: item.category,
+    lineName: item.lineName,
+    sector: item.sector,
+    defect_type: item.defect_type,
+    verdict: item.verdict,
+    conveyor_action: item.conveyor_action,
+    score: item.score,
+    threshold: item.threshold,
+    delta: item.delta,
+    confidence: item.confidence,
+    latency_ms: item.latency_ms,
+    operator: item.operator,
+    workstation: item.workstation
+  }));
+
+  const blob = new Blob([JSON.stringify(cleanData, null, 2)], { type: 'application/json' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  a.setAttribute('download', `DefectVision_Inspection_Audit_Log_${new Date().toISOString().split('T')[0]}.json`);
+  a.click();
+}
+
+function clearAuditLog() {
+  if (confirm('Are you sure you want to clear the recent inspection audit buffer?')) {
+    state.auditLog = [];
+    try {
+      localStorage.removeItem('defectvision_audit_log');
+    } catch (e) {}
+    renderAuditLogPage();
+  }
+}
+
+function diagnoseFromAudit(unitId) {
+  const item = state.auditLog.find(x => x.id === unitId);
+  if (!item) return;
+  state.currentInspectionData = item;
+  state.selectedLine = item.category;
+  navigateTo('unitDiagnostics');
+}
+
+function reInspectFromAudit(unitId) {
+  const item = state.auditLog.find(x => x.id === unitId);
+  if (!item) return;
+  state.currentInspectionData = item;
+  state.selectedLine = item.category;
+  navigateTo('inspect');
+  applyInspectionResults(item);
 }

@@ -2,7 +2,7 @@
 
 [![Python 3.10 - 3.14](https://img.shields.io/badge/python-3.10%20--%203.14-blue.svg)](https://www.python.org/downloads/)
 [![Framework: PyTorch](https://img.shields.io/badge/framework-PyTorch-EE4C2C.svg)](https://pytorch.org/)
-[![Dashboard: Streamlit](https://img.shields.io/badge/dashboard-Streamlit-FF4B4B.svg)](https://streamlit.io/)
+[![Platform: FastAPI & Tailwind HUD](https://img.shields.io/badge/platform-FastAPI%20%26%20Tailwind%20HUD-00B050.svg)](http://localhost:8000)
 [![Dataset: MVTec AD](https://img.shields.io/badge/dataset-MVTec%20AD-green.svg)](https://www.mvtec.com/company/research/datasets/mvtec-ad)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-lightgrey.svg)](license.txt)
 
@@ -40,25 +40,13 @@ The DefectVision framework is organized into three parallel engineering tracks:
 
 ```
 DefectVision/
-├── app/
-│   └── streamlit_app.py                    # Production Streamlit inspection & analytics app (3-tab HUD)
-├── authentication/
-│   ├── config/
-│   │   └── settings.py                     # Auth configuration & role definitions
-│   ├── database/
-│   │   └── auth_users.db                   # [Excluded in Git] SQLite user store (WAL mode)
-│   ├── auth_backend.py                     # bcrypt password hashing & user validation
-│   ├── login.py                            # Login portal UI
-│   ├── register.py                         # New user registration UI
-│   ├── forgot_password.py                  # Password reset UI
-│   ├── session_manager.py                  # Session state & remember-me logic
-│   ├── user_dashboard.py                   # Operator/engineer dashboard
-│   ├── admin_dashboard.py                  # Admin management panel
-│   ├── styles.css                          # Auth portal custom CSS
-│   └── requirements-auth.txt              # Auth-specific dependencies
-├── .streamlit/
-│   ├── config.toml                         # Streamlit server and UI configurations
-│   └── credentials.toml                   # Streamlit client configurations
+├── api_server.py                           # Enterprise FastAPI & Uvicorn AOI API Server (port 8000)
+├── frontend/                               # DefectVision 2.0 Web Inspection Platform & Instrumental HUD
+│   ├── index.html                          # Single-Page Cockpit UI (Viewfinder, Lines, Scoreboard, Audit Log)
+│   ├── app.js                              # Client orchestration, SPA routing, telemetries, and buffer logic
+│   ├── auth.js                             # Operator authentication, User ID/Email, and PIN recovery
+│   ├── telemetry.js                        # Real-time inspection analytics & telemetry widgets
+│   └── plots/                              # Pre-rendered evaluation plots and research manifolds
 ├── data/
 │   ├── mvtec/                              # [Excluded in Git] MVTec categories (bottle, cable, hazelnut)
 │   │   ├── bottle/  (train/, test/, ground_truth/)
@@ -135,7 +123,7 @@ DefectVision/
 - **Unsupervised Clustering**: K-Means elbow/silhouette optimization, DBSCAN density-based noise outlier detection (`src/clustering.py`).
 - **Validation Metrics**: Evaluation via Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index, Adjusted Rand Index (ARI), and Normalized Mutual Information (NMI).
 
-### 3. Member 3: Gayatri U (Full-Stack MLOps & Dashboard Application)
+### 3. Member 3: Gayatri U (Full-Stack MLOps & Web Cockpit)
 - **Production Dashboard**: 3-Tab interactive Streamlit application (`app/streamlit_app.py`) running on port 8501:
   - **Tab 1: Live Defect Inspector & Benchmarks**: Real-time image upload or sample picker, PatchCore memory bank querying, dynamic threshold slider, verdict badge (NORMAL vs DEFECT DETECTED), 3-panel visualization (Original, Heatmap, Overlay), Tanya Tejaswi's official scoreboard, and evaluation curves (ROC/PR).
   - **Tab 2: Interactive Plotly Cluster Explorer**: 2D/3D PCA & t-SNE scatter plots with hover metadata tooltips and category filtering.
@@ -161,11 +149,11 @@ DefectVision/
 pip install -r requirements.txt
 ```
 
-### 3. Launch the Production Dashboard
+### 3. Launch the Web Inspection Cockpit
 ```bash
-streamlit run app/streamlit_app.py
+python -m uvicorn api_server:app --host 0.0.0.0 --port 8000
 ```
-Open **`http://localhost:8501`** in your browser.
+Open **`http://localhost:8000`** in your browser.
 
 ### 4. Run the Test Suite
 ```bash
