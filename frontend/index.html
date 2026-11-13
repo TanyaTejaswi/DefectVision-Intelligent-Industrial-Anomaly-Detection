@@ -55,7 +55,7 @@
         </button>
 
         <button id="navBtnLines" onclick="navigateTo('lines')" class="hover:text-gray-900 transition">
-          8-LINE SUITE
+          8 PRODUCTION LINES
         </button>
 
         <button id="navBtnBenchmarks" onclick="navigateTo('benchmarks')" class="hover:text-gray-900 transition">
@@ -264,9 +264,9 @@
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
       <div>
         <span class="text-xs font-bold uppercase tracking-widest text-[#00B050] font-mono">DETECTABLE DEFECT CATALOG</span>
-        <h2 class="text-3xl font-black text-gray-900 mt-1">Industrial Defect Detection Capability Catalog</h2>
+        <h2 class="text-3xl font-black text-gray-900 mt-1">8 Production Lines & Defect Detection Catalog</h2>
         <p class="text-sm text-gray-600 mt-1">
-          Explore detectable anomaly categories across 8 industrial manufacturing lines. Sign in or create an operator account to select images and run live inspections.
+          Explore detectable anomaly categories across 8 industrial manufacturing lines (Electronics, Pharma, Glass Bottles, Cables, and Strip Steel). Sign in or create an operator account to select images and run live inspections.
         </p>
       </div>
 
@@ -819,26 +819,26 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 font-mono">
       <div class="clean-card p-5 border-l-4 border-l-sky-500">
         <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Manifold Vectors</div>
-        <div class="text-2xl font-black text-gray-900 mt-1">977 Vectors</div>
-        <div class="text-[11px] text-sky-600 font-sans mt-0.5">ResNet-50 Layers 2+3 Embeddings</div>
+        <div class="text-2xl font-black text-gray-900 mt-1">976 Vectors</div>
+        <div class="text-[11px] text-sky-600 font-sans mt-0.5">8-Line Industrial Deep Embeddings</div>
       </div>
 
       <div class="clean-card p-5 border-l-4 border-l-[#00B050]">
         <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">PCA Retained Variance</div>
-        <div class="text-2xl font-black text-gray-900 mt-1">95.14%</div>
-        <div class="text-[11px] text-[#00B050] font-sans mt-0.5">120 Principal Components Retained</div>
+        <div class="text-2xl font-black text-gray-900 mt-1">95.01%</div>
+        <div class="text-[11px] text-[#00B050] font-sans mt-0.5">185 Principal Components Retained</div>
       </div>
 
       <div class="clean-card p-5 border-l-4 border-l-purple-500">
         <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Optimal Discovered Clusters</div>
         <div class="text-2xl font-black text-gray-900 mt-1">K = 8 Clusters</div>
-        <div class="text-[11px] text-purple-600 font-sans mt-0.5">Peak Silhouette: 0.2951 (K-Means)</div>
+        <div class="text-[11px] text-purple-600 font-sans mt-0.5">Peak Silhouette: 0.4996 (K-Means)</div>
       </div>
 
       <div class="clean-card p-5 border-l-4 border-l-amber-500">
         <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">DBSCAN Anomaly Noise</div>
-        <div class="text-2xl font-black text-gray-900 mt-1">8.2% Outliers</div>
-        <div class="text-[11px] text-amber-600 font-sans mt-0.5">Density-flagged defect vectors (&epsilon;=1.0)</div>
+        <div class="text-2xl font-black text-gray-900 mt-1">13.8% Outliers</div>
+        <div class="text-[11px] text-amber-600 font-sans mt-0.5">135 Density-flagged defect vectors (&epsilon;=25.0)</div>
       </div>
     </div>
 
@@ -874,11 +874,11 @@
           <div>
             <div class="flex items-center justify-between text-xs font-mono mb-2">
               <span class="px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold border border-sky-200">EIGEN-DECOMPOSITION</span>
-              <span class="text-gray-500">120 Components = 95.14%</span>
+              <span class="text-gray-500">185 Components = 95.01%</span>
             </div>
             <h3 class="text-base font-bold text-gray-900">PCA Scree & Cumulative Explained Variance</h3>
             <p class="text-xs text-gray-600 mt-1 mb-4">
-              Demonstrates variance retention across high-dimensional ResNet-50 patch vectors, indicating sufficient dimensionality reduction while preserving 95.14% of defect representation variance.
+              Demonstrates variance retention across high-dimensional feature vectors across all 8 lines, indicating sufficient dimensionality reduction while preserving 95.01% of defect representation variance.
             </p>
           </div>
           <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
@@ -910,9 +910,9 @@
               <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-bold border border-purple-200">2D NON-LINEAR MANIFOLD</span>
               <span class="text-gray-500">t-SNE Perplexity: 30</span>
             </div>
-            <h3 class="text-base font-bold text-gray-900">t-SNE 2D Feature Manifold (K-Means K=3)</h3>
+            <h3 class="text-base font-bold text-gray-900">t-SNE 2D Feature Manifold (K-Means K=8)</h3>
             <p class="text-xs text-gray-600 mt-1 mb-4">
-              Unsupervised clustering mapped to non-linear 2D manifold space. Clean geometric separation reveals distinct component topologies and defect cluster segregation.
+              Unsupervised clustering mapped to non-linear 2D manifold space across all 8 manufacturing categories. Clean geometric separation reveals distinct component topologies and defect segregation.
             </p>
           </div>
           <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
@@ -942,56 +942,141 @@
 
     <!-- SUB-TAB 2: ROC & PRECISION-RECALL PERFORMANCE CURVES -->
     <div id="analyticsTabContent_rocpr" class="hidden space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
-        <!-- Curve 1: Bottle Line -->
-        <div class="clean-card p-6 flex flex-col justify-between">
+        <!-- Curve 1: pcb1 Line -->
+        <div class="clean-card p-5 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs font-mono mb-2">
-              <span class="px-2 py-0.5 rounded bg-emerald-50 text-[#00B050] font-bold border border-emerald-200">PACKAGING LINE</span>
-              <span class="text-gray-900 font-bold">99.68% AUROC</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-50 text-[#00B050] font-bold border border-emerald-200">SEMICONDUCTOR</span>
+              <span class="text-gray-900 font-bold">55.84% AUROC</span>
             </div>
-            <h3 class="text-base font-bold text-gray-900">Bottle Line ROC & PR Curves</h3>
-            <p class="text-xs text-gray-600 mt-1 mb-4">
-              Calibrated optimal decision threshold: <strong>52.41</strong>. Demonstrates near-perfect separation (AUPRC: 99.90%, F1: 0.9756) across glass fractures, contaminations, and sealing flaws.
+            <h3 class="text-sm font-bold text-gray-900">pcb1 (Mainboard Traces)</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-3">
+              Optimal threshold: <strong>12.91</strong>. Evaluates open copper traces and solder bridges.
             </p>
           </div>
-          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-1">
+            <img src="/static/plots/pcb1_roc_pr.png" alt="pcb1 ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+        <!-- Curve 2: pcb2 Line -->
+        <div class="clean-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-emerald-50 text-[#00B050] font-bold border border-emerald-200">MICRO-ELECTRONICS</span>
+              <span class="text-gray-900 font-bold">42.72% AUROC</span>
+            </div>
+            <h3 class="text-sm font-bold text-gray-900">pcb2 (Micro-Soldering)</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-3">
+              Optimal threshold: <strong>13.84</strong>. Detects micro-joint cracks and cold solders.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-1">
+            <img src="/static/plots/pcb2_roc_pr.png" alt="pcb2 ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+        <!-- Curve 3: pcb3 Line -->
+        <div class="clean-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-emerald-50 text-[#00B050] font-bold border border-emerald-200">IC PACKAGING</span>
+              <span class="text-gray-900 font-bold">56.32% AUROC</span>
+            </div>
+            <h3 class="text-sm font-bold text-gray-900">pcb3 (IC Component Array)</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-3">
+              Optimal threshold: <strong>21.33</strong>. Evaluates pin shorts and missing IC packages.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-1">
+            <img src="/static/plots/pcb3_roc_pr.png" alt="pcb3 ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+        <!-- Curve 4: pcb4 Line -->
+        <div class="clean-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-emerald-50 text-[#00B050] font-bold border border-emerald-200">HIGH DENSITY</span>
+              <span class="text-gray-900 font-bold">70.08% AUROC</span>
+            </div>
+            <h3 class="text-sm font-bold text-gray-900">pcb4 (High-Density Board)</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-3">
+              Optimal threshold: <strong>20.09</strong>. Isolates via defects and multi-layer scratches.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-1">
+            <img src="/static/plots/pcb4_roc_pr.png" alt="pcb4 ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+        <!-- Curve 5: Capsules Line -->
+        <div class="clean-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-bold border border-purple-200">PHARMA & MEDICAL</span>
+              <span class="text-gray-900 font-bold">46.88% AUROC</span>
+            </div>
+            <h3 class="text-sm font-bold text-gray-900">capsules (Medical Capsules)</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-3">
+              Optimal threshold: <strong>13.55</strong>. Flags cracked shells and particulate intrusion.
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-1">
+            <img src="/static/plots/capsules_roc_pr.png" alt="Capsules ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
+          </div>
+        </div>
+
+        <!-- Curve 6: Bottle Line -->
+        <div class="clean-card p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs font-mono mb-2">
+              <span class="px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold border border-sky-200">PACKAGING AOI</span>
+              <span class="text-gray-900 font-bold">89.80% AUROC</span>
+            </div>
+            <h3 class="text-sm font-bold text-gray-900">bottle (Bottling & Cap Line)</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-3">
+              Optimal threshold: <strong>12.18</strong>. Strong separation (AUPRC: 93.43%, F1: 0.8372).
+            </p>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-1">
             <img src="/static/plots/bottle_roc_pr.png" alt="Bottle ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
           </div>
         </div>
 
-        <!-- Curve 2: Cable Wiring Harness Line -->
-        <div class="clean-card p-6 flex flex-col justify-between">
+        <!-- Curve 7: Cable Line -->
+        <div class="clean-card p-5 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs font-mono mb-2">
-              <span class="px-2 py-0.5 rounded bg-sky-50 text-sky-700 font-bold border border-sky-200">WIRING HARNESS</span>
-              <span class="text-gray-900 font-bold">83.08% AUROC</span>
+              <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200">WIRING HARNESS</span>
+              <span class="text-gray-900 font-bold">43.84% AUROC</span>
             </div>
-            <h3 class="text-base font-bold text-gray-900">Cable Line ROC & PR Curves</h3>
-            <p class="text-xs text-gray-600 mt-1 mb-4">
-              Calibrated optimal decision threshold: <strong>65.13</strong>. Evaluates complex deformable wiring geometry, missing strands, swapped color codes, and cut insulation sleeves.
+            <h3 class="text-sm font-bold text-gray-900">cable (Wiring Harness)</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-3">
+              Optimal threshold: <strong>17.47</strong>. Identifies cut conductors and swapped wires.
             </p>
           </div>
-          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-1">
             <img src="/static/plots/cable_roc_pr.png" alt="Cable ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
           </div>
         </div>
 
-        <!-- Curve 3: Hazelnut Agricultural Line -->
-        <div class="clean-card p-6 flex flex-col justify-between">
+        <!-- Curve 8: Steel Line -->
+        <div class="clean-card p-5 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-xs font-mono mb-2">
-              <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200">AGRICULTURAL AOI</span>
-              <span class="text-gray-900 font-bold">High Precision</span>
+              <span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 font-bold border border-rose-200">STEEL ROLLING</span>
+              <span class="text-gray-900 font-bold">100.0% AUROC</span>
             </div>
-            <h3 class="text-base font-bold text-gray-900">Hazelnut Line ROC & PR Curves</h3>
-            <p class="text-xs text-gray-600 mt-1 mb-4">
-              Evaluates non-rigid organic texture variations, crack defects, hole perforations, and mold discoloration with tight true-positive confidence bounds.
+            <h3 class="text-sm font-bold text-gray-900">steel (Hot-Rolled Strips)</h3>
+            <p class="text-xs text-gray-600 mt-1 mb-3">
+              Optimal threshold: <strong>9.09</strong>. Perfect discrimination (AUPRC: 100%, F1: 1.0).
             </p>
           </div>
-          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-2">
-            <img src="/static/plots/hazelnut_roc_pr.png" alt="Hazelnut ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-white p-1">
+            <img src="/static/plots/steel_roc_pr.png" alt="Steel ROC PR Curves" class="w-full h-auto object-contain rounded-lg">
           </div>
         </div>
 
@@ -1089,33 +1174,59 @@
         </div>
       </div>
 
-      <!-- Section 3: Hazelnut Exemplars -->
+      <!-- Section 3: PCB1 Exemplars -->
       <div class="clean-card p-6">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="text-base font-bold text-gray-900 font-sans">Hazelnut Agricultural Line &bull; Exemplar Modes</h3>
-            <p class="text-xs text-gray-500 font-mono">Natural surface variations vs cracked shells, hole punctures, and organic rot.</p>
+            <h3 class="text-base font-bold text-gray-900 font-sans">pcb1 Mainboard Traces Line &bull; Exemplar Modes</h3>
+            <p class="text-xs text-gray-500 font-mono">Pristine trace routing vs open copper conductor cracks and solder bridging.</p>
           </div>
-          <span class="px-2.5 py-1 rounded bg-amber-50 text-amber-700 font-mono text-xs font-bold border border-amber-200">Organic Line</span>
+          <span class="px-2.5 py-1 rounded bg-emerald-50 text-[#00B050] font-mono text-xs font-bold border border-emerald-200">Semiconductor Line</span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
-            <img src="/static/plots/hazelnut_sample_0.png" alt="Hazelnut Sample 0" class="w-full h-auto object-contain rounded-lg">
-            <span class="text-[11px] font-mono text-gray-300 py-1.5">Hazelnut Exemplar #0 (Pristine Shell)</span>
+            <img src="/static/plots/pcb1_sample_0.png" alt="PCB1 Sample 0" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">pcb1 Exemplar #0 (Nominal PCB Trace)</span>
           </div>
           <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
-            <img src="/static/plots/hazelnut_sample_1.png" alt="Hazelnut Sample 1" class="w-full h-auto object-contain rounded-lg">
-            <span class="text-[11px] font-mono text-gray-300 py-1.5">Hazelnut Exemplar #1 (Cracked Hull)</span>
+            <img src="/static/plots/pcb1_sample_1.png" alt="PCB1 Sample 1" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">pcb1 Exemplar #1 (Severed Trace Defect)</span>
           </div>
           <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
-            <img src="/static/plots/hazelnut_sample_2.png" alt="Hazelnut Sample 2" class="w-full h-auto object-contain rounded-lg">
-            <span class="text-[11px] font-mono text-gray-300 py-1.5">Hazelnut Exemplar #2 (Perforation Hole)</span>
+            <img src="/static/plots/pcb1_sample_2.png" alt="PCB1 Sample 2" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">pcb1 Exemplar #2 (Solder Bridge Short)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Steel Strip Exemplars -->
+      <div class="clean-card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-base font-bold text-gray-900 font-sans">Hot-Rolled Steel Strip Line &bull; Exemplar Modes</h3>
+            <p class="text-xs text-gray-500 font-mono">Nominal hot-rolled steel surface vs scratches and rolled-in scale oxide defects.</p>
+          </div>
+          <span class="px-2.5 py-1 rounded bg-rose-50 text-rose-700 font-mono text-xs font-bold border border-rose-200">Steel Metallurgy Line</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/steel_sample_0.png" alt="Steel Sample 0" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Steel Exemplar #0 (Pristine Surface)</span>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/steel_sample_1.png" alt="Steel Sample 1" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Steel Exemplar #1 (Surface Abrasion)</span>
+          </div>
+          <div class="rounded-xl overflow-hidden border border-gray-200 bg-black p-1 flex flex-col items-center">
+            <img src="/static/plots/steel_sample_2.png" alt="Steel Sample 2" class="w-full h-auto object-contain rounded-lg">
+            <span class="text-[11px] font-mono text-gray-300 py-1.5">Steel Exemplar #2 (Rolled-in Scale)</span>
           </div>
         </div>
       </div>
 
     </div>
     <!-- End of projectAnalysisSection -->
+  </div>
 
   </section>
 
@@ -1702,47 +1813,51 @@
   <footer class="bg-[#111111] text-white pt-16 pb-12 px-8 mt-auto border-t border-gray-800">
     <div class="max-w-[1600px] mx-auto">
       
-      <!-- Top Multi-Column Grid (Outcomes, Platform, Datasets, Engineering Track Team) -->
+      <!-- Top Multi-Column Grid (Capabilities, Inspected Lines, Datasets, Engineering Track Team) -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-gray-800 text-xs">
         
-        <!-- Column 1: OUTCOMES -->
+        <!-- Column 1: SYSTEM CAPABILITIES -->
         <div>
-          <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4">Outcomes</h4>
-          <div class="text-gray-400 space-y-2.5 font-sans">
-            <p class="font-bold text-gray-300 font-mono text-[11px] uppercase">By Use Cases</p>
-            <ul class="space-y-2 pl-3 list-disc marker:text-[#00B050]">
-              <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('home')">New Product Introduction</span></li>
-              <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('lines')">Mass Production AOI</span></li>
-              <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('inspect')">Automated Conveyor Routing</span></li>
-              <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('benchmarks')">Sub-Millimeter Quality Auditing</span></li>
-            </ul>
-            <p class="font-bold text-gray-300 font-mono text-[11px] uppercase pt-2">By Industry</p>
-            <ul class="space-y-1.5 pl-3 list-disc marker:text-gray-600">
-              <li class="hover:text-gray-300">Consumer Electronics & SMT</li>
-              <li class="hover:text-gray-300">Semiconductor Packaging</li>
-              <li class="hover:text-gray-300">Automotive Wiring Harnesses</li>
-              <li class="hover:text-gray-300">Metallurgy Hot-Rolled Steel</li>
-            </ul>
-          </div>
+          <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4">Core Capabilities</h4>
+          <ul class="space-y-2 text-gray-400 font-sans pl-3 list-disc marker:text-[#00B050]">
+            <li>Zero-Shot Defect Discovery</li>
+            <li>Patch-Level Anomaly Heatmaps</li>
+            <li>Automated Conveyor Pass/Reject</li>
+            <li>Multi-Scale Feature Extraction</li>
+            <li>Sub-25ms Real-Time Inference</li>
+          </ul>
         </div>
 
-        <!-- Column 2: PLATFORM -->
+        <!-- Column 2: 8 INSPECTED LINES -->
         <div>
-          <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4">Platform</h4>
-          <ul class="space-y-2.5 text-gray-400 font-sans">
-            <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('home')">ResNet-50 PatchCore Engine</span></li>
-            <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('lines')">8-Line Industrial Suite</span></li>
-            <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('inspect')">Triple Comparative Viewfinder</span></li>
-            <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('benchmarks')">Multi-Category Scoreboard</span></li>
-            <li><span class="hover:text-white transition cursor-pointer" onclick="navigateTo('analytics')">Manifold & Clustering Graphs</span></li>
-            <li><span class="hover:text-white transition cursor-pointer" onclick="openLineIngestModal('pcb1')">Direct Hardware Camera Ingestion</span></li>
-            <li><span class="hover:text-white transition cursor-pointer" onclick="openLineIngestModal('pcb2')">Web & Clipboard Ingestion</span></li>
+          <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4">Inspected Lines (8)</h4>
+          <ul class="space-y-2 text-gray-400 font-sans">
+            <li class="flex items-center gap-1.5 cursor-pointer hover:text-white" onclick="openLineIngestModal('pcb1')">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span>
+              <span>pcb1–pcb4 (Electronics & SMT)</span>
+            </li>
+            <li class="flex items-center gap-1.5 cursor-pointer hover:text-white" onclick="openLineIngestModal('capsules')">
+              <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              <span>capsules (Pharma & Medical)</span>
+            </li>
+            <li class="flex items-center gap-1.5 cursor-pointer hover:text-white" onclick="openLineIngestModal('bottle')">
+              <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+              <span>bottle (Bottling & Cap Line)</span>
+            </li>
+            <li class="flex items-center gap-1.5 cursor-pointer hover:text-white" onclick="openLineIngestModal('cable')">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+              <span>cable (Wiring Harnesses)</span>
+            </li>
+            <li class="flex items-center gap-1.5 cursor-pointer hover:text-white" onclick="openLineIngestModal('steel')">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+              <span>steel (Hot-Rolled Strips)</span>
+            </li>
           </ul>
         </div>
 
         <!-- Column 3: DATASETS -->
         <div>
-          <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4">Datasets</h4>
+          <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4">Benchmark Datasets</h4>
           <ul class="space-y-2.5 text-gray-400 font-sans">
             <li class="flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span>
@@ -1754,7 +1869,7 @@
             </li>
             <li class="flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span>
-              <span>NEU Surface Defect (Hot-Rolled Steel)</span>
+              <span>NEU Surface Defect (Strip Steel)</span>
             </li>
             <li class="pt-2">
               <button onclick="navigateTo('analytics')" class="text-xs font-mono text-[#00B050] hover:underline flex items-center gap-1">
@@ -1764,50 +1879,28 @@
             </li>
           </ul>
         </div>
-            <li class="flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span>
-              <span>MVTec AD (Bottles, Cables, Nuts)</span>
-            </li>
-            <li class="flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00B050]"></span>
-              <span>NEU Surface Defect (Strip Steel)</span>
-            </li>
-            <li class="pt-2">
-              <button onclick="exportBenchmarkCSV()" class="btn-instrumental px-3 py-1.5 rounded text-[11px] font-mono font-bold flex items-center gap-1.5 uppercase">
-                <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                <span>Export Audit CSV</span>
-              </button>
-            </li>
-          </ul>
-        </div>
 
-        <!-- Column 4 & 5: ENGINEERING TEAM TRACK LEADS (2-Column Span) -->
+        <!-- Column 4 & 5: ENGINEERING TEAM (Clean Names & Roles, No Contributions) -->
         <div class="lg:col-span-2">
           <h4 class="text-white font-bold tracking-wider uppercase font-mono text-xs mb-4 flex items-center justify-between">
             <span>Engineering Track Team</span>
-            <span class="text-[10px] text-[#00B050] font-normal lowercase">project-contributors</span>
+            <span class="text-[10px] text-[#00B050] font-normal lowercase">project-team</span>
           </h4>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
             
             <div class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#00B050]/50 transition">
-              <div class="text-[#00B050] font-bold text-[10px] uppercase mb-0.5">Member 1</div>
-              <div class="text-white font-bold text-xs truncate">Tanya Tejaswi</div>
-              <div class="text-gray-400 text-[11px] font-sans mt-0.5 font-medium">CV & Feature Fusion</div>
-              <p class="text-gray-500 font-sans text-[10px] mt-1.5 leading-snug">Multi-dataset ingestion, ResNet-50 patch extraction & thermal heatmap engine.</p>
+              <div class="text-[#00B050] font-bold text-[10px] uppercase mb-1">Member 1</div>
+              <div class="text-white font-bold text-sm truncate">Tanya Tejaswi</div>
             </div>
 
             <div class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#00B050]/50 transition">
-              <div class="text-[#00B050] font-bold text-[10px] uppercase mb-0.5">Member 2</div>
-              <div class="text-white font-bold text-xs truncate">Chandan Reddy</div>
-              <div class="text-gray-400 text-[11px] font-sans mt-0.5 font-medium">Unsupervised ML Lead</div>
-              <p class="text-gray-500 font-sans text-[10px] mt-1.5 leading-snug">PCA scree decomposition, explained variance decay & manifold stability.</p>
+              <div class="text-[#00B050] font-bold text-[10px] uppercase mb-1">Member 2</div>
+              <div class="text-white font-bold text-sm truncate">Chandan Reddy</div>
             </div>
 
             <div class="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#00B050]/50 transition">
-              <div class="text-[#00B050] font-bold text-[10px] uppercase mb-0.5">Member 3</div>
-              <div class="text-white font-bold text-xs truncate">Gayatri U</div>
-              <div class="text-gray-400 text-[11px] font-sans mt-0.5 font-medium">Full-Stack MLOps</div>
-              <p class="text-gray-500 font-sans text-[10px] mt-1.5 leading-snug">K-Means & DBSCAN clustering, conveyor routing logic & Instrumental cockpit UI.</p>
+              <div class="text-[#00B050] font-bold text-[10px] uppercase mb-1">Member 3</div>
+              <div class="text-white font-bold text-sm truncate">Gayatri U</div>
             </div>
 
           </div>
@@ -1815,7 +1908,7 @@
 
       </div>
 
-      <!-- Bottom Sub-Footer Bar (Matches Instrumental Reference Design) -->
+      <!-- Bottom Sub-Footer Bar (Cleaned of fake links) -->
       <div class="pt-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-gray-500 font-mono">
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2 text-white font-bold tracking-tight">
@@ -1826,14 +1919,13 @@
           <span>Instrumental-Grade Autonomous Optical Inspection Platform</span>
         </div>
 
-        <div class="flex items-center gap-6 text-[11px]">
-          <span class="hover:text-gray-300 cursor-pointer">Privacy Policy</span>
-          <span class="hover:text-gray-300 cursor-pointer">Security Standards</span>
-          <span class="hover:text-gray-300 cursor-pointer">IPC-A-610 Compliant</span>
+        <div class="flex items-center gap-5 text-[11px]">
           <span class="flex items-center gap-1.5 text-gray-400">
             <span class="w-2 h-2 rounded-full bg-[#00B050]"></span>
             <span>All 8 Lines Calibrated</span>
           </span>
+          <span class="text-gray-700">&bull;</span>
+          <span class="text-gray-400">Production Ready</span>
           <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 flex items-center justify-center text-white transition ml-2" title="Back to top">
             <i data-lucide="arrow-up" class="w-4 h-4"></i>
           </button>

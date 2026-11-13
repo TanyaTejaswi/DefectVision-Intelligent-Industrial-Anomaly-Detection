@@ -1,0 +1,13 @@
+{
+  "category": "pcb1",
+  "auroc": 0.5584,
+  "auprc": 0.5949494052458857,
+  "f1_score": 0.676923076923077,
+  "precision": 0.55,
+  "recall": 0.88,
+  "optimal_threshold": 12.909492492675781,
+  "true_positives": 22,
+  "true_negatives": 7,
+  "false_positives": 18,
+  "false_negatives": 3
+}

@@ -126,6 +126,145 @@ def build_mvtec_metadata(
     return df
 
 
+def build_industrial_suite_metadata(
+    project_root: Union[str, Path] = ".",
+    categories: Optional[List[str]] = None,
+    max_samples_per_category: Optional[int] = None
+) -> pd.DataFrame:
+    """
+    Builds a unified, authoritative metadata DataFrame covering the complete
+    8-Line Industrial Quality Suite across MVTec AD, Amazon VisA, and NEU Steel:
+    1. pcb1 (Amazon VisA)
+    2. pcb2 (Amazon VisA)
+    3. pcb3 (Amazon VisA)
+    4. pcb4 (Amazon VisA)
+    5. capsules (Amazon VisA)
+    6. bottle (MVTec AD)
+    7. cable (MVTec AD)
+    8. steel (NEU Surface Defect)
+    """
+    root = Path(project_root).resolve()
+    if categories is None:
+        categories = ["pcb1", "pcb2", "pcb3", "pcb4", "capsules", "bottle", "cable", "steel"]
+
+    records = []
+
+    # 1. VisA Categories
+    visa_cats = [c for c in categories if c in ["pcb1", "pcb2", "pcb3", "pcb4", "capsules"]]
+    visa_dir = root / "datasets" / "visa"
+    if visa_dir.exists():
+        split_csv = visa_dir / "split_csv" / "1cls.csv"
+        if split_csv.exists():
+            visa_split_df = pd.read_csv(split_csv)
+            for cat in visa_cats:
+                cat_sub = visa_split_df[visa_split_df["object"] == cat]
+                for _, row in cat_sub.iterrows():
+                    img_rel = str(row["image"]).replace("\\", "/")
+                    full_img = visa_dir / img_rel
+                    if not full_img.exists():
+                        continue
+                    is_anom = 1 if row["label"] == "anomaly" else 0
+                    mask_p = None
+                    if is_anom and pd.notna(row.get("mask")):
+                        full_mask = visa_dir / str(row["mask"]).replace("\\", "/")
+                        if full_mask.exists():
+                            mask_p = str(full_mask.resolve())
+
+                    records.append({
+                        "image_id": f"{cat}_{row['split']}_{row['label']}_{full_img.stem}",
+                        "category": cat,
+                        "split": str(row["split"]),
+                        "defect_type": "defect" if is_anom else "good",
+                        "is_anomaly": is_anom,
+                        "image_path": str(full_img.resolve()),
+                        "mask_path": mask_p
+                    })
+        else:
+            # Direct folder scanning fallback
+            for cat in visa_cats:
+                cat_dir = visa_dir / cat / "Data" / "Images"
+                norm_files = sorted(list((cat_dir / "Normal").glob("*.*"))) if (cat_dir / "Normal").exists() else []
+                anom_files = sorted(list((cat_dir / "Anomaly").glob("*.*"))) if (cat_dir / "Anomaly").exists() else []
+                # Train: 80% normal, Test: 20% normal + all anomaly
+                n_split = int(len(norm_files) * 0.8)
+                for f in norm_files[:n_split]:
+                    records.append({
+                        "image_id": f"{cat}_train_good_{f.stem}",
+                        "category": cat,
+                        "split": "train",
+                        "defect_type": "good",
+                        "is_anomaly": 0,
+                        "image_path": str(f.resolve()),
+                        "mask_path": None
+                    })
+                for f in norm_files[n_split:]:
+                    records.append({
+                        "image_id": f"{cat}_test_good_{f.stem}",
+                        "category": cat,
+                        "split": "test",
+                        "defect_type": "good",
+                        "is_anomaly": 0,
+                        "image_path": str(f.resolve()),
+                        "mask_path": None
+                    })
+                for f in anom_files:
+                    records.append({
+                        "image_id": f"{cat}_test_defect_{f.stem}",
+                        "category": cat,
+                        "split": "test",
+                        "defect_type": "defect",
+                        "is_anomaly": 1,
+                        "image_path": str(f.resolve()),
+                        "mask_path": None
+                    })
+
+    # 2. MVTec Categories
+    mvtec_cats = [c for c in categories if c in ["bottle", "cable"]]
+    mvtec_dir = root / "data" / "mvtec"
+    if mvtec_dir.exists() and mvtec_cats:
+        mvtec_df = build_mvtec_metadata(mvtec_dir, categories=mvtec_cats)
+        records.extend(mvtec_df.to_dict(orient="records"))
+
+    # 3. Steel (NEU) Category
+    if "steel" in categories:
+        steel_dir = root / "data" / "steel"
+        if steel_dir.exists():
+            tg = steel_dir / "train" / "good"
+            if tg.exists():
+                for f in sorted(list(tg.glob("*.png"))):
+                    records.append({
+                        "image_id": f"steel_train_good_{f.stem}",
+                        "category": "steel",
+                        "split": "train",
+                        "defect_type": "good",
+                        "is_anomaly": 0,
+                        "image_path": str(f.resolve()),
+                        "mask_path": None
+                    })
+            test_dir = steel_dir / "test"
+            if test_dir.exists():
+                for sub in sorted(list(test_dir.iterdir())):
+                    if not sub.is_dir():
+                        continue
+                    is_anom = 0 if sub.name == "good" else 1
+                    for f in sorted(list(sub.glob("*.png"))):
+                        records.append({
+                            "image_id": f"steel_test_{sub.name}_{f.stem}",
+                            "category": "steel",
+                            "split": "test",
+                            "defect_type": sub.name,
+                            "is_anomaly": is_anom,
+                            "image_path": str(f.resolve()),
+                            "mask_path": None
+                        })
+
+    df = pd.DataFrame(
+        records,
+        columns=["image_id", "category", "split", "defect_type", "is_anomaly", "image_path", "mask_path"]
+    )
+    return df
+
+
 class MVTecDataset(Dataset):
     """
     PyTorch Dataset implementation for MVTec Anomaly Detection.

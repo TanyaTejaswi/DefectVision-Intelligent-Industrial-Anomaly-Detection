@@ -12,8 +12,13 @@ This script ties together all core modules:
 """
 
 import os
+import sys
 import json
+import tempfile
+os.environ["MPLCONFIGDIR"] = tempfile.gettempdir()
+from pathlib import Path
 import numpy as np
+import pandas as pd
 from sklearn.datasets import make_blobs
 
 # Import core modules
@@ -44,16 +49,26 @@ from src.evaluation import (
 from src.anomaly_detection import MemoryBankAnomalyDetector
 
 
-def load_or_generate_features(data_path: str = "datasets/features.npy"):
+def load_or_generate_features(data_path: str = "data/embeddings/image_embeddings.npy"):
     """
-    Loads pre-extracted deep features (e.g. from Tanya's ResNet50 extractor),
+    Loads pre-extracted deep features across the 8-Line Industrial Suite,
     or generates a realistic synthetic industrial inspection feature matrix.
     """
+    meta_path = "data/embeddings/metadata.csv"
+    if not os.path.exists(data_path):
+        data_path = "datasets/features.npy"
     labels_path = "datasets/labels.npy"
+
     if os.path.exists(data_path):
-        print(f"[DATA] Loading real ResNet50 feature embeddings from {data_path}...")
+        print(f"[DATA] Loading real deep feature embeddings from {data_path}...")
         features = np.load(data_path)
-        labels = np.load(labels_path) if os.path.exists(labels_path) else None
+        if os.path.exists(meta_path):
+            mdf = pd.read_csv(meta_path)
+            labels = mdf["is_anomaly"].values
+        elif os.path.exists(labels_path):
+            labels = np.load(labels_path)
+        else:
+            labels = None
     else:
         print("[DATA] No pre-extracted 'datasets/features.npy' found.")
         print("[DATA] Generating synthetic industrial inspection embeddings (2,048 dimensions)...")
@@ -114,15 +129,15 @@ def main():
     # STEP 3: K-Means Clustering & Elbow Method
     # ------------------------------------------------------------------------
     print("\n--- STEP 3: Centroid Clustering (K-Means) ---")
-    max_k = min(8, n_samples // 2)
+    max_k = min(12, n_samples // 2)
     k_range = list(range(2, max(3, max_k + 1)))
     k_vals, inertias = compute_elbow_inertias(reduced_features, k_range=k_range)
     elbow_path = "results/plots/kmeans_elbow.png"
     plot_elbow_curve(k_vals, inertias, save_path=elbow_path)
     print(f"-> Saved K-Means Elbow curve to: {elbow_path}")
 
-    kmeans_k = min(3, n_samples)
-    kmeans_labels, _ = run_kmeans(reduced_features, n_clusters=kmeans_k)
+    kmeans_k = min(8, n_samples)
+    kmeans_labels, _ = run_kmeans(reduced_features, n_clusters=kmeans_k, random_state=42)
     kmeans_metrics = compute_clustering_metrics(reduced_features, kmeans_labels)
     kmeans_summary = get_cluster_summary(kmeans_labels)
     print(f"-> Fitted K-Means (k={kmeans_k}): Silhouette Score = {kmeans_metrics['silhouette_score']:.4f}")
@@ -220,6 +235,14 @@ def main():
     with open(metrics_file, "w") as f:
         json.dump(benchmark_report, f, indent=4)
     print(f"-> Exported full metrics report to: {metrics_file}")
+
+    # Export CSV summary for report
+    os.makedirs("reports", exist_ok=True)
+    summary_records = [
+        {"algorithm": "K-Means (K=8)", "clusters": kmeans_summary['num_clusters'], "silhouette": round(kmeans_metrics['silhouette_score'], 4), "davies_bouldin": round(kmeans_metrics['davies_bouldin_index'], 4), "calinski_harabasz": round(kmeans_metrics['calinski_harabasz_index'], 2)},
+        {"algorithm": "DBSCAN (eps=25.0)", "clusters": dbscan_summary['num_clusters'], "silhouette": round(dbscan_metrics['silhouette_score'], 4) if not np.isnan(dbscan_metrics['silhouette_score']) else 0.0, "davies_bouldin": round(dbscan_metrics['davies_bouldin_index'], 4) if not np.isnan(dbscan_metrics['davies_bouldin_index']) else 0.0, "calinski_harabasz": round(dbscan_metrics['calinski_harabasz_index'], 2) if not np.isnan(dbscan_metrics['calinski_harabasz_index']) else 0.0}
+    ]
+    pd.DataFrame(summary_records).to_csv("reports/clustering_benchmark.csv", index=False)
 
     print("\n" + "=" * 80)
     print(" CLUSTERING & ANOMALY BENCHMARK COMPARISON TABLE")

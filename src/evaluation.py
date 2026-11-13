@@ -11,7 +11,8 @@ This module is strictly organized into two distinct evaluation categories:
    - ARI / NMI for post-hoc analysis when ground-truth categories are known.
 """
 
-from typing import Dict, Any, Optional, Tuple
+from pathlib import Path
+from typing import Dict, Any, Optional, Tuple, Union
 import numpy as np
 from sklearn.metrics import (
     silhouette_score,
@@ -192,4 +193,86 @@ def compute_posthoc_cluster_alignment(
         "adjusted_rand_index": ari,
         "normalized_mutual_info": nmi
     }
+
+
+def evaluate_image_level(
+    y_true: np.ndarray,
+    anomaly_scores: np.ndarray,
+    category_name: str = "general",
+    threshold: Optional[float] = None
+) -> Dict[str, Any]:
+    """
+    Standard image-level anomaly detection evaluation wrapper.
+    Computes AUROC, AUPRC, F1-score, Confusion Matrix stats, and optimal threshold.
+    """
+    m = compute_anomaly_detection_metrics(y_true, anomaly_scores, threshold=threshold)
+    y_true_bin = np.asarray(y_true).astype(int)
+    y_pred = (np.asarray(anomaly_scores) >= m["threshold"]).astype(int)
+
+    tp = int(np.sum((y_true_bin == 1) & (y_pred == 1)))
+    tn = int(np.sum((y_true_bin == 0) & (y_pred == 0)))
+    fp = int(np.sum((y_true_bin == 0) & (y_pred == 1)))
+    fn = int(np.sum((y_true_bin == 1) & (y_pred == 0)))
+
+    return {
+        "category": category_name,
+        "auroc": m["roc_auc"],
+        "auprc": m["pr_auc"],
+        "f1_score": m["f1_score"],
+        "precision": m["precision"],
+        "recall": m["recall"],
+        "optimal_threshold": m["threshold"],
+        "true_positives": tp,
+        "true_negatives": tn,
+        "false_positives": fp,
+        "false_negatives": fn
+    }
+
+
+def plot_roc_pr_curves(
+    y_true: np.ndarray,
+    anomaly_scores: np.ndarray,
+    category_name: str = "Industrial Component",
+    save_path: Optional[Union[str, Path]] = None
+):
+    """
+    Plots high-resolution dual ROC and Precision-Recall evaluation curves.
+    """
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import roc_curve, precision_recall_curve, roc_auc_score, average_precision_score
+
+    fpr, tpr, _ = roc_curve(y_true, anomaly_scores)
+    prec, rec, _ = precision_recall_curve(y_true, anomaly_scores)
+    roc_auc = roc_auc_score(y_true, anomaly_scores)
+    pr_auc = average_precision_score(y_true, anomaly_scores)
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.5), dpi=150)
+
+    # ROC Curve
+    axes[0].plot(fpr, tpr, color="#059669", lw=2.5, label=f"ROC (AUC = {roc_auc:.4f})")
+    axes[0].plot([0, 1], [0, 1], color="#9ca3af", lw=1.5, linestyle="--")
+    axes[0].set_xlim([0.0, 1.0])
+    axes[0].set_ylim([0.0, 1.05])
+    axes[0].set_xlabel("False Positive Rate", fontsize=10, fontweight="bold")
+    axes[0].set_ylabel("True Positive Rate (Recall)", fontsize=10, fontweight="bold")
+    axes[0].set_title(f"{category_name} - Receiver Operating Characteristic", fontsize=11, fontweight="bold")
+    axes[0].legend(loc="lower right", frameon=True)
+    axes[0].grid(True, linestyle=":", alpha=0.6)
+
+    # PR Curve
+    axes[1].plot(rec, prec, color="#2563eb", lw=2.5, label=f"PR (AUC = {pr_auc:.4f})")
+    axes[1].set_xlim([0.0, 1.0])
+    axes[1].set_ylim([0.0, 1.05])
+    axes[1].set_xlabel("Recall", fontsize=10, fontweight="bold")
+    axes[1].set_ylabel("Precision", fontsize=10, fontweight="bold")
+    axes[1].set_title(f"{category_name} - Precision-Recall Curve", fontsize=11, fontweight="bold")
+    axes[1].legend(loc="lower left", frameon=True)
+    axes[1].grid(True, linestyle=":", alpha=0.6)
+
+    plt.tight_layout()
+    if save_path:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(save_path, bbox_inches="tight")
+        plt.close(fig)
+    return fig
 
