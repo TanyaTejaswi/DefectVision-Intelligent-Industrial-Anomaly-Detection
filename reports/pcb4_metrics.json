@@ -1,13 +1,13 @@
 {
   "category": "pcb4",
-  "auroc": 0.7008,
-  "auprc": 0.5944566038557011,
-  "f1_score": 0.8,
-  "precision": 0.6857142857142857,
-  "recall": 0.96,
-  "optimal_threshold": 20.09065055847168,
-  "true_positives": 24,
-  "true_negatives": 14,
-  "false_positives": 11,
-  "false_negatives": 1
+  "auroc": 0.7635,
+  "auprc": 0.9443,
+  "f1_score": 0.9174,
+  "precision": 0.8475,
+  "recall": 1.0,
+  "optimal_threshold": 36.7921,
+  "true_positives": 200,
+  "true_negatives": 4,
+  "false_positives": 36,
+  "false_negatives": 0
 }

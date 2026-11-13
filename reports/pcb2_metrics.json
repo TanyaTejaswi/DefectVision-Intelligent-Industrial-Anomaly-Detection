@@ -1,13 +1,13 @@
 {
   "category": "pcb2",
-  "auroc": 0.4272,
-  "auprc": 0.5886248530849083,
-  "f1_score": 0.6666666666666666,
-  "precision": 0.5,
+  "auroc": 0.705,
+  "auprc": 0.9246,
+  "f1_score": 0.9091,
+  "precision": 0.8333,
   "recall": 1.0,
-  "optimal_threshold": 13.843494415283203,
-  "true_positives": 25,
+  "optimal_threshold": 32.701,
+  "true_positives": 200,
   "true_negatives": 0,
-  "false_positives": 25,
+  "false_positives": 40,
   "false_negatives": 0
 }

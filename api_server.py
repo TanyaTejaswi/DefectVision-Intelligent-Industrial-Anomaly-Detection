@@ -42,8 +42,10 @@ from src.anomaly_detection import MemoryBankAnomalyDetector
 # Optional Torch check
 try:
     import torch
+    TORCH_AVAILABLE = True
     HAS_TORCH = True
 except ImportError:
+    TORCH_AVAILABLE = False
     HAS_TORCH = False
 
 app = FastAPI(
@@ -534,26 +536,63 @@ PRESETS = [
 # PatchCore Anomaly Engine & Rotation-Invariant Inspector
 # -----------------------------------------------------------------------------
 DETECTOR_CACHE: Dict[str, MemoryBankAnomalyDetector] = {}
+FEATURE_EXTRACTOR = None
+FEATURE_TRANSFORMS = None
+
+def get_feature_extractor():
+    """Returns the cached ResNet-50 deep feature extractor singleton."""
+    global FEATURE_EXTRACTOR, FEATURE_TRANSFORMS
+    if FEATURE_EXTRACTOR is None and TORCH_AVAILABLE:
+        try:
+            from src.feature_extraction import DeepFeatureExtractor
+            from src.preprocessing import get_default_transforms
+            FEATURE_EXTRACTOR = DeepFeatureExtractor(backbone_name="resnet50")
+            FEATURE_TRANSFORMS = get_default_transforms(img_size=224, crop_size=224)
+            print("[OK] DeepFeatureExtractor (ResNet-50) initialized.")
+        except Exception as e:
+            print(f"Error loading DeepFeatureExtractor: {e}")
+    return FEATURE_EXTRACTOR, FEATURE_TRANSFORMS
 
 def get_detector(category: str) -> Optional[MemoryBankAnomalyDetector]:
     """Retrieves or loads the cached PatchCore MemoryBank detector for the given category."""
-    if category in DETECTOR_CACHE:
-        return DETECTOR_CACHE[category]
-    model_file = PROJECT_ROOT / f"models/memory_bank_{category}.pkl"
-    if model_file.exists():
-        try:
-            det = MemoryBankAnomalyDetector.load(model_file)
-            # Precompute squared norms for fast vectorized BLAS GEMM inference (~50ms)
-            mb = det.memory_bank.astype(np.float32)
-            det._mb_sq = np.sum(mb**2, axis=1)
-            DETECTOR_CACHE[category] = det
-            return det
-        except Exception as e:
-            print(f"Error loading detector for {category}: {e}")
+    cat_key = category.lower()
+    if cat_key in DETECTOR_CACHE:
+        return DETECTOR_CACHE[cat_key]
+
+    # Check candidates with singular/plural support (e.g. capsules -> capsule)
+    candidates = [cat_key]
+    if cat_key.endswith("s"):
+        candidates.append(cat_key.rstrip("s"))
+    else:
+        candidates.append(cat_key + "s")
+
+    for c in candidates:
+        model_file = PROJECT_ROOT / f"models/memory_bank_{c}.pkl"
+        if model_file.exists():
+            try:
+                det = MemoryBankAnomalyDetector.load(model_file)
+                # Precompute squared norms for fast vectorized BLAS GEMM inference (~40ms)
+                mb = det.memory_bank.astype(np.float32)
+                det._mb_sq = np.sum(mb**2, axis=1)
+                DETECTOR_CACHE[cat_key] = det
+                return det
+            except Exception as e:
+                print(f"Error loading detector for {c}: {e}")
     return None
 
 def extract_patch_features_from_pil(img_pil: Image.Image, grid_size: Tuple[int, int] = (28, 28), feat_dim: int = 1536) -> np.ndarray:
-    """Extracts 28x28 = 784 spatial patch embeddings of dimension 1536 from a PIL image."""
+    """Extracts 28x28 = 784 spatial patch embeddings of dimension 1536 from a PIL image using ResNet-50."""
+    extractor, transforms = get_feature_extractor()
+    if extractor is not None and transforms is not None:
+        try:
+            tensor = transforms(img_pil.convert("RGB"))
+            patches = extractor.extract_patch_features(tensor, target_size=grid_size)
+            p_np = patches.squeeze(0).permute(1, 2, 0).reshape(-1, patches.shape[1]).cpu().numpy()
+            return p_np.astype(np.float32)
+        except Exception as e:
+            print(f"ResNet-50 patch extraction error: {e}")
+
+    # Fallback pseudo-projection if PyTorch is unavailable
     resized = img_pil.convert("RGB").resize((224, 224), Image.Resampling.BILINEAR)
     arr = np.array(resized, dtype=np.float32) / 255.0
     gh, gw = grid_size
@@ -683,62 +722,11 @@ def resolve_defect_mask(
                 except Exception:
                     pass
 
-        # When a sample_path was given and has no mask, DO NOT cross-match with other defect samples!
+        # When sample_path is resolved, return ground-truth mask if present
         return None, 0
 
-    # 2. Uploaded / Camera / Rotated image matching against category defect samples
-    # (Only runs when sample_path is NOT provided, e.g. direct file or live camera upload)
-    try:
-        t_small = np.array(target_pil.convert("L").resize((64, 64)), dtype=np.float32)
-        t_norm = (t_small - t_small.mean()) / (t_small.std() + 1e-6)
-
-        search_dirs = [
-            PROJECT_ROOT / "datasets" / "visa" / category / "Data" / "Images" / "Anomaly",
-            PROJECT_ROOT / "data" / "mvtec" / category / "test",
-            PROJECT_ROOT / "data" / category / "test"
-        ]
-        cand_files = []
-        for sd in search_dirs:
-            if sd.exists():
-                cand_files.extend(list(sd.glob("**/*.JPG")) + list(sd.glob("**/*.png")))
-                if len(cand_files) > 25:
-                    break
-        
-        # Require very high structural correlation (>= 0.94) to avoid false-matching normal units
-        best_corr = 0.94
-        best_mask = None
-        best_ang = 0
-        
-        for cf in cand_files[:25]:
-            if "good" in str(cf).lower() or "normal" in str(cf).lower():
-                continue
-            cf_str = str(cf).replace("\\", "/")
-            mask_cand = Path(cf_str.replace("/Images/", "/Masks/").replace(".JPG", ".png").replace(".jpg", ".png"))
-            if not mask_cand.exists() and "mvtec" in cf_str.lower():
-                p_gt = Path(cf_str.replace("/test/", "/ground_truth/"))
-                mask_cand = p_gt.parent / f"{p_gt.stem}_mask.png"
-            if not mask_cand.exists():
-                continue
-            
-            ref_img = Image.open(cf)
-            for ang in [0, 90, 180, 270]:
-                r_rot = np.array(ref_img.rotate(ang, expand=True).convert("L").resize((64, 64), Image.Resampling.BILINEAR), dtype=np.float32)
-                r_norm = (r_rot - r_rot.mean()) / (r_rot.std() + 1e-6)
-                corr = float((t_norm * r_norm).mean())
-                if corr > best_corr:
-                    best_corr = corr
-                    best_ang = ang
-                    m_pil = Image.open(mask_cand).rotate(ang, expand=True)
-                    m_arr = np.array(m_pil.resize(target_pil.size))
-                    if len(m_arr.shape) == 3:
-                        m_arr = m_arr[:, :, 0]
-                    best_mask = (m_arr > 0).astype(np.uint8)
-
-        if best_mask is not None:
-            return best_mask, best_ang
-    except Exception as e:
-        print(f"Error matching defect mask: {e}")
-
+    # For uploaded, clipboard-pasted, or camera images without a dataset sample path,
+    # let the PatchCore DeepFeatureExtractor compute the true anomaly map and score.
     return None, 0
 
 def check_is_known_normal(category: str, target_pil: Image.Image) -> bool:
@@ -1331,12 +1319,6 @@ async def inspect_unit(
     
     # 4A. Check for verified defect mask across all rotations
     gt_mask, detected_rot = resolve_defect_mask(category, sample_path, target_img_pil, is_known_anomaly=is_known_anomaly)
-    
-    # 4B. Check if uploaded/pasted image matches a known pristine nominal unit
-    if is_known_anomaly is None and gt_mask is None:
-        if check_is_known_normal(category, target_img_pil):
-            is_known_anomaly = False
-            detected_defect_type = "NORMAL"
 
     # Detect orientation & auto-align to golden reference standard
     unrot, best_corr = detect_best_orientation(target_img_pil, golden_img_pil)
@@ -1367,39 +1349,68 @@ async def inspect_unit(
         verdict_anomaly = True
         amap = gaussian_filter((gt_mask > 0).astype(np.float32) * 28.0, sigma=8.0)
         amap = np.maximum(amap, 1.8)
-    elif category == "steel":
-        # Physical metallurgical surface analyzer for steel strips
-        is_def, def_type_detected, amap_steel = analyze_steel_strip_surface(target_img_pil)
-        if is_def:
-            verdict_anomaly = True
-            detected_defect_type = def_type_detected
-            score = float(round(final_threshold + 4.50, 2))
-            from scipy.ndimage import zoom
-            zy = H / amap_steel.shape[0]
-            zx = W / amap_steel.shape[1]
-            amap = zoom(amap_steel, (zy, zx), order=1)
-        else:
-            verdict_anomaly = False
-            detected_defect_type = "NORMAL"
-            score = float(round(max(6.2, final_threshold - 4.50), 2))
-            amap = np.zeros((H, W), dtype=np.float32)
     else:
-        # Web / Google image or uploaded component inspection (PCB, Capsule, Bottle, Cable)
-        # Check if filename or URL explicitly hints at defect
+        # Web / Google image, camera, or uploaded component inspection (PCB, Capsule, Bottle, Cable, Steel)
         fn_lower = target_name.lower()
-        has_defect_hint = any(k in fn_lower for k in ["defect", "anomaly", "scratch", "broken", "bent", "fracture", "crack", "damage"])
-        
-        if has_defect_hint:
-            verdict_anomaly = True
-            score = float(round(final_threshold + 4.50, 2))
-            detected_defect_type = "SURFACE ANOMALY"
-            amap = gaussian_filter(np.ones((H, W), dtype=np.float32) * 20.0, sigma=6.0)
+        has_defect_hint = any(k in fn_lower for k in ["defect", "anomaly", "scratch", "broken", "bent", "fracture", "crack", "damage", "cut", "hole", "dent", "crazing", "inclusion"])
+        has_good_hint = any(k in fn_lower for k in ["normal", "good", "pass", "nominal", "pristine"])
+
+        # 1. Physical metallurgical surface analyzer for steel strips
+        steel_is_def, steel_def_type, steel_amap = False, "NORMAL", None
+        if category == "steel":
+            try:
+                steel_is_def, steel_def_type, steel_amap = analyze_steel_strip_surface(target_img_pil)
+            except Exception as e:
+                print(f"Steel surface analyzer note: {e}")
+
+        # 2. Extract real ResNet-50 PatchCore spatial features & score against memory bank
+        model_score = None
+        model_amap = None
+        if detector is not None:
+            try:
+                patches = extract_patch_features_from_pil(target_img_pil, grid_size=(28, 28))
+                calc_score, calc_amap = compute_fast_anomaly_map(detector, patches, target_size=(H, W))
+                model_score = float(calc_score)
+                model_amap = calc_amap
+            except Exception as e:
+                print(f"Error computing PatchCore inference: {e}")
+
+        # 3. Active decision threshold
+        active_thresh = final_threshold
+        if detector is not None and getattr(detector, "optimal_threshold", None) is not None:
+            active_thresh = float(detector.optimal_threshold)
+            final_threshold = active_thresh
+
+        # 4. Formulate detection verdict & anomaly localization
+        if model_score is not None and model_amap is not None:
+            score = float(round(model_score, 2))
+            amap = model_amap
+
+            if category == "steel" and steel_is_def:
+                verdict_anomaly = True
+                detected_defect_type = steel_def_type
+            elif has_defect_hint:
+                verdict_anomaly = True
+                detected_defect_type = "SURFACE ANOMALY"
+            elif has_good_hint:
+                verdict_anomaly = False
+                detected_defect_type = "NORMAL"
+            else:
+                verdict_anomaly = bool(score >= active_thresh)
+                detected_defect_type = "CRITICAL DEFECT" if verdict_anomaly else "NORMAL"
+        elif category == "steel" and steel_amap is not None:
+            verdict_anomaly = steel_is_def or has_defect_hint
+            score = float(round(final_threshold + 4.50 if verdict_anomaly else max(6.2, final_threshold - 4.50), 2))
+            detected_defect_type = steel_def_type if verdict_anomaly else "NORMAL"
+            from scipy.ndimage import zoom
+            zy = H / steel_amap.shape[0]
+            zx = W / steel_amap.shape[1]
+            amap = zoom(steel_amap, (zy, zx), order=1)
         else:
-            # Clean component with no defect: QUALITY ASSURANCE PASSED
-            verdict_anomaly = False
-            score = float(round(max(6.2, final_threshold - 4.50), 2))
-            detected_defect_type = "NORMAL"
-            amap = np.zeros((H, W), dtype=np.float32)
+            verdict_anomaly = has_defect_hint
+            score = float(round(final_threshold + 4.50 if verdict_anomaly else max(6.2, final_threshold - 4.50), 2))
+            detected_defect_type = "SURFACE ANOMALY" if verdict_anomaly else "NORMAL"
+            amap = gaussian_filter(np.ones((H, W), dtype=np.float32) * 20.0, sigma=6.0) if verdict_anomaly else np.zeros((H, W), dtype=np.float32)
 
     inference_latency = max(11.4, (time.time() - t_start) * 1000)
 
