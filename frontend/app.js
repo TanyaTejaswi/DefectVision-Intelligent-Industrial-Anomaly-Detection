@@ -1591,7 +1591,9 @@ function handleAuthSubmit(e, mode) {
     state.pendingLineIdAfterAuth = null;
     openLineIngestModal(lineToOpen);
   } else {
-    navigateTo('inspect');
+    // Preserve current page location: stay on the exact page where login was initiated
+    const returnPage = state.currentPage || 'home';
+    navigateTo(returnPage, false);
   }
 }
 
