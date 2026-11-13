@@ -1,0 +1,13 @@
+{
+  "category": "zipper",
+  "auroc": 0.8939,
+  "auprc": 0.9615,
+  "f1_score": 0.9306,
+  "precision": 0.9048,
+  "recall": 0.958,
+  "optimal_threshold": 25.5477,
+  "true_positives": 114,
+  "true_negatives": 20,
+  "false_positives": 12,
+  "false_negatives": 5
+}

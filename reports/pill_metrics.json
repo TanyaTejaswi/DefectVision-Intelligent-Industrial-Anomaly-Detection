@@ -1,0 +1,13 @@
+{
+  "category": "pill",
+  "auroc": 0.8511,
+  "auprc": 0.9651,
+  "f1_score": 0.9392,
+  "precision": 0.8968,
+  "recall": 0.9858,
+  "optimal_threshold": 30.0006,
+  "true_positives": 139,
+  "true_negatives": 10,
+  "false_positives": 16,
+  "false_negatives": 2
+}

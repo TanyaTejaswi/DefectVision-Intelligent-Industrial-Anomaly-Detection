@@ -1,0 +1,13 @@
+{
+  "category": "metal_nut",
+  "auroc": 0.9936,
+  "auprc": 0.9986,
+  "f1_score": 0.9836,
+  "precision": 1.0,
+  "recall": 0.9677,
+  "optimal_threshold": 35.4871,
+  "true_positives": 90,
+  "true_negatives": 22,
+  "false_positives": 0,
+  "false_negatives": 3
+}

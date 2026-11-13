@@ -1,0 +1,13 @@
+{
+  "category": "leather",
+  "auroc": 0.9997,
+  "auprc": 0.9999,
+  "f1_score": 0.9946,
+  "precision": 0.9892,
+  "recall": 1.0,
+  "optimal_threshold": 30.9437,
+  "true_positives": 92,
+  "true_negatives": 31,
+  "false_positives": 1,
+  "false_negatives": 0
+}

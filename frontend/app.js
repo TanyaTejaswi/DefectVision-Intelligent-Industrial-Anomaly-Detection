@@ -664,10 +664,53 @@ async function inspectDatasetSample(sample) {
  * TAB 4: BROWSE FROM INTERNET / GOOGLE IMAGES & CLIPBOARD SELECTOR
  * ====================================================================
  */
-function openGoogleImagesInBrowser() {
-  const line = state.lines.find(l => l.id === state.selectedLine);
-  const lineName = line ? line.name : state.selectedLine;
-  const query = `${lineName} industrial defect visual inspection`;
+const LINE_GOOGLE_SEARCH_QUERIES = {
+  steel: {
+    all: 'NEU surface defect database steel strip defect scratches "rolled-in scale"',
+    good: 'hot rolled steel strip surface nominal ASTM A1011',
+    defect: 'NEU surface defect database steel strip scratches rolled-in scale crazing'
+  },
+  pcb1: {
+    all: 'HC-SR04 ultrasonic sensor PCB circuit board inspection',
+    good: 'HC-SR04 ultrasonic sensor module PCB board front',
+    defect: 'HC-SR04 PCB circuit trace severed scratch defect'
+  },
+  pcb2: {
+    all: 'HC-SR04 ultrasonic sensor PCB SMD component inspection',
+    good: 'HC-SR04 ultrasonic sensor PCB board assembled',
+    defect: 'HC-SR04 PCB missing component misplaced soldering defect'
+  },
+  pcb3: {
+    all: 'HC-SR04 PCB soldering trace defect visual inspection',
+    good: 'HC-SR04 PCB clean solder joint front trace',
+    defect: 'PCB cold solder joint bridge defect inspection'
+  },
+  pcb4: {
+    all: 'HC-SR04 ultrasonic sensor PCB header pins bent defect',
+    good: 'HC-SR04 sensor 4 pin header straight',
+    defect: 'HC-SR04 sensor 4 pin header bent defect'
+  },
+  capsules: {
+    all: 'pharmaceutical gelatin capsule defect inspection MVTec',
+    good: 'gelatin pharmaceutical capsule defect free pristine MVTec',
+    defect: 'MVTec capsule scratch crack squeeze defect inspection'
+  },
+  bottle: {
+    all: 'glass bottle rim defect inspection MVTec',
+    good: 'glass bottle mouth rim pristine nominal MVTec',
+    defect: 'MVTec bottle broken large small crack contamination defect'
+  },
+  cable: {
+    all: 'industrial electrical cable wire defect inspection MVTec',
+    good: 'industrial cable wire intact insulation nominal MVTec',
+    defect: 'MVTec cable cut outer insulation poke wire missing defect'
+  }
+};
+
+function openGoogleImagesInBrowser(mode = 'all') {
+  const lineId = state.selectedLine || 'pcb1';
+  const queryObj = LINE_GOOGLE_SEARCH_QUERIES[lineId] || LINE_GOOGLE_SEARCH_QUERIES['pcb1'];
+  const query = (typeof queryObj === 'object' ? (queryObj[mode] || queryObj.all) : queryObj);
   const url = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
   window.open(url, '_blank');
 }
@@ -719,38 +762,56 @@ function handlePastedImageUrl(url) {
 }
 
 /**
- * Curated In-App Web Images Gallery (Click Any to Select & Inspect)
+ * Curated In-App Exemplar Images Gallery (Real Dataset Samples for Instant Verification)
  */
 const WEB_GALLERY_IMAGES = {
   pcb1: [
-    { title: "Mainboard Conductor Trace", url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80" },
-    { title: "SMD Micro-Resistor Array", url: "https://images.unsplash.com/photo-1597733336794-12d05021d510?auto=format&fit=crop&w=400&q=80" },
-    { title: "Copper Circuit Board", url: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=400&q=80" },
-    { title: "Defect Solder Trace", url: "https://images.unsplash.com/photo-1563770660941-20978e870e26?auto=format&fit=crop&w=400&q=80" }
+    { title: "Nominal CAD Standard", path: "datasets/visa/pcb1/Data/Images/Normal/0000.JPG", tag: "NOMINAL PASS" },
+    { title: "Pristine Sensor Unit", path: "datasets/visa/pcb1/Data/Images/Normal/0012.JPG", tag: "NOMINAL PASS" },
+    { title: "Severed Conductor Trace", path: "datasets/visa/pcb1/Data/Images/Anomaly/000.JPG", tag: "DEFECT" },
+    { title: "Bent Terminal Header Pins", path: "datasets/visa/pcb1/Data/Images/Anomaly/009.JPG", tag: "DEFECT" }
   ],
   pcb2: [
-    { title: "Cold Solder Joint Defect", url: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80" },
-    { title: "SMT Micro-Soldering Pad", url: "https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?auto=format&fit=crop&w=400&q=80" },
-    { title: "Misaligned Micro-Chip", url: "https://images.unsplash.com/photo-1588508065123-287b28e013da?auto=format&fit=crop&w=400&q=80" },
-    { title: "PCB Soldering Quality Standard", url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80" }
+    { title: "Nominal SMT Assembly", path: "datasets/visa/pcb2/Data/Images/Normal/0000.JPG", tag: "NOMINAL PASS" },
+    { title: "Pristine Alignment", path: "datasets/visa/pcb2/Data/Images/Normal/0005.JPG", tag: "NOMINAL PASS" },
+    { title: "Misplaced Resistor Defect", path: "datasets/visa/pcb2/Data/Images/Anomaly/000.JPG", tag: "DEFECT" },
+    { title: "Cold Solder Joint Defect", path: "datasets/visa/pcb2/Data/Images/Anomaly/001.JPG", tag: "DEFECT" }
+  ],
+  pcb3: [
+    { title: "Nominal Multi-Layer Trace", path: "datasets/visa/pcb3/Data/Images/Normal/0000.JPG", tag: "NOMINAL PASS" },
+    { title: "Intact Copper Plane", path: "datasets/visa/pcb3/Data/Images/Normal/0005.JPG", tag: "NOMINAL PASS" },
+    { title: "Substrate Micro-Crack", path: "datasets/visa/pcb3/Data/Images/Anomaly/000.JPG", tag: "DEFECT" },
+    { title: "Inter-Trace Solder Bridge", path: "datasets/visa/pcb3/Data/Images/Anomaly/001.JPG", tag: "DEFECT" }
+  ],
+  pcb4: [
+    { title: "Nominal Straight Pin", path: "datasets/visa/pcb4/Data/Images/Normal/0000.JPG", tag: "NOMINAL PASS" },
+    { title: "Pristine Pin Interface", path: "datasets/visa/pcb4/Data/Images/Normal/0005.JPG", tag: "NOMINAL PASS" },
+    { title: "Severely Bent Header Pin", path: "datasets/visa/pcb4/Data/Images/Anomaly/000.JPG", tag: "DEFECT" },
+    { title: "Misaligned Pin Pitch", path: "datasets/visa/pcb4/Data/Images/Anomaly/001.JPG", tag: "DEFECT" }
+  ],
+  capsules: [
+    { title: "Pristine Gelatin Capsule", path: "data/mvtec/capsule/train/good/000.png", tag: "NOMINAL PASS" },
+    { title: "Nominal Capsule Baseline", path: "data/mvtec/capsule/train/good/001.png", tag: "NOMINAL PASS" },
+    { title: "Shell Surface Scratch", path: "data/mvtec/capsule/test/scratch/000.png", tag: "DEFECT" },
+    { title: "Capsule Wall Fracture", path: "data/mvtec/capsule/test/crack/000.png", tag: "DEFECT" }
   ],
   bottle: [
-    { title: "Glass Rim Fracture Defect", url: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=400&q=80" },
-    { title: "Beverage Packaging Unit", url: "https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&w=400&q=80" },
-    { title: "Chemical Sealing Flaw", url: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=400&q=80" },
-    { title: "Pristine Bottle Baseline", url: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=400&q=80" }
+    { title: "Pristine Molded Glass Rim", path: "data/mvtec/bottle/train/good/000.png", tag: "NOMINAL PASS" },
+    { title: "Nominal Flange Standard", path: "data/mvtec/bottle/train/good/001.png", tag: "NOMINAL PASS" },
+    { title: "Chipped Flange Fracture", path: "data/mvtec/bottle/test/broken_large/000.png", tag: "DEFECT" },
+    { title: "Surface Contamination", path: "data/mvtec/bottle/test/contamination/000.png", tag: "DEFECT" }
   ],
   cable: [
-    { title: "Wire Cut Outer Insulation", url: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80" },
-    { title: "Swapped Harness Conductor", url: "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=400&q=80" },
-    { title: "Automotive Braid Wire", url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=400&q=80" },
-    { title: "Intact Harness Assembly", url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80" }
+    { title: "Pristine Cable Assembly", path: "data/mvtec/cable/train/good/000.png", tag: "NOMINAL PASS" },
+    { title: "Nominal Insulated Harness", path: "data/mvtec/cable/train/good/001.png", tag: "NOMINAL PASS" },
+    { title: "Cut Outer Insulation", path: "data/mvtec/cable/test/cut_outer_insulation/000.png", tag: "DEFECT" },
+    { title: "Bent Internal Braid", path: "data/mvtec/cable/test/bent_wire/000.png", tag: "DEFECT" }
   ],
   steel: [
-    { title: "Hot-Rolled Strip Scratch", url: "https://images.unsplash.com/photo-1535813547-99c456a41d4a?auto=format&fit=crop&w=400&q=80" },
-    { title: "Rolled-In Oxide Scale", url: "https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=400&q=80" },
-    { title: "Steel Mill Surface Coiling", url: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80" },
-    { title: "Pristine Steel Strip", url: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=400&q=80" }
+    { title: "Pristine Nominal Strip", path: "data/steel/train/good/000.png", tag: "NOMINAL PASS" },
+    { title: "ASTM A1011 Standard", path: "data/steel/test/good/001.png", tag: "NOMINAL PASS" },
+    { title: "NEU Surface Scratch", path: "data/steel/test/scratches/000.png", tag: "DEFECT" },
+    { title: "Rolled-In Oxide Scale", path: "data/steel/test/rolled-in_scale/000.png", tag: "DEFECT" }
   ]
 };
 
@@ -762,12 +823,20 @@ function renderModalWebGallery(lineId) {
   const images = WEB_GALLERY_IMAGES[lineId] || WEB_GALLERY_IMAGES['pcb1'];
   images.forEach(img => {
     const card = document.createElement('div');
-    card.className = 'group rounded-xl overflow-hidden border border-gray-200 hover:border-[#00B050] bg-white cursor-pointer transition shadow-sm flex flex-col';
+    const isDefect = img.tag === 'DEFECT';
+    const tagBg = isDefect ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white';
+    const borderHover = isDefect ? 'hover:border-rose-500' : 'hover:border-[#00B050]';
+    const imgUrl = `/api/sample-image?path=${encodeURIComponent(img.path)}`;
+
+    card.className = `group rounded-xl overflow-hidden border border-gray-200 ${borderHover} bg-white cursor-pointer transition shadow-sm flex flex-col`;
     card.innerHTML = `
-      <div class="aspect-square bg-black overflow-hidden relative">
-        <img src="${img.url}" alt="${img.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+      <div class="aspect-square bg-gray-900 overflow-hidden relative">
+        <img src="${imgUrl}" alt="${img.title}" class="w-full h-full object-contain p-1 group-hover:scale-105 transition duration-300">
+        <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${tagBg}">
+          ${img.tag}
+        </span>
         <span class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-[11px] font-bold font-mono">
-          Click to Inspect
+          Click to Inspect &rarr;
         </span>
       </div>
       <div class="p-2 text-[10px] font-mono text-gray-700 truncate text-center bg-gray-50 group-hover:text-[#00B050] font-bold">
@@ -777,7 +846,14 @@ function renderModalWebGallery(lineId) {
     card.onclick = () => {
       closeLineIngestModal();
       navigateTo('inspect');
-      inspectWebUrl(img.url);
+      inspectDatasetSample({
+        id: `curated_${img.title}`,
+        category: lineId,
+        display: img.title,
+        filename: img.path.split('/').pop(),
+        rel_path: img.path,
+        is_anomaly: isDefect
+      });
     };
     container.appendChild(card);
   });

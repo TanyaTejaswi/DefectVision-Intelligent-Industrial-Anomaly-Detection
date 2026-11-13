@@ -1,0 +1,13 @@
+{
+  "category": "transistor",
+  "auroc": 0.9133,
+  "auprc": 0.8903,
+  "f1_score": 0.8095,
+  "precision": 0.7727,
+  "recall": 0.85,
+  "optimal_threshold": 40.3573,
+  "true_positives": 34,
+  "true_negatives": 50,
+  "false_positives": 10,
+  "false_negatives": 6
+}

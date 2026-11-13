@@ -1,0 +1,13 @@
+{
+  "category": "toothbrush",
+  "auroc": 0.8694,
+  "auprc": 0.9425,
+  "f1_score": 0.9206,
+  "precision": 0.8788,
+  "recall": 0.9667,
+  "optimal_threshold": 35.4878,
+  "true_positives": 29,
+  "true_negatives": 8,
+  "false_positives": 4,
+  "false_negatives": 1
+}

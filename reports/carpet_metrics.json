@@ -1,0 +1,13 @@
+{
+  "category": "carpet",
+  "auroc": 0.9848,
+  "auprc": 0.9956,
+  "f1_score": 0.9775,
+  "precision": 0.9775,
+  "recall": 0.9775,
+  "optimal_threshold": 28.7833,
+  "true_positives": 87,
+  "true_negatives": 26,
+  "false_positives": 2,
+  "false_negatives": 2
+}

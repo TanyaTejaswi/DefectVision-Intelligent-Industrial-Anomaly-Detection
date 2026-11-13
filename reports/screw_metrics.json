@@ -1,0 +1,13 @@
+{
+  "category": "screw",
+  "auroc": 0.819,
+  "auprc": 0.9148,
+  "f1_score": 0.8871,
+  "precision": 0.8527,
+  "recall": 0.9244,
+  "optimal_threshold": 33.2266,
+  "true_positives": 110,
+  "true_negatives": 22,
+  "false_positives": 19,
+  "false_negatives": 9
+}
