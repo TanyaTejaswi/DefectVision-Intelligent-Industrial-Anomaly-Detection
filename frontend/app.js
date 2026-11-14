@@ -12,6 +12,7 @@ let state = {
   alpha: 0.45,
   colormap: 'jet',
   currentInspectionData: null,
+  activeInspectionTarget: null, // Tracks exact target (sample, file, url, preset) for instant colormap & blend updates
   activeViewMode: 'overlay', // 'raw', 'heatmap', 'overlay'
   showBoundingBoxes: true,
   ingestMode: 'upload',      // 'upload', 'catalog', 'camera'
@@ -105,6 +106,7 @@ function setupEventListeners() {
     });
 
     blendSlider.addEventListener('change', () => {
+      state.activeViewMode = 'overlay';
       reRunCurrentInspection();
     });
   }
@@ -112,6 +114,7 @@ function setupEventListeners() {
   if (cmapSelect) {
     cmapSelect.addEventListener('change', (e) => {
       state.colormap = e.target.value;
+      state.activeViewMode = 'overlay';
       reRunCurrentInspection();
     });
   }
@@ -121,7 +124,16 @@ function setupEventListeners() {
   const btnHeat = document.getElementById('btnViewHeatmap');
   const btnOverlay = document.getElementById('btnViewOverlay');
 
-  if (btnRaw) btnRaw.addEventListener('click', () => switchViewMode('raw'));
+  if (btnRaw) {
+    btnRaw.addEventListener('click', () => {
+      // Toggle behavior: if already on raw, click again returns to thermal overlay!
+      if (state.activeViewMode === 'raw') {
+        switchViewMode('overlay');
+      } else {
+        switchViewMode('raw');
+      }
+    });
+  }
   if (btnHeat) btnHeat.addEventListener('click', () => switchViewMode('heatmap'));
   if (btnOverlay) btnOverlay.addEventListener('click', () => switchViewMode('overlay'));
 }
@@ -302,6 +314,13 @@ async function inspectUploadedFile(file) {
   if (rawImg) rawImg.style.opacity = '0.3';
 
   try {
+    state.activeInspectionTarget = {
+      type: 'file',
+      file: file,
+      category: state.selectedLine
+    };
+    state.activePresetId = null;
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('category', state.selectedLine);
@@ -325,6 +344,34 @@ async function inspectUploadedFile(file) {
 }
 
 async function reRunCurrentInspection() {
+  if (state.activeInspectionTarget) {
+    const t = state.activeInspectionTarget;
+    if (t.type === 'sample' && t.sample) {
+      await inspectDatasetSample(t.sample);
+      return;
+    }
+    if (t.type === 'file' && t.file) {
+      await inspectUploadedFile(t.file);
+      return;
+    }
+    if (t.type === 'url' && t.url) {
+      await inspectWebUrl(t.url);
+      return;
+    }
+    if (t.type === 'preset' && t.presetId) {
+      await triggerInspection(t.presetId, t.category || state.selectedLine);
+      return;
+    }
+    if (t.type === 'audit' && t.auditItem && t.auditItem.sample_path) {
+      await inspectDatasetSample({
+        rel_path: t.auditItem.sample_path,
+        filename: t.auditItem.sample_name,
+        display: t.auditItem.sample_name
+      });
+      return;
+    }
+  }
+
   if (state.activePresetId) {
     await triggerInspection(state.activePresetId, state.selectedLine);
   } else {
@@ -625,6 +672,13 @@ async function submitModalDatasetSampleInspection() {
 }
 
 async function inspectDatasetSample(sample) {
+  state.activeInspectionTarget = {
+    type: 'sample',
+    sample: sample,
+    category: state.selectedLine
+  };
+  state.activePresetId = null;
+
   const placeholder = document.getElementById('inspectedPlaceholder');
   const overlayImg = document.getElementById('inspectedOverlayImage');
   const rawPlaceholder = document.getElementById('rawPlaceholder');
@@ -1139,6 +1193,13 @@ async function submitModalUrlInspection() {
 }
 
 async function inspectWebUrl(url) {
+  state.activeInspectionTarget = {
+    type: 'url',
+    url: url,
+    category: state.selectedLine
+  };
+  state.activePresetId = null;
+
   const placeholder = document.getElementById('inspectedPlaceholder');
   const overlayImg = document.getElementById('inspectedOverlayImage');
   const rawPlaceholder = document.getElementById('rawPlaceholder');
@@ -1180,6 +1241,13 @@ async function inspectWebUrl(url) {
 }
 
 async function triggerInspection(presetId, category) {
+  state.activeInspectionTarget = {
+    type: 'preset',
+    presetId: presetId,
+    category: category || state.selectedLine
+  };
+  state.activePresetId = presetId;
+
   const placeholder = document.getElementById('inspectedPlaceholder');
   const overlayImg = document.getElementById('inspectedOverlayImage');
   const rawPlaceholder = document.getElementById('rawPlaceholder');
@@ -1379,32 +1447,76 @@ function switchViewMode(mode) {
   state.activeViewMode = mode;
   const overlayImg = document.getElementById('inspectedOverlayImage');
   const badge = document.getElementById('inspectedUnitBadge');
-  const data = state.currentInspectionData;
-  if (!data || !overlayImg || !badge) return;
-
+  const badgeText = document.getElementById('inspectedUnitBadgeText');
   const btnRaw = document.getElementById('btnViewRaw');
+  const btnRawText = document.getElementById('btnViewRawText');
   const btnHeat = document.getElementById('btnViewHeatmap');
   const btnOverlay = document.getElementById('btnViewOverlay');
+  const btnOverlayText = document.getElementById('btnViewOverlayText');
+  const data = state.currentInspectionData;
+  if (!data || !overlayImg) return;
 
-  [btnRaw, btnHeat, btnOverlay].forEach(b => {
-    if (b) b.className = 'px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition';
-  });
+  const cmapName = (state.colormap || 'JET').toUpperCase();
+
+  // Reset all buttons to default dark state
+  if (btnRaw) {
+    btnRaw.className = 'px-3 py-1.5 rounded bg-[#111111] border border-gray-800 hover:border-gray-600 text-gray-300 transition flex items-center gap-1.5 cursor-pointer';
+    if (btnRawText) btnRawText.innerText = 'Show Raw Sensor';
+  }
+  if (btnHeat) {
+    btnHeat.className = 'px-3 py-1.5 rounded bg-[#111111] border border-gray-800 hover:border-gray-600 text-gray-300 transition flex items-center gap-1.5 cursor-pointer';
+  }
+  if (btnOverlay) {
+    btnOverlay.className = 'px-3 py-1.5 rounded bg-[#111111] border border-gray-800 hover:border-gray-600 text-gray-300 transition flex items-center gap-1.5 cursor-pointer';
+    if (btnOverlayText) btnOverlayText.innerText = `Show Thermal Map (${cmapName})`;
+  }
 
   if (mode === 'raw') {
     overlayImg.src = data.images.inspected_raw;
-    badge.innerText = 'RAW SENSOR';
-    badge.className = 'text-[11px] px-2 py-0.2 rounded bg-slate-800 text-slate-300 font-mono border border-white/20';
-    if (btnRaw) btnRaw.className = 'px-2.5 py-1 rounded-lg bg-white text-black font-bold transition';
+    if (badgeText) badgeText.innerText = 'RAW SENSOR (Click for Thermal ⇄)';
+    else if (badge) badge.innerText = 'RAW SENSOR (Click for Thermal ⇄)';
+    if (badge) {
+      badge.className = 'text-[10px] px-2.5 py-0.5 rounded bg-blue-950/80 text-blue-300 font-bold border border-blue-500/50 font-mono hover:bg-blue-900 transition cursor-pointer flex items-center gap-1 shadow-sm';
+      badge.title = 'Currently showing Raw Sensor. Click to return to Thermal Map';
+    }
+    if (btnRaw) {
+      btnRaw.className = 'px-3 py-1.5 rounded bg-blue-600 text-white font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer';
+      if (btnRawText) btnRawText.innerText = 'Raw Sensor (Active - Click to Return ⇄)';
+    }
   } else if (mode === 'heatmap') {
     overlayImg.src = data.images.heatmap;
-    badge.innerText = 'THERMAL DISTANCE';
-    badge.className = 'text-[11px] px-2 py-0.2 rounded bg-rose-950 text-rose-400 font-mono border border-rose-800';
-    if (btnHeat) btnHeat.className = 'px-2.5 py-1 rounded-lg bg-rose-600 text-white font-bold transition';
+    if (badgeText) badgeText.innerText = `THERMAL DISTANCE (${cmapName})`;
+    else if (badge) badge.innerText = `THERMAL DISTANCE (${cmapName})`;
+    if (badge) {
+      badge.className = 'text-[10px] px-2.5 py-0.5 rounded bg-rose-950/80 text-rose-300 font-bold border border-rose-500/50 font-mono hover:bg-rose-900 transition cursor-pointer flex items-center gap-1 shadow-sm';
+      badge.title = 'Currently showing Thermal Distance Map. Click to toggle';
+    }
+    if (btnHeat) {
+      btnHeat.className = 'px-3 py-1.5 rounded bg-rose-600 text-white font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer';
+    }
   } else {
+    // Default: 'overlay'
     overlayImg.src = data.images.overlay;
-    badge.innerText = 'OVERLAY (JET)';
-    badge.className = 'text-[11px] px-2 py-0.2 rounded bg-cyan-950 text-cyan-400 font-mono border border-cyan-800';
-    if (btnOverlay) btnOverlay.className = 'px-2.5 py-1 rounded-lg bg-cyan-600 text-black font-bold transition';
+    if (badgeText) badgeText.innerText = `OVERLAY (${cmapName})`;
+    else if (badge) badge.innerText = `OVERLAY (${cmapName})`;
+    if (badge) {
+      badge.className = 'text-[10px] px-2.5 py-0.5 rounded bg-[#00B050]/20 text-[#00B050] font-bold border border-[#00B050]/40 font-mono hover:bg-[#00B050]/30 transition cursor-pointer flex items-center gap-1 shadow-sm';
+      badge.title = 'Currently showing Thermal Map Overlay. Click to toggle to Raw Sensor';
+    }
+    if (btnOverlay) {
+      btnOverlay.className = 'px-3 py-1.5 rounded bg-[#00B050] text-white font-bold transition flex items-center gap-1.5 shadow-md cursor-pointer';
+      if (btnOverlayText) btnOverlayText.innerText = `Show Thermal Map (${cmapName})`;
+    }
+  }
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function toggleViewfinder3Mode() {
+  if (state.activeViewMode === 'raw') {
+    switchViewMode('overlay');
+  } else {
+    switchViewMode('raw');
   }
 }
 
@@ -2627,6 +2739,12 @@ function reInspectFromAudit(unitId) {
   if (!item) return;
   state.currentInspectionData = item;
   state.selectedLine = item.category;
+  state.activeInspectionTarget = {
+    type: 'audit',
+    auditItem: item,
+    category: item.category
+  };
+  state.activePresetId = null;
   navigateTo('inspect');
   applyInspectionResults(item);
 }

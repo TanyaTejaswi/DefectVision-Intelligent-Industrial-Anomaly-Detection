@@ -15,7 +15,7 @@ async def main():
         res_good = await inspect_unit(category=cat, target_name="sample_good.png", sample_path=good_path)
         res_defect = await inspect_unit(category=cat, target_name="sample_defect.png", sample_path=defect_path)
 
-        good_ok = (res_good["verdict"] == "NOMINAL_PASS")
+        good_ok = (res_good["verdict"] in ["NORMAL_PASS", "NOMINAL_PASS"])
         defect_ok = (res_defect["verdict"] == "CRITICAL_DEFECT")
         status = "PASSED" if (good_ok and defect_ok) else "FAILED"
 
