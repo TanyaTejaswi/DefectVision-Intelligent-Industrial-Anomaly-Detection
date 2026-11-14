@@ -574,6 +574,11 @@ def get_detector(category: str) -> Optional[MemoryBankAnomalyDetector]:
     if cat_key in DETECTOR_CACHE:
         return DETECTOR_CACHE[cat_key]
 
+    # Enforce strict 1-detector memory limit: free previous model to keep container RAM < 180MB
+    DETECTOR_CACHE.clear()
+    import gc
+    gc.collect()
+
     # Check candidates with singular/plural support (e.g. capsules -> capsule)
     candidates = [cat_key]
     if cat_key.endswith("s"):
@@ -586,9 +591,9 @@ def get_detector(category: str) -> Optional[MemoryBankAnomalyDetector]:
         if model_file.exists():
             try:
                 det = MemoryBankAnomalyDetector.load(model_file)
-                # Precompute squared norms for fast vectorized BLAS GEMM inference (~40ms)
-                mb = det.memory_bank.astype(np.float32)
-                det._mb_sq = np.sum(mb**2, axis=1)
+                # Precompute squared norms once without duplicate runtime re-allocations
+                det._mb_f32 = det.memory_bank.astype(np.float32)
+                det._mb_sq = np.sum(det._mb_f32**2, axis=1)
                 DETECTOR_CACHE[cat_key] = det
                 return det
             except Exception as e:
@@ -655,7 +660,10 @@ def compute_fast_anomaly_map(
     raw_img_pil: Optional[Image.Image] = None
 ) -> Tuple[float, np.ndarray]:
     """Computes PatchCore anomaly distance and 2D spatial heatmap using fast BLAS GEMM (~40ms)."""
-    mb = detector.memory_bank.astype(np.float32)
+    mb = getattr(detector, "_mb_f32", None)
+    if mb is None:
+        mb = detector.memory_bank.astype(np.float32)
+        detector._mb_f32 = mb
     if not hasattr(detector, "_mb_sq"):
         detector._mb_sq = np.sum(mb**2, axis=1)
 
@@ -1309,10 +1317,12 @@ def get_line_samples(line_id: str):
 
 @app.get("/api/sample-image")
 def get_sample_image(path: str):
-    """Serves sample image file for preview."""
-    target = PROJECT_ROOT / path
+    """Serves sample image file for preview with browser caching."""
+    import urllib.parse
+    clean = urllib.parse.unquote(path).lstrip("/\\").replace("\\", "/")
+    target = PROJECT_ROOT / clean
     if target.exists() and target.is_file():
-        return FileResponse(str(target))
+        return FileResponse(str(target), headers={"Cache-Control": "public, max-age=86400"})
     raise HTTPException(status_code=404, detail="Sample image not found")
 
 @app.get("/api/lines/{line_id}/presets")
@@ -1720,7 +1730,11 @@ async def inspect_unit(
     # 8. Packaging Response
     confidence = min(99.4, max(52.0, (abs(score - final_threshold) / final_threshold) * 80.0 + 50.0))
     delta = score - final_threshold
-    
+
+    # Clean unneeded array allocations immediately to keep RAM low
+    import gc
+    gc.collect()
+
     return {
         "unit_id": f"{category.upper()}-{abs(hash(target_name)) % 100000:05d}",
         "category": category,

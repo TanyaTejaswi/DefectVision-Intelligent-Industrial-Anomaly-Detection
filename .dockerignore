@@ -1,17 +1,28 @@
+# Large raw archives & compressed blobs (DO NOT copy 5.2GB tar into Docker!)
+*.tar.xz
+*.tar.gz
+*.tar
+*.zip
+mvtec_anomaly_detection.tar.xz
+
 # Exclude heavy raw datasets (curated samples in data/curated are used for deployment)
 datasets/
 data/mvtec/
 data/steel/
 data/visa/
+data/embeddings/
 
-# Exclude notebooks and experiment scrapbooks
+# Research notebooks, offline plots, and development utilities
 notebooks/
+results/
+tests/
+scripts/
 scratch/
 temp/
 tmp/
 *.log
 
-# Exclude Git and environment artifacts
+# Git & development artifacts
 .git/
 .gitignore
 .env
@@ -26,4 +37,4 @@ env/
 .idea/
 .vscode/
 .gemini/
-
+requirements-dev.txt
