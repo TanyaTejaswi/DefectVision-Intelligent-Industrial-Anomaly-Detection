@@ -41,9 +41,17 @@ env.bak/
 venv.bak/
 
 # ==============================
-# Jupyter Notebook
+# Research Notebooks & Experiments (Not needed for production website)
 # ==============================
+notebooks/
+*.ipynb
 .ipynb_checkpoints/
+
+# ==============================
+# Offline Plots & Evaluation Results (Not needed for production website)
+# ==============================
+results/
+requirements-dev.txt
 
 # ==============================
 # Environment Variables and Secrets
