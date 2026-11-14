@@ -2071,14 +2071,26 @@ function scrollToProjectAnalysis() {
 /**
  * ====================================================================
  * INSPECTION AUDIT LOG & OPERATIONAL METADATA LEDGER (Max 20 Items)
+ * Scoped personally to each logged-in operator session (or guest).
  * ====================================================================
  */
+function getAuditLogStorageKey() {
+  const user = (window.AuthManager && window.AuthManager.currentUser)
+    ? window.AuthManager.currentUser.username
+    : 'guest';
+  return 'defectvision_audit_log_' + encodeURIComponent(user.toLowerCase());
+}
+
 function initAuditLog() {
-  const saved = localStorage.getItem('defectvision_audit_log');
+  const userObj = (window.AuthManager && window.AuthManager.currentUser) ? window.AuthManager.currentUser : null;
+  const username = userObj ? userObj.username : 'guest';
+  const key = getAuditLogStorageKey();
+
+  const saved = localStorage.getItem(key);
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         state.auditLog = parsed.slice(0, 20);
         return;
       }
@@ -2087,14 +2099,19 @@ function initAuditLog() {
     }
   }
 
-  // Pre-populate with 12 realistic recent detection records across production lines
-  state.auditLog = generateSeedAuditLog();
-  try {
-    localStorage.setItem('defectvision_audit_log', JSON.stringify(state.auditLog));
-  } catch (e) {}
+  // Pre-populate with realistic baseline ONLY for default admin account
+  // Any other registered user, inspector, or new guest starts with a clean personal ledger!
+  if (username.toLowerCase() === 'admin') {
+    state.auditLog = generateSeedAuditLog('admin (QA Operations Lead)', userObj ? userObj.workstationId : 'WS-101');
+    try {
+      localStorage.setItem(key, JSON.stringify(state.auditLog));
+    } catch (e) {}
+  } else {
+    state.auditLog = [];
+  }
 }
 
-function generateSeedAuditLog() {
+function generateSeedAuditLog(operator = 'admin (QA Operations Lead)', workstation = 'WS-101') {
   const now = Date.now();
   const formatTimeAgo = (minutesAgo) => {
     const d = new Date(now - minutesAgo * 60 * 1000);
@@ -2121,8 +2138,8 @@ function generateSeedAuditLog() {
       delta: 12.10,
       confidence: 99.2,
       latency_ms: 14.8,
-      operator: 'admin (QA Lead)',
-      workstation: 'WS-104',
+      operator,
+      workstation,
       images: {
         raw: '/static/plots/tsne_kmeans.png',
         overlay: '/static/plots/tsne_kmeans.png',
@@ -2148,8 +2165,8 @@ function generateSeedAuditLog() {
       delta: 11.40,
       confidence: 98.4,
       latency_ms: 13.9,
-      operator: 'admin (QA Lead)',
-      workstation: 'WS-104',
+      operator,
+      workstation,
       images: {
         raw: '/static/plots/pca_scree.png',
         overlay: '/static/plots/pca_scree.png',
@@ -2229,8 +2246,8 @@ function generateSeedAuditLog() {
       delta: -12.40,
       confidence: 97.9,
       latency_ms: 13.5,
-      operator: 'admin (QA Lead)',
-      workstation: 'WS-104',
+      operator,
+      workstation,
       images: {
         raw: '/static/plots/tsne_dbscan.png',
         overlay: '/static/plots/tsne_dbscan.png',
@@ -2310,8 +2327,8 @@ function generateSeedAuditLog() {
       delta: -8.70,
       confidence: 96.8,
       latency_ms: 13.8,
-      operator: 'admin (QA Lead)',
-      workstation: 'WS-104',
+      operator,
+      workstation,
       images: {
         raw: '/static/plots/pca_scree.png',
         overlay: '/static/plots/pca_scree.png',
@@ -2364,8 +2381,8 @@ function generateSeedAuditLog() {
       delta: -12.60,
       confidence: 98.9,
       latency_ms: 14.2,
-      operator: 'admin (QA Lead)',
-      workstation: 'WS-104',
+      operator,
+      workstation,
       images: {
         raw: '/static/plots/capsules_sample_0.png',
         overlay: '/static/plots/capsules_sample_0.png',
@@ -2418,8 +2435,8 @@ function generateSeedAuditLog() {
       delta: -9.90,
       confidence: 98.4,
       latency_ms: 13.7,
-      operator: 'admin (QA Lead)',
-      workstation: 'WS-104',
+      operator,
+      workstation,
       images: {
         raw: '/static/plots/pca_scree.png',
         overlay: '/static/plots/pca_scree.png',
@@ -2473,8 +2490,8 @@ function recordInspectionAudit(data) {
     delta: parseFloat(rawDelta.toFixed(2)),
     confidence: parseFloat(rawConf.toFixed(1)),
     latency_ms: data.latency_ms || 14.2,
-    operator: (window.AuthManager && window.AuthManager.currentUser) ? window.AuthManager.currentUser.username : 'admin (QA Lead)',
-    workstation: (window.AuthManager && window.AuthManager.currentUser) ? window.AuthManager.currentUser.workstationId : 'WS-104',
+    operator: (window.AuthManager && window.AuthManager.currentUser) ? `${window.AuthManager.currentUser.username} (${(window.AuthManager.currentUser.role || 'Inspector').split(' ')[0]})` : 'Guest Operator',
+    workstation: (window.AuthManager && window.AuthManager.currentUser) ? (window.AuthManager.currentUser.workstationId || 'WS-101') : 'WS-101',
     images: {
       raw: data.images?.inspected_raw || '',
       overlay: data.images?.overlay || data.images?.heatmap || data.images?.inspected_raw || '',
@@ -2496,7 +2513,8 @@ function recordInspectionAudit(data) {
   }
 
   try {
-    localStorage.setItem('defectvision_audit_log', JSON.stringify(state.auditLog));
+    const key = getAuditLogStorageKey();
+    localStorage.setItem(key, JSON.stringify(state.auditLog));
   } catch (e) {
     console.warn('Could not save audit log:', e);
   }
@@ -2522,6 +2540,16 @@ function renderAuditLogPage() {
   if (elDefects) elDefects.innerText = `${defects} Units`;
   if (elPassed) elPassed.innerText = `${passed} Units`;
   if (elYield) elYield.innerText = `${yieldRate}%`;
+
+  const currentUser = (window.AuthManager && window.AuthManager.currentUser) ? window.AuthManager.currentUser : null;
+  const elOpName = document.getElementById('auditOperatorName');
+  const elStation = document.getElementById('auditWorkstationId');
+  if (elOpName) {
+    elOpName.innerText = currentUser ? `${currentUser.username} (${currentUser.role || 'Inspector'})` : 'Guest / Unassigned Operator';
+  }
+  if (elStation) {
+    elStation.innerText = currentUser ? (currentUser.workstationId || 'WS-101') : 'WS-101';
+  }
 
   const countAll = document.getElementById('auditFilterCount_all');
   const countDefects = document.getElementById('auditFilterCount_defects');
@@ -2560,15 +2588,21 @@ function renderAuditLogTable() {
   });
 
   if (filtered.length === 0) {
+    const currentUser = (window.AuthManager && window.AuthManager.currentUser) ? window.AuthManager.currentUser : null;
+    const opLabel = currentUser ? currentUser.username : 'your account';
+    const isCleanBuffer = state.auditLog.length === 0;
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td colspan="9" class="py-12 text-center text-gray-500 font-sans">
-        <div class="flex flex-col items-center justify-center gap-2">
-          <i data-lucide="clipboard-x" class="w-8 h-8 text-gray-400"></i>
-          <p class="font-bold text-gray-700">No detection events match the current filter.</p>
-          <p class="text-xs text-gray-400">Run an inspection in the Live Studio to add items to the audit buffer.</p>
-          <button onclick="navigateTo('inspect')" class="btn-instrumental px-4 py-2 text-xs uppercase tracking-wider font-mono font-bold mt-2">
-            Inspect Unit Now &rarr;
+      <td colspan="9" class="py-14 text-center text-gray-500 font-sans">
+        <div class="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
+          <div class="w-12 h-12 rounded-full ${isCleanBuffer ? 'bg-emerald-50 text-[#00B050]' : 'bg-gray-100 text-gray-400'} flex items-center justify-center mb-1">
+            <i data-lucide="${isCleanBuffer ? 'shield-check' : 'clipboard-x'}" class="w-6 h-6"></i>
+          </div>
+          <p class="font-bold text-gray-800 text-base">${isCleanBuffer ? `Personal Audit Buffer Ready for ${opLabel}` : 'No detection events match the current filter.'}</p>
+          <p class="text-xs text-gray-500">${isCleanBuffer ? 'No inspections have been logged under this operator session yet. As you inspect components in the Live Studio, every unit verdict, anomaly score, and conveyor action will be recorded in this personal ledger.' : 'Run an inspection in the Live Studio to add items to the audit buffer.'}</p>
+          <button onclick="navigateTo('inspect')" class="btn-instrumental px-5 py-2 text-xs uppercase tracking-wider font-mono font-bold mt-2 shadow-sm">
+            Inspect Unit in Studio &rarr;
           </button>
         </div>
       </td>
@@ -2724,10 +2758,13 @@ function exportAuditLogJSON() {
 }
 
 function clearAuditLog() {
-  if (confirm('Are you sure you want to clear the recent inspection audit buffer?')) {
+  const currentUser = (window.AuthManager && window.AuthManager.currentUser) ? window.AuthManager.currentUser : null;
+  const opName = currentUser ? currentUser.username : 'current operator';
+  if (confirm(`Are you sure you want to clear the personal inspection audit buffer for ${opName}?`)) {
     state.auditLog = [];
     try {
-      localStorage.removeItem('defectvision_audit_log');
+      const key = getAuditLogStorageKey();
+      localStorage.removeItem(key);
     } catch (e) {}
     renderAuditLogPage();
   }

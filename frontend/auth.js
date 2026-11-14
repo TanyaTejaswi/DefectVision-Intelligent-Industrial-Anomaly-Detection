@@ -237,6 +237,14 @@ const AuthManager = {
         navInspectCtaBtn.innerText = 'OPERATOR LOGIN';
       }
     }
+
+    // Synchronize Personal Inspection Audit Log to the active operator
+    if (typeof window.initAuditLog === 'function') {
+      window.initAuditLog();
+    }
+    if (typeof window.renderAuditLogPage === 'function' && window.state && window.state.currentPage === 'auditLog') {
+      window.renderAuditLogPage();
+    }
   }
 };
 

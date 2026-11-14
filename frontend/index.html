@@ -1236,7 +1236,15 @@
           </span>
         </div>
         <h2 class="text-3xl font-black text-gray-900 mt-1">Inspection Audit Log & Defect Metadata</h2>
-        <p class="text-sm text-gray-600 mt-1 max-w-3xl">
+        <div id="auditOperatorBanner" class="inline-flex items-center gap-2 mt-2 px-3 py-1 rounded-lg bg-gray-100 border border-gray-200 text-xs font-mono text-gray-700">
+          <span class="w-2 h-2 rounded-full bg-[#00B050] animate-pulse"></span>
+          <span>Active Operator: <strong id="auditOperatorName" class="text-gray-900">admin (QA Operations Lead)</strong></span>
+          <span class="text-gray-400">&bull;</span>
+          <span>Station: <strong id="auditWorkstationId" class="text-gray-900">WS-101</strong></span>
+          <span class="text-gray-400">&bull;</span>
+          <span class="text-[11px] text-gray-500 font-sans">Personal Rolling Ledger</span>
+        </div>
+        <p class="text-sm text-gray-600 mt-1.5 max-w-3xl">
           Real-time FIFO ledger tracking the last 10–20 detected items across all 8 manufacturing lines. Logs sub-millimeter anomaly scores, decision thresholds, localized defect classes, operator IDs, and automated conveyor routing actions.
         </p>
       </div>
@@ -1927,10 +1935,10 @@
   </footer>
 
   <!-- Modular JavaScript Scripts with Cache Busting -->
-  <script src="/static/auth.js?v=20261112_v14"></script>
-  <script src="/static/camera.js?v=20261112_v14"></script>
-  <script src="/static/telemetry.js?v=20261112_v14"></script>
-  <script src="/static/app.js?v=20261112_v14"></script>
+  <script src="/static/auth.js?v=20261114_v16"></script>
+  <script src="/static/camera.js?v=20261114_v16"></script>
+  <script src="/static/telemetry.js?v=20261114_v16"></script>
+  <script src="/static/app.js?v=20261114_v16"></script>
   <script>
     lucide.createIcons();
     if (window.AuthManager) window.AuthManager.init();
