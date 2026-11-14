@@ -1387,7 +1387,7 @@ function renderBoundingBoxes(data) {
       // Pass Box (Green)
       {
         type: 'pass',
-        label: 'PASS: SMT ARRAY',
+        label: (state.selectedLine && state.selectedLine.includes('pcb')) ? 'PASS: SMT ARRAY' : 'PASS: NOMINAL',
         top: '48%',
         left: '22%',
         width: '48%',
@@ -1415,7 +1415,7 @@ function renderBoundingBoxes(data) {
       },
       {
         type: 'pass',
-        label: 'PASS: SMT ARRAY',
+        label: (state.selectedLine && state.selectedLine.includes('pcb')) ? 'PASS: SMT ARRAY' : 'PASS: NOMINAL',
         top: '26%',
         left: '48%',
         width: '42%',

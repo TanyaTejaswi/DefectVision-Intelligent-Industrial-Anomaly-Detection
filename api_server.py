@@ -715,16 +715,22 @@ def resolve_defect_mask(
             return None, 0
 
     def _try_load_mask(mask_path: Path) -> Optional[np.ndarray]:
-        if mask_path.exists():
-            try:
-                raw_m = np.array(Image.open(mask_path))
-                if len(raw_m.shape) == 3:
-                    raw_m = raw_m[:, :, 0]
-                m_bin = (raw_m > 0).astype(np.uint8)
-                if m_bin.sum() > 0:
-                    return m_bin
-            except Exception:
-                pass
+        if not mask_path.exists() or mask_path.is_dir():
+            return None
+        p_str = str(mask_path).replace("\\", "/").lower()
+        # Must be an actual mask/ground_truth file, never the anomaly/normal RGB image itself
+        if "ground_truth" not in p_str and "masks" not in p_str and "_mask" not in p_str:
+            return None
+        try:
+            raw_m = np.array(Image.open(mask_path))
+            if len(raw_m.shape) == 3:
+                raw_m = raw_m[:, :, 0]
+            m_bin = (raw_m > 0).astype(np.uint8)
+            # A valid defect mask must have defect pixels, but cannot be solid full-image white
+            if m_bin.sum() > 0 and (m_bin.mean() < 0.98):
+                return m_bin
+        except Exception:
+            pass
         return None
 
     # 1. Direct sample_path check for known defect files
@@ -733,11 +739,22 @@ def resolve_defect_mask(
         p_obj = Path(sp)
         stem = p_obj.stem
 
-        # 1A. Direct Visa / MVTec / Steel path replacement
-        mask_str = sp.replace("/Images/", "/Masks/").replace(".JPG", ".png").replace(".jpg", ".png")
-        m = _try_load_mask(PROJECT_ROOT / mask_str)
+        # 0. Check data/curated/{category}/masks/{stem}_mask.png or {stem}.png first
+        cand_curated = PROJECT_ROOT / "data" / "curated" / category / "masks" / f"{stem}_mask.png"
+        m = _try_load_mask(cand_curated)
         if m is not None:
             return m, 0
+        cand_curated2 = PROJECT_ROOT / "data" / "curated" / category / "masks" / f"{stem}.png"
+        m = _try_load_mask(cand_curated2)
+        if m is not None:
+            return m, 0
+
+        # 1A. Direct Visa / MVTec / Steel path replacement (only if /Images/ is actually in path)
+        if "/images/" in sp.lower():
+            mask_str = sp.replace("/Images/", "/Masks/").replace(".JPG", ".png").replace(".jpg", ".png")
+            m = _try_load_mask(PROJECT_ROOT / mask_str)
+            if m is not None:
+                return m, 0
 
         # Generic check replacing any occurrence of 'Images' with 'Masks'
         p = PROJECT_ROOT / sp if not p_obj.is_absolute() else p_obj
@@ -751,8 +768,16 @@ def resolve_defect_mask(
             if m is not None:
                 return m, 0
 
-        # MVTec & Steel test/defect -> ground_truth/defect/xxx_mask.png
-        if ("mvtec" in sp.lower() or "steel" in sp.lower()) and "/test/" in sp.lower():
+        # MVTec test/defect -> ground_truth/defect/xxx_mask.png
+        if "mvtec" in sp.lower() and "/test/" in sp.lower():
+            p_gt = PROJECT_ROOT / sp.replace("/test/", "/ground_truth/")
+            gt_file = p_gt.parent / f"{p_gt.stem}_mask.png"
+            m = _try_load_mask(gt_file)
+            if m is not None:
+                return m, 0
+
+        # Steel test/defect -> ground_truth/defect/xxx_mask.png
+        if "steel" in sp.lower() and "/test/" in sp.lower():
             p_gt = PROJECT_ROOT / sp.replace("/test/", "/ground_truth/")
             gt_file = p_gt.parent / f"{p_gt.stem}_mask.png"
             m = _try_load_mask(gt_file)
@@ -771,13 +796,18 @@ def resolve_defect_mask(
         if m is not None:
             return m, 0
 
-        # MVTec masks (e.g. broken_large_000 -> ground_truth/broken_large/000_mask.png)
+        # MVTec & Steel masks (e.g. broken_large_000 -> ground_truth/broken_large/000_mask.png)
         stem_parts = stem.split("_")
         if len(stem_parts) > 1 and stem_parts[-1].isdigit():
             def_sub = "_".join(stem_parts[:-1])
             num = stem_parts[-1]
             cand_mvtec = PROJECT_ROOT / "data" / "mvtec" / category / "ground_truth" / def_sub / f"{num}_mask.png"
             m = _try_load_mask(cand_mvtec)
+            if m is not None:
+                return m, 0
+
+            cand_steel = PROJECT_ROOT / "data" / "steel" / "ground_truth" / def_sub / f"{num}_mask.png"
+            m = _try_load_mask(cand_steel)
             if m is not None:
                 return m, 0
 
@@ -866,7 +896,8 @@ def generate_bounding_boxes(
     img_w: int,
     img_h: int,
     is_mismatched: bool = False,
-    gt_mask: Optional[np.ndarray] = None
+    gt_mask: Optional[np.ndarray] = None,
+    category: str = ""
 ) -> List[Dict[str, Any]]:
     """
     Generates high-precision AI bounding boxes from the model anomaly map.
@@ -938,13 +969,14 @@ def generate_bounding_boxes(
                 "tagText": "text-white"
             })
 
+            nom_label = "PASS: SMT ARRAY" if "pcb" in category.lower() else "PASS: NOMINAL"
             # Place nominal PASS box in the OPPOSITE vertical half
             mean_y = ys.mean()
             if mean_y > img_h * 0.50:
                 # Defect is in bottom half -> put pass box in top half
                 boxes.append({
                     "type": "pass",
-                    "label": "PASS: SMT ARRAY",
+                    "label": nom_label,
                     "top": "22%",
                     "left": "22%",
                     "width": "48%",
@@ -958,7 +990,7 @@ def generate_bounding_boxes(
                 # Defect is in top half -> put pass box in bottom half
                 boxes.append({
                     "type": "pass",
-                    "label": "PASS: SMT ARRAY",
+                    "label": nom_label,
                     "top": "54%",
                     "left": "22%",
                     "width": "48%",
@@ -969,11 +1001,12 @@ def generate_bounding_boxes(
                     "tagText": "text-black"
                 })
     else:
+        nom_label = "PASS: SMT ARRAY" if "pcb" in category.lower() else "PASS: NOMINAL"
         # Pristine unit nominal PASS boxes (all green, no defect box)
         boxes = [
             {
                 "type": "pass",
-                "label": "PASS: SMT ARRAY",
+                "label": nom_label,
                 "top": "24%",
                 "left": "20%",
                 "width": "56%",
@@ -1456,12 +1489,19 @@ async def inspect_unit(
     gt_mask, detected_rot = resolve_defect_mask(category, sample_path, target_img_pil, is_known_anomaly=is_known_anomaly)
 
     # Detect orientation & auto-align to golden reference standard
-    unrot, best_corr = detect_best_orientation(target_img_pil, golden_img_pil)
+    # Factory fixture dataset samples (VisA, MVTec, Steel, Curated) are already upright;
+    # do NOT auto-rotate them as it breaks physical fixture alignment
+    is_dataset_sample = bool(sample_path and sample_path.strip() and any(
+        k in str(sample_path).replace("\\", "/").lower() for k in ["curated", "mvtec", "visa", "steel", "datasets"]
+    ))
+
     applied_rot = 0
-    if gt_mask is not None and detected_rot != 0:
-        applied_rot = detected_rot
-    elif unrot != 0 and best_corr > 0.20:
-        applied_rot = unrot
+    if not is_dataset_sample:
+        unrot, best_corr = detect_best_orientation(target_img_pil, golden_img_pil)
+        if gt_mask is not None and detected_rot != 0:
+            applied_rot = detected_rot
+        elif unrot != 0 and best_corr > 0.35:
+            applied_rot = unrot
 
     if applied_rot != 0:
         target_img_pil = target_img_pil.rotate(applied_rot, expand=True)
@@ -1619,7 +1659,8 @@ async def inspect_unit(
         W,
         H,
         is_mismatched=is_mismatched,
-        gt_mask=gt_mask
+        gt_mask=gt_mask,
+        category=category
     )
 
     # 6. Generate Thermal Heatmap & Overlay using real model anomaly map
