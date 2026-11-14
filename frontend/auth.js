@@ -78,8 +78,12 @@ const AuthManager = {
   },
 
   login(identifier, password, remember = true) {
-    const cleanId = (identifier || 'admin').trim();
+    const cleanId = (identifier || '').trim();
     const cleanPass = (password || '').trim();
+    if (!cleanId || !cleanPass) {
+      alert('Please enter both your User ID / Email and password.');
+      return false;
+    }
     const accounts = this.getAccounts();
 
     // Match by User ID OR Email (case-insensitive)
@@ -89,19 +93,13 @@ const AuthManager = {
     );
 
     if (!account) {
-      // If not in registered accounts, create an ephemeral account record
-      const role = (cleanId.toLowerCase().includes('admin') || cleanId.toLowerCase().includes('lead'))
-        ? 'QA Operations Lead'
-        : 'Conveyor Quality Inspector';
-      account = {
-        userId: cleanId.includes('@') ? cleanId.split('@')[0] : cleanId,
-        email: cleanId.includes('@') ? cleanId : `${cleanId.toLowerCase()}@defectvision.industrial`,
-        password: cleanPass || 'DefectVision@2026',
-        role: role,
-        workstationId: 'WS-' + Math.floor(100 + Math.random() * 900)
-      };
-      accounts.push(account);
-      this.saveAccounts(accounts);
+      alert('No account found for "' + cleanId + '". Please click "Create Account" below to register.');
+      return false;
+    }
+
+    if (account.password && cleanPass !== account.password) {
+      alert('Incorrect password. Please verify your password or click "Forgot Password".');
+      return false;
     }
 
     this.currentUser = {

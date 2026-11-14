@@ -37,3 +37,4 @@ EXPOSE 7860
 
 # Launch DefectVision FastAPI Server
 CMD ["sh", "-c", "uvicorn api_server:app --host 0.0.0.0 --port ${PORT:-7860}"]
+

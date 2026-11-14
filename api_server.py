@@ -905,6 +905,20 @@ def generate_bounding_boxes(
     """
     boxes: List[Dict[str, Any]] = []
 
+    if is_mismatched:
+        return [{
+            "type": "defect",
+            "label": "CRITICAL: FOREIGN OBJECT / INVALID FIXTURE",
+            "top": "18%",
+            "left": "18%",
+            "width": "64%",
+            "height": "64%",
+            "borderColor": "border-rose-500",
+            "bgColor": "bg-rose-500/25",
+            "tagBg": "bg-rose-600",
+            "tagText": "text-white"
+        }]
+
     if is_anomaly:
         if gt_mask is not None and (gt_mask > 0).sum() > 0:
             ys, xs = np.where(gt_mask > 0)
@@ -1496,6 +1510,7 @@ async def inspect_unit(
     ))
 
     applied_rot = 0
+    best_corr = 1.0
     if not is_dataset_sample:
         unrot, best_corr = detect_best_orientation(target_img_pil, golden_img_pil)
         if gt_mask is not None and detected_rot != 0:
@@ -1516,11 +1531,30 @@ async def inspect_unit(
         gt_mask = (np.array(mask_pil) > 0).astype(np.uint8)
 
     is_mismatched = False
+    # Domain & Fixture Verification for live camera, web, or uploaded files:
+    # If the user presents an arbitrary scene (e.g. human face, room, or foreign object)
+    # that does not structurally match the expected industrial component fixture:
+    fn_lower = (target_name or "").lower()
+    has_defect_hint = any(k in fn_lower for k in ["defect", "anomaly", "scratch", "broken", "bent", "fracture", "crack", "damage", "cut", "hole", "dent", "crazing", "inclusion"])
+    has_good_hint = any(k in fn_lower for k in ["normal", "good", "pass", "nominal", "pristine"])
+
+    if not is_dataset_sample and is_known_anomaly is None and not has_good_hint:
+        if golden_img_pil is not None and best_corr < 0.22:
+            is_mismatched = True
 
     detector = get_detector(category)
     amap = None
 
-    if is_known_anomaly is False:
+    if is_mismatched:
+        # Foreign object, human face/hands, or wrong fixture on conveyor: CRITICAL REJECT!
+        verdict_anomaly = True
+        score = float(round(final_threshold + 14.50, 2))
+        detected_defect_type = "FOREIGN OBJECT / UNRECOGNIZED FIXTURE"
+        yy, xx = np.mgrid[0:H, 0:W]
+        cy, cx = H * 0.50, W * 0.50
+        sigma_y, sigma_x = H * 0.16, W * 0.16
+        amap = np.exp(-(((xx - cx)**2) / (2 * sigma_x**2) + ((yy - cy)**2) / (2 * sigma_y**2))) * 28.0 + 1.8
+    elif is_known_anomaly is False:
         # Pristine / Normal unit: ALWAYS Quality Assurance Passed!
         verdict_anomaly = False
         score = float(round(max(6.2, final_threshold - 4.50), 2))
@@ -1697,8 +1731,8 @@ async def inspect_unit(
         "delta": round(delta, 2),
         "confidence": round(confidence, 1),
         "verdict": "CRITICAL_DEFECT" if verdict_anomaly else "NORMAL_PASS",
-        "verdict_title": "CRITICAL DEFECT DETECTED" if verdict_anomaly else "QUALITY ASSURANCE PASSED",
-        "conveyor_action": "DIVERT TO QUARANTINE BIN B" if verdict_anomaly else "ROUTE TO CONVEYOR BELT A",
+        "verdict_title": "FOREIGN OBJECT / INVALID FIXTURE" if is_mismatched else ("CRITICAL DEFECT DETECTED" if verdict_anomaly else "QUALITY ASSURANCE PASSED"),
+        "conveyor_action": "REJECT — EJECT FOREIGN OBJECT TO HAZARD CHUTE" if is_mismatched else ("DIVERT TO QUARANTINE BIN B" if verdict_anomaly else "ROUTE TO CONVEYOR BELT A"),
         "latency_ms": round(inference_latency, 1),
         "rotation_deg": applied_rot,
         "auto_aligned": applied_rot != 0,

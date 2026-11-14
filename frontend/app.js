@@ -841,52 +841,52 @@ function handlePastedImageUrl(url) {
  */
 const WEB_GALLERY_IMAGES = {
   pcb1: [
-    { title: "Nominal CAD Standard", path: "datasets/visa/pcb1/Data/Images/Normal/0000.JPG", tag: "NOMINAL PASS" },
-    { title: "Pristine Sensor Unit", path: "datasets/visa/pcb1/Data/Images/Normal/0012.JPG", tag: "NOMINAL PASS" },
-    { title: "Severed Conductor Trace", path: "datasets/visa/pcb1/Data/Images/Anomaly/000.JPG", tag: "DEFECT" },
-    { title: "Bent Terminal Header Pins", path: "datasets/visa/pcb1/Data/Images/Anomaly/009.JPG", tag: "DEFECT" }
+    { title: "Nominal CAD Standard", path: "data/curated/pcb1/good/0000.JPG", tag: "NOMINAL PASS" },
+    { title: "Pristine Sensor Unit", path: "data/curated/pcb1/good/0001.JPG", tag: "NOMINAL PASS" },
+    { title: "Severed Conductor Trace", path: "data/curated/pcb1/anomaly/000.JPG", tag: "DEFECT" },
+    { title: "Bent Terminal Header Pins", path: "data/curated/pcb1/anomaly/001.JPG", tag: "DEFECT" }
   ],
   pcb2: [
-    { title: "Nominal SMT Assembly", path: "datasets/visa/pcb2/Data/Images/Normal/0000.JPG", tag: "NOMINAL PASS" },
-    { title: "Pristine Alignment", path: "datasets/visa/pcb2/Data/Images/Normal/0005.JPG", tag: "NOMINAL PASS" },
-    { title: "Misplaced Resistor Defect", path: "datasets/visa/pcb2/Data/Images/Anomaly/000.JPG", tag: "DEFECT" },
-    { title: "Cold Solder Joint Defect", path: "datasets/visa/pcb2/Data/Images/Anomaly/001.JPG", tag: "DEFECT" }
+    { title: "Nominal SMT Assembly", path: "data/curated/pcb2/good/0000.JPG", tag: "NOMINAL PASS" },
+    { title: "Pristine Alignment", path: "data/curated/pcb2/good/0001.JPG", tag: "NOMINAL PASS" },
+    { title: "Misplaced Resistor Defect", path: "data/curated/pcb2/anomaly/000.JPG", tag: "DEFECT" },
+    { title: "Cold Solder Joint Defect", path: "data/curated/pcb2/anomaly/001.JPG", tag: "DEFECT" }
   ],
   pcb3: [
-    { title: "Nominal Multi-Layer Trace", path: "datasets/visa/pcb3/Data/Images/Normal/0000.JPG", tag: "NOMINAL PASS" },
-    { title: "Intact Copper Plane", path: "datasets/visa/pcb3/Data/Images/Normal/0005.JPG", tag: "NOMINAL PASS" },
-    { title: "Substrate Micro-Crack", path: "datasets/visa/pcb3/Data/Images/Anomaly/000.JPG", tag: "DEFECT" },
-    { title: "Inter-Trace Solder Bridge", path: "datasets/visa/pcb3/Data/Images/Anomaly/001.JPG", tag: "DEFECT" }
+    { title: "Nominal Multi-Layer Trace", path: "data/curated/pcb3/good/0000.JPG", tag: "NOMINAL PASS" },
+    { title: "Intact Copper Plane", path: "data/curated/pcb3/good/0001.JPG", tag: "NOMINAL PASS" },
+    { title: "Substrate Micro-Crack", path: "data/curated/pcb3/anomaly/000.JPG", tag: "DEFECT" },
+    { title: "Inter-Trace Solder Bridge", path: "data/curated/pcb3/anomaly/001.JPG", tag: "DEFECT" }
   ],
   pcb4: [
-    { title: "Nominal Straight Pin", path: "datasets/visa/pcb4/Data/Images/Normal/0000.JPG", tag: "NOMINAL PASS" },
-    { title: "Pristine Pin Interface", path: "datasets/visa/pcb4/Data/Images/Normal/0005.JPG", tag: "NOMINAL PASS" },
-    { title: "Severely Bent Header Pin", path: "datasets/visa/pcb4/Data/Images/Anomaly/000.JPG", tag: "DEFECT" },
-    { title: "Misaligned Pin Pitch", path: "datasets/visa/pcb4/Data/Images/Anomaly/001.JPG", tag: "DEFECT" }
+    { title: "Nominal Straight Pin", path: "data/curated/pcb4/good/0000.JPG", tag: "NOMINAL PASS" },
+    { title: "Pristine Pin Interface", path: "data/curated/pcb4/good/0001.JPG", tag: "NOMINAL PASS" },
+    { title: "Severely Bent Header Pin", path: "data/curated/pcb4/anomaly/000.JPG", tag: "DEFECT" },
+    { title: "Misaligned Pin Pitch", path: "data/curated/pcb4/anomaly/001.JPG", tag: "DEFECT" }
   ],
   capsules: [
-    { title: "Pristine Gelatin Capsule", path: "data/mvtec/capsule/train/good/000.png", tag: "NOMINAL PASS" },
-    { title: "Nominal Capsule Baseline", path: "data/mvtec/capsule/train/good/001.png", tag: "NOMINAL PASS" },
-    { title: "Shell Surface Scratch", path: "data/mvtec/capsule/test/scratch/000.png", tag: "DEFECT" },
-    { title: "Capsule Wall Fracture", path: "data/mvtec/capsule/test/crack/000.png", tag: "DEFECT" }
+    { title: "Pristine Gelatin Capsule", path: "data/curated/capsules/good/000.JPG", tag: "NOMINAL PASS" },
+    { title: "Nominal Capsule Baseline", path: "data/curated/capsules/good/001.JPG", tag: "NOMINAL PASS" },
+    { title: "Shell Surface Scratch", path: "data/curated/capsules/anomaly/000.JPG", tag: "DEFECT" },
+    { title: "Capsule Wall Fracture", path: "data/curated/capsules/anomaly/001.JPG", tag: "DEFECT" }
   ],
   bottle: [
-    { title: "Pristine Molded Glass Rim", path: "data/mvtec/bottle/train/good/000.png", tag: "NOMINAL PASS" },
-    { title: "Nominal Flange Standard", path: "data/mvtec/bottle/train/good/001.png", tag: "NOMINAL PASS" },
-    { title: "Chipped Flange Fracture", path: "data/mvtec/bottle/test/broken_large/000.png", tag: "DEFECT" },
-    { title: "Surface Contamination", path: "data/mvtec/bottle/test/contamination/000.png", tag: "DEFECT" }
+    { title: "Pristine Molded Glass Rim", path: "data/curated/bottle/good/000.png", tag: "NOMINAL PASS" },
+    { title: "Nominal Flange Standard", path: "data/curated/bottle/good/001.png", tag: "NOMINAL PASS" },
+    { title: "Chipped Flange Fracture", path: "data/curated/bottle/anomaly/broken_large_000.png", tag: "DEFECT" },
+    { title: "Surface Contamination", path: "data/curated/bottle/anomaly/broken_large_001.png", tag: "DEFECT" }
   ],
   cable: [
-    { title: "Pristine Cable Assembly", path: "data/mvtec/cable/train/good/000.png", tag: "NOMINAL PASS" },
-    { title: "Nominal Insulated Harness", path: "data/mvtec/cable/train/good/001.png", tag: "NOMINAL PASS" },
-    { title: "Cut Outer Insulation", path: "data/mvtec/cable/test/cut_outer_insulation/000.png", tag: "DEFECT" },
-    { title: "Bent Internal Braid", path: "data/mvtec/cable/test/bent_wire/000.png", tag: "DEFECT" }
+    { title: "Pristine Cable Assembly", path: "data/curated/cable/good/000.png", tag: "NOMINAL PASS" },
+    { title: "Nominal Insulated Harness", path: "data/curated/cable/good/001.png", tag: "NOMINAL PASS" },
+    { title: "Cut Outer Insulation", path: "data/curated/cable/anomaly/bent_wire_000.png", tag: "DEFECT" },
+    { title: "Bent Internal Braid", path: "data/curated/cable/anomaly/bent_wire_001.png", tag: "DEFECT" }
   ],
   steel: [
-    { title: "Pristine Nominal Strip", path: "data/steel/train/good/000.png", tag: "NOMINAL PASS" },
-    { title: "ASTM A1011 Standard", path: "data/steel/test/good/001.png", tag: "NOMINAL PASS" },
-    { title: "NEU Surface Scratch", path: "data/steel/test/scratches/000.png", tag: "DEFECT" },
-    { title: "Rolled-In Oxide Scale", path: "data/steel/test/rolled-in_scale/000.png", tag: "DEFECT" }
+    { title: "Pristine Nominal Strip", path: "data/curated/steel/good/000.png", tag: "NOMINAL PASS" },
+    { title: "ASTM A1011 Standard", path: "data/curated/steel/good/001.png", tag: "NOMINAL PASS" },
+    { title: "NEU Surface Scratch", path: "data/curated/steel/anomaly/crazing_000.png", tag: "DEFECT" },
+    { title: "Rolled-In Oxide Scale", path: "data/curated/steel/anomaly/crazing_001.png", tag: "DEFECT" }
   ]
 };
 
@@ -1789,11 +1789,16 @@ function handleAuthSubmit(e, mode) {
     }
   } else {
     // Mode === 'login'
-    const identifier = (document.getElementById('authUsername') && document.getElementById('authUsername').value) || 'admin';
-    const pass = (document.getElementById('authPassword') && document.getElementById('authPassword').value) || '';
+    const identifier = (document.getElementById('authUsername') && document.getElementById('authUsername').value || '').trim();
+    const pass = (document.getElementById('authPassword') && document.getElementById('authPassword').value || '').trim();
     const remember = document.getElementById('authRemember') ? document.getElementById('authRemember').checked : true;
+    if (!identifier || !pass) {
+      alert('Please enter your Operator User ID / Email and password, or switch to Create Account.');
+      return;
+    }
     if (window.AuthManager) {
-      window.AuthManager.login(identifier, pass, remember);
+      const ok = window.AuthManager.login(identifier, pass, remember);
+      if (!ok) return;
     }
   }
 
