@@ -1289,13 +1289,15 @@ function applyInspectionResults(data) {
   const placeholder = document.getElementById('inspectedPlaceholder');
   const overlayImg = document.getElementById('inspectedOverlayImage');
 
-  if (data.images.golden_reference) {
-    goldenImg.src = data.images.golden_reference;
-    goldenImg.style.display = 'block';
-    if (goldenPlaceholder) goldenPlaceholder.style.display = 'none';
-  } else {
-    goldenImg.style.display = 'none';
-    if (goldenPlaceholder) goldenPlaceholder.style.display = 'flex';
+  if (goldenImg) {
+    if (data.images && data.images.golden_reference) {
+      goldenImg.src = data.images.golden_reference;
+      goldenImg.style.display = 'block';
+      if (goldenPlaceholder) goldenPlaceholder.style.display = 'none';
+    } else {
+      goldenImg.style.display = 'none';
+      if (goldenPlaceholder) goldenPlaceholder.style.display = 'flex';
+    }
   }
 
   // 2. Pure Raw Captured Image (Completely without heatmap)

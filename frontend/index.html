@@ -320,9 +320,9 @@
             <div>
               <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 font-mono">
                 <i data-lucide="scan" class="w-4 h-4 text-[#00B050]"></i>
-                Triple Comparative Optical Viewfinder
+                Dual Comparative Optical Viewfinder
               </h3>
-              <p class="text-xs text-gray-400 font-mono" id="viewfinderUnitSub">Comparing Golden Reference vs. Raw Inspected Unit vs. AI Anomaly Heatmap</p>
+              <p class="text-xs text-gray-400 font-mono" id="viewfinderUnitSub">Comparing Raw Inspected Unit vs. AI Anomaly Heatmap</p>
             </div>
 
             <!-- Controls: Blend & Colormap -->
@@ -347,28 +347,13 @@
             </div>
           </div>
 
-          <!-- Triple Comparative Images (Golden Reference, Current Raw Unit, Thermal Heatmap) -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Dual Comparative Images (Current Raw Unit, Thermal Heatmap / Defect Localization) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             
-            <!-- Box 1: Golden Nominal Reference -->
+            <!-- Box 1: Current Selected Image (RAW with AI Bounding Boxes) -->
             <div class="flex flex-col">
               <div class="flex items-center justify-between text-xs text-gray-400 mb-2 font-mono">
-                <span class="flex items-center gap-1.5 text-gray-300 font-bold"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-[#00B050]"></i> 1. GOLDEN REFERENCE</span>
-                <span class="text-gray-500 text-[10px]">Nominal CAD Standard</span>
-              </div>
-              <div class="rounded-xl overflow-hidden bg-black border border-gray-800 aspect-square flex items-center justify-center relative p-2 shadow-inner">
-                <img id="goldenImage" src="" alt="Golden Unit" class="w-full h-full object-contain rounded-lg">
-                <div id="goldenPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-xs gap-2">
-                  <i data-lucide="image" class="w-8 h-8 text-gray-600"></i>
-                  <span>Loading Reference Unit...</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Box 2: Current Selected Image (RAW with AI Bounding Boxes) -->
-            <div class="flex flex-col">
-              <div class="flex items-center justify-between text-xs text-gray-400 mb-2 font-mono">
-                <span class="flex items-center gap-1.5 text-blue-400 font-bold"><i data-lucide="camera" class="w-3.5 h-3.5 text-blue-400"></i> 2. CURRENT RAW UNIT</span>
+                <span class="flex items-center gap-1.5 text-blue-400 font-bold"><i data-lucide="camera" class="w-3.5 h-3.5 text-blue-400"></i> 1. CURRENT RAW UNIT</span>
                 <div class="flex items-center gap-1.5">
                   <button id="btnToggleBoxes" onclick="toggleBoundingBoxes()" class="text-[10px] px-2 py-0.5 rounded bg-blue-950/80 text-blue-300 font-bold border border-blue-700/60 font-mono hover:bg-blue-900 transition flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
@@ -404,10 +389,10 @@
               </div>
             </div>
 
-            <!-- Box 3: Thermal Defect Anomaly Heatmap / Overlay -->
+            <!-- Box 2: Thermal Defect Anomaly Heatmap / Overlay -->
             <div class="flex flex-col">
               <div class="flex items-center justify-between text-xs text-gray-400 mb-2 font-mono">
-                <span class="flex items-center gap-1.5 text-white font-bold"><i data-lucide="crosshair" class="w-3.5 h-3.5 text-[#00B050]"></i> 3. DEFECT LOCALIZATION</span>
+                <span class="flex items-center gap-1.5 text-white font-bold"><i data-lucide="crosshair" class="w-3.5 h-3.5 text-[#00B050]"></i> 2. DEFECT LOCALIZATION</span>
                 <button id="inspectedUnitBadge" onclick="toggleViewfinder3Mode()" class="text-[10px] px-2.5 py-0.5 rounded bg-[#00B050]/20 text-[#00B050] font-bold border border-[#00B050]/40 font-mono hover:bg-[#00B050]/30 transition cursor-pointer flex items-center gap-1 shadow-sm" title="Click to toggle between Thermal Colormap and Raw Sensor">
                   <span id="inspectedUnitBadgeText">OVERLAY (JET)</span>
                   <i data-lucide="arrow-left-right" class="w-3 h-3"></i>
@@ -717,32 +702,25 @@
             <span class="px-2 py-0.5 rounded bg-gray-100 text-gray-800 font-bold border border-gray-200">OPTICAL COMPARISON</span>
             <span class="text-gray-500 font-mono">ResNet-50 Layers 2+3</span>
           </div>
-          <h3 class="text-base font-bold text-gray-900">Triple Comparative Sensor Alignment</h3>
+          <h3 class="text-base font-bold text-gray-900">Dual Comparative Sensor Alignment</h3>
           <p class="text-xs text-gray-600 mt-1 mb-4">
-            Direct comparison: Golden Reference standard vs Current Sensor Frame vs 2D Gaussian thermal overlay.
+            Direct comparison: Current Sensor Frame vs 2D Gaussian thermal overlay.
           </p>
         </div>
 
-        <div class="grid grid-cols-3 gap-2 bg-[#111111] p-3 rounded-xl border border-gray-800">
-          <div class="text-center font-mono">
-            <div class="rounded-lg overflow-hidden aspect-square bg-black border border-gray-700 flex items-center justify-center p-1">
-              <img id="diagThumbGolden" src="" alt="Golden CAD" class="w-full h-full object-contain">
-            </div>
-            <span class="text-[10px] text-gray-400 mt-1 block">1. Golden CAD</span>
-          </div>
-
+        <div class="grid grid-cols-2 gap-3 bg-[#111111] p-3 rounded-xl border border-gray-800">
           <div class="text-center font-mono">
             <div class="rounded-lg overflow-hidden aspect-square bg-black border border-gray-700 flex items-center justify-center p-1">
               <img id="diagThumbRaw" src="" alt="Raw Sensor" class="w-full h-full object-contain">
             </div>
-            <span class="text-[10px] text-gray-400 mt-1 block">2. Raw Sensor</span>
+            <span class="text-[10px] text-gray-400 mt-1 block">1. Raw Sensor</span>
           </div>
 
           <div class="text-center font-mono">
             <div class="rounded-lg overflow-hidden aspect-square bg-black border border-gray-700 flex items-center justify-center p-1">
               <img id="diagThumbHeatmap" src="" alt="Localization" class="w-full h-full object-contain">
             </div>
-            <span class="text-[10px] text-emerald-400 font-bold mt-1 block">3. Defect Overlay</span>
+            <span class="text-[10px] text-emerald-400 font-bold mt-1 block">2. Defect Overlay</span>
           </div>
         </div>
       </div>
@@ -1750,18 +1728,6 @@
             </button>
           </div>
 
-          <!-- Inspection Mode Selector for Web Images -->
-          <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-xl border border-gray-200">
-            <span class="text-xs font-mono text-gray-700 font-bold flex items-center gap-1.5">
-              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-[#00B050]"></i>
-              <span>Inspection Target Type:</span>
-            </span>
-            <div class="flex gap-1 font-mono text-[11px]">
-              <button type="button" id="btnWebModeAuto" onclick="setWebInspectMode('auto')" class="px-2.5 py-1 rounded-lg bg-gray-900 text-white font-bold transition shadow-sm">Auto (AI Vision)</button>
-              <button type="button" id="btnWebModeGood" onclick="setWebInspectMode('good')" class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 font-bold transition">Nominal / Good Unit</button>
-              <button type="button" id="btnWebModeDefect" onclick="setWebInspectMode('defect')" class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 hover:bg-rose-50 hover:text-rose-700 font-bold transition">Defective Unit</button>
-            </div>
-          </div>
 
           <!-- Easy Paste / Drop Zone from Browser -->
           <div id="modalWebDropZone" class="p-5 rounded-xl border-2 border-dashed border-gray-300 hover:border-[#00B050] bg-white text-center flex flex-col items-center justify-center gap-2 cursor-pointer transition" onclick="pasteFromClipboard()">
