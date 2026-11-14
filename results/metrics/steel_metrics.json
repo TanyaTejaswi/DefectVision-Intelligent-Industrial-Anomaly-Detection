@@ -1,0 +1,13 @@
+{
+  "category": "steel",
+  "auroc": 1.0,
+  "auprc": 0.9999999999999999,
+  "f1_score": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "optimal_threshold": 9.091756820678711,
+  "true_positives": 10,
+  "true_negatives": 5,
+  "false_positives": 0,
+  "false_negatives": 0
+}

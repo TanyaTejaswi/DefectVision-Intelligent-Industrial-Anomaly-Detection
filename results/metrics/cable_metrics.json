@@ -1,0 +1,13 @@
+{
+  "category": "cable",
+  "auroc": 0.4384,
+  "auprc": 0.5071412266297728,
+  "f1_score": 0.6666666666666666,
+  "precision": 0.5,
+  "recall": 1.0,
+  "optimal_threshold": 17.470970153808594,
+  "true_positives": 25,
+  "true_negatives": 0,
+  "false_positives": 25,
+  "false_negatives": 0
+}

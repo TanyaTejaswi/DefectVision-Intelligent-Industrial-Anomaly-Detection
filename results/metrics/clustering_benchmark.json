@@ -1,0 +1,39 @@
+{
+    "pipeline_metadata": {
+        "input_samples": 976,
+        "raw_dimensions": 2048,
+        "pca_components": 185,
+        "retained_variance_ratio": 0.9501024484634399
+    },
+    "clustering_evaluation_metrics (unsupervised)": {
+        "kmeans": {
+            "silhouette_score": 0.49964579939842224,
+            "davies_bouldin_index": 1.5019057336217334,
+            "calinski_harabasz_index": 333.8535998774995,
+            "evaluated_samples": 976,
+            "evaluated_clusters": 8
+        },
+        "dbscan": {
+            "silhouette_score": 0.5766687393188477,
+            "davies_bouldin_index": 0.80784048108385,
+            "calinski_harabasz_index": 459.5190411288441,
+            "evaluated_samples": 841,
+            "evaluated_clusters": 8
+        },
+        "hdbscan": {
+            "silhouette_score": 0.5535193085670471,
+            "davies_bouldin_index": 0.8128340522671962,
+            "calinski_harabasz_index": 276.61686957359973,
+            "evaluated_samples": 911,
+            "evaluated_clusters": 13
+        }
+    },
+    "anomaly_detection_metrics (supervised_validation)": {
+        "roc_auc": 0.9470941310975609,
+        "pr_auc": 0.9462171127389156,
+        "threshold": 1.3353477716445923,
+        "precision": 1.0,
+        "recall": 0.90625,
+        "f1_score": 0.9508196721311475
+    }
+}
