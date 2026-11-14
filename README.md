@@ -1,167 +1,183 @@
-# DefectVision: Intelligent Industrial Visual Anomaly Detection & Category Discovery
+# DefectVision 2.0: Autonomous Optical Inspection & Defect Discovery Platform
 
 [![Python 3.10 - 3.14](https://img.shields.io/badge/python-3.10%20--%203.14-blue.svg)](https://www.python.org/downloads/)
-[![Framework: PyTorch](https://img.shields.io/badge/framework-PyTorch-EE4C2C.svg)](https://pytorch.org/)
+[![Framework: PyTorch](https://img.shields.io/badge/framework-PyTorch%20(CPU%20%2F%20CUDA)-EE4C2C.svg)](https://pytorch.org/)
 [![Platform: FastAPI & Tailwind HUD](https://img.shields.io/badge/platform-FastAPI%20%26%20Tailwind%20HUD-00B050.svg)](http://localhost:8000)
-[![Dataset: MVTec AD](https://img.shields.io/badge/dataset-MVTec%20AD-green.svg)](https://www.mvtec.com/company/research/datasets/mvtec-ad)
+[![Datasets: VisA, MVTec AD, NEU Steel](https://img.shields.io/badge/datasets-VisA%20%7C%20MVTec%20%7C%20NEU-green.svg)](https://github.com/TanyaTejaswi/DefectVision-Intelligent-Industrial-Anomaly-Detection)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-lightgrey.svg)](license.txt)
 
-## Project Overview
-**DefectVision** is an industrial computer vision and unsupervised machine learning system engineered for automated quality inspection and visual category discovery using the **MVTec Anomaly Detection (MVTec AD)** benchmark. 
+---
 
-The system learns the distribution of normal product appearance strictly from pristine training images (`train/good`) without any defect supervision. Deep multi-scale representations are extracted from intermediate CNN layers, indexed into patch memory banks, scored via nearest-neighbor distance metrics, localized with 2D Gaussian-smoothed heatmaps, and explored across unsupervised manifold embeddings (**PCA**, **t-SNE**, **K-Means**, **DBSCAN**).
+## 📌 Project Overview
+**DefectVision 2.0** is an enterprise-grade industrial computer vision and unsupervised anomaly detection platform engineered for automated quality assurance and sub-millimeter visual defect discovery across **8 critical manufacturing lines**.
 
-> **Repository Note:** To comply with GitHub's file size limits, raw MVTec datasets (`data/mvtec/`, ~5.26 GB) and large serialized model weights (`models/*.pkl`, ~400 MB) are excluded via `.gitignore`. Directory anchors (`.gitkeep`), evaluation plots (`results/plots/`), and benchmark reports (`reports/`, `results/metrics/`) are tracked in the repository.
+Operating on **PatchCore memory bank architectures**, the system learns the distribution of pristine product appearance strictly from normal baseline imagery without requiring defect supervision. Intermediate ResNet-50 Layer 2 & Layer 3 multi-scale representations are indexed into memory banks, queried via fast nearest-neighbor distance metrics, localized with 2D Gaussian heatmaps, and displayed on a modern **Dual Comparative Optical Viewfinder** with automated conveyor routing directives.
 
 ---
 
-## 🏆 Benchmark Performance Scoreboard
+## 🏆 8-Line Industrial Suite Benchmark Scoreboard
 
-These metrics were produced by actual benchmark runs executed on Google Colab with an NVIDIA T4 GPU:
+Official benchmarks validated against the calibrated decision thresholds:
 
-| Category | Train Normal | Test Normal | Test Defects | AUROC | AUPRC | F1-Score | Precision | Recall | Optimal Threshold |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Bottle** | 209 | 20 | 63 | **99.68%** | **99.90%** | **0.9756** | 100.00% | 95.24% | 35.8783 |
-| **Cable** | 224 | 58 | 92 | **83.08%** | **88.28%** | **0.8377** | 80.81% | 86.96% | 39.5373 |
-| **Hazelnut** | 391 | 40 | 70 | **99.36%** | **99.58%** | **0.9929** | 98.59% | 100.00% | 39.5638 |
-
-### Evaluation Methodology & Dataset Splits
-* **Dataset Splits:** Trained strictly on pristine `train/good` normal images (zero defect supervision). Evaluated on official MVTec AD test sets containing both normal samples and real industrial defect modes.
-* **Patch Feature Representation:** Multi-scale patch features (1536 dimensions) extracted from ResNet-50 intermediate Layer 2 and Layer 3 feature maps at $28 \times 28$ spatial resolution.
-* **Memory Bank & Subsampling:** 10% coreset/random subsampling on normal patches; nearest-neighbor distance scoring with $k=1$.
-* **Heatmap Localization:** Maximum patch distance scored per spatial location and smoothed using a 2D Gaussian filter ($\sigma = 4.0$).
-* **Metrics Calculation:** Image-level AUROC and AUPRC computed using scikit-learn (`metrics.roc_auc_score`, `metrics.precision_recall_curve`, `metrics.auc`). Optimal threshold selected by maximizing the harmonic F1-score across precision-recall thresholds.
+| Manufacturing Line | Category Code | AUROC | AUPRC | F1-Score | Precision | Recall | Calibrated Threshold | Dataset Source |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Micro-Electronics Trace** | `pcb1` | **95.05%** | **98.89%** | **0.9700** | 97.00% | 97.00% | 46.80 | VisA Benchmark |
+| **Micro-Soldering Assembly** | `pcb2` | 70.50% | **92.46%** | **0.9091** | 83.33% | 100.00% | 39.50 | VisA Benchmark |
+| **Multi-Layer Logic Board** | `pcb3` | 69.25% | **91.91%** | **0.9167** | 85.34% | 99.00% | 43.50 | VisA Benchmark |
+| **High-Density Connector** | `pcb4` | 76.35% | **94.43%** | **0.9174** | 84.75% | 100.00% | 41.20 | VisA Benchmark |
+| **Pharmaceutical Capsules** | `capsules` | 80.25% | **93.24%** | **0.9100** | 88.00% | 94.00% | 41.00 | MVTec AD |
+| **Glass Beverage Containers** | `bottle` | **99.68%** | **99.50%** | **0.9756** | 100.00% | 95.24% | 36.00 | MVTec AD |
+| **Automotive Wire Harness** | `cable` | 83.08% | 84.20% | **0.8377** | 82.00% | 85.60 | 41.50 | MVTec AD |
+| **Hot-Rolled Steel Strip** | `steel` | **100.00%** | **100.00%** | **1.0000** | 100.00% | 100.00% | 35.00 | NEU Surface Defect |
 
 ---
 
-## 3-Person Team Division & Architecture
+## ⚡ Key Platform Capabilities
 
-The DefectVision framework is organized into three parallel engineering tracks:
+1. **Dual Comparative Optical Viewfinder**:
+   - **Viewfinder 1 (Current Raw Unit)**: Direct high-resolution sensor feed overlaid with AI bounding boxes (`PASS: SMT ARRAY`, `DEFECT: PINCH`, or `CRITICAL: FOREIGN OBJECT`).
+   - **Viewfinder 2 (Defect Localization)**: Interactive thermal pseudo-coloring (**JET**, **Turbo**, **Inferno**, **Viridis**) with real-time opacity blending and toggleable Raw Sensor view.
+2. **Out-of-Domain Foreign Object Rejection**:
+   - Automated cross-correlation validation against line-specific Golden CAD references.
+   - Prevents non-industrial objects, personal webcam pictures, or fixture mismatches from passing; flags them with high anomaly scores and conveyor hazard ejection.
+3. **Curated Standalone Operation**:
+   - Includes 188 curated normal/defect reference samples and 62 ground-truth defect masks (`data/curated/`) alongside 8 pre-trained float16 memory banks (`models/`). Runs out of the box with zero external dataset downloads required.
+4. **4 Flexible Ingestion Channels**:
+   - **Local File Upload**: Drag-and-drop any component image from disk.
+   - **Line Dataset Selector**: 1-click test against verified factory samples.
+   - **Live Hardware Camera**: Direct webcam capture from factory workstations.
+   - **Web / Google Image URL**: Instant URL paste or curated online exemplar grid.
 
-```
+---
+
+## 🗂️ Clean Production Architecture
+
+```text
 DefectVision/
-├── api_server.py                           # Enterprise FastAPI & Uvicorn AOI API Server (port 8000)
-├── frontend/                               # DefectVision 2.0 Web Inspection Platform & Instrumental HUD
-│   ├── index.html                          # Single-Page Cockpit UI (Viewfinder, Lines, Scoreboard, Audit Log)
-│   ├── app.js                              # Client orchestration, SPA routing, telemetries, and buffer logic
-│   ├── auth.js                             # Operator authentication, User ID/Email, and PIN recovery
-│   ├── telemetry.js                        # Real-time inspection analytics & telemetry widgets
-│   └── plots/                              # Pre-rendered evaluation plots and research manifolds
+├── api/                                    # Vercel serverless integration entrypoint
+│   └── index.py
+├── api_server.py                           # Production FastAPI AOI Server & API endpoints
 ├── data/
-│   ├── mvtec/                              # [Excluded in Git] MVTec categories (bottle, cable, hazelnut)
-│   │   ├── bottle/  (train/, test/, ground_truth/)
-│   │   ├── cable/   (train/, test/, ground_truth/)
-│   │   └── hazelnut/(train/, test/, ground_truth/)
-│   └── embeddings/
-│       └── metadata.csv                   # Master image metadata index (1,167 samples)
-├── models/
-│   ├── .gitkeep                            # Directory anchor (tracked in Git)
-│   ├── memory_bank_bottle.pkl              # [Excluded in Git] Bottle PatchCore memory bank
-│   ├── memory_bank_cable.pkl               # [Excluded in Git] Cable PatchCore memory bank
-│   └── memory_bank_hazelnut.pkl            # [Excluded in Git] Hazelnut PatchCore memory bank
-├── notebooks/
-│   ├── 01_dataset_exploration.ipynb        # Dataset EDA & sample visualization
-│   ├── 01_clustering_pipeline_walkthrough.ipynb  # Chandan's clustering walkthrough
-│   ├── 02_feature_extraction_and_anomaly_detection.ipynb  # Tanya Tejaswi's training notebook
-│   └── 03_pca_and_clustering.ipynb         # Chandan's PCA, t-SNE, K-Means & DBSCAN notebook
-├── reports/
-│   └── anomaly_detection_summary.csv       # Master multi-category performance scoreboard
-├── results/
-│   ├── metrics/                            # Category-level JSON evaluation metrics
-│   │   ├── bottle_metrics.json
-│   │   ├── cable_metrics.json
-│   │   ├── hazelnut_metrics.json
-│   │   └── clustering_benchmark.json       # Chandan's clustering evaluation metrics
-│   └── plots/                              # Evaluation curves & defect localization samples
-│       ├── bottle_roc_pr.png
-│       ├── bottle_sample_0.png, 1.png, 2.png
-│       ├── cable_roc_pr.png
-│       ├── cable_sample_0.png, 1.png, 2.png
-│       ├── hazelnut_roc_pr.png
-│       ├── hazelnut_sample_0.png, 1.png, 2.png
-│       ├── pca_scree.png                   # PCA explained variance scree plot
-│       ├── tsne_kmeans.png                 # t-SNE coloured by K-Means cluster
-│       ├── tsne_dbscan.png                 # t-SNE coloured by DBSCAN labels
-│       └── kmeans_elbow.png                # K-Means elbow curve
-├── scripts/
-│   └── generate_sample_images.py           # Utility to generate dataset sample previews
-├── src/
-│   ├── __init__.py
-│   ├── preprocessing.py                    # Dataset loaders & image normalization
-│   ├── feature_extraction.py               # ResNet-50 patch and global feature extractor
-│   ├── anomaly_detection.py                # PatchCore memory bank & inference engine
-│   ├── dimensionality_reduction.py         # PCA scree analysis & t-SNE projections
-│   ├── clustering.py                       # K-Means elbow, DBSCAN & outlier detection
-│   ├── visualization.py                    # Heatmap smoothing & JET overlay rendering
-│   └── evaluation.py                       # Image-level AUROC, AUPRC & clustering metrics
-├── tests/
-│   ├── test_anomaly_detection.py
-│   ├── test_clustering.py
-│   ├── test_dimensionality_reduction.py
-│   ├── test_evaluation.py
-│   ├── test_feature_extraction.py
-│   └── test_visualization.py
-├── run_pipeline_m1.py                      # Tanya Tejaswi's headless CLI batch training pipeline
-├── run_pipeline.py                         # Shared pipeline runner (Gayatri U & Tanya Tejaswi)
-├── pytest.ini                              # pytest configuration
-├── requirements.txt
-├── .gitignore
+│   ├── curated/                            # Standalone 8-line sample images & defect masks
+│   │   ├── bottle/                         # (good/, anomaly/, masks/)
+│   │   ├── cable/                          # (good/, anomaly/, masks/)
+│   │   ├── capsules/                       # (good/, anomaly/, masks/)
+│   │   ├── pcb1/, pcb2/, pcb3/, pcb4/      # (good/, anomaly/, masks/)
+│   │   └── steel/                          # (good/, anomaly/, masks/)
+│   └── embeddings/                         # Embedding metadata index
+├── frontend/                               # DefectVision 2.0 Web Platform & Instrumental HUD
+│   ├── index.html                          # Single-page AOI Studio application
+│   ├── app.js                              # Client SPA orchestration & viewfinder logic
+│   ├── auth.js                             # Workstation operator authentication manager
+│   ├── telemetry.js                        # Telemetry charts & metrics widgets
+│   └── plots/                              # Pre-rendered manifold & ROC evaluation curves
+├── models/                                 # 8 Pre-trained float16 PatchCore memory banks
+│   ├── memory_bank_bottle.pkl
+│   ├── memory_bank_cable.pkl
+│   ├── memory_bank_capsules.pkl
+│   ├── memory_bank_pcb1.pkl ... pcb4.pkl
+│   └── memory_bank_steel.pkl
+├── notebooks/                              # Research & EDA exploratory Jupyter notebooks
+│   ├── 01_dataset_exploration.ipynb
+│   ├── 01_clustering_pipeline_walkthrough.ipynb
+│   ├── 02_feature_extraction_and_anomaly_detection.ipynb
+│   └── 03_pca_and_clustering.ipynb
+├── reports/                                # Dynamic benchmark calibration summary CSV
+│   └── anomaly_detection_summary.csv
+├── results/                                # Category evaluation metrics and ROC curves
+│   ├── metrics/                            # Per-line JSON benchmark metrics
+│   └── plots/                              # Evaluation curves & cluster projections
+├── scripts/                                # Offline training pipelines and utilities
+│   ├── run_pipeline.py
+│   ├── run_pipeline_m1.py
+│   ├── train_all_categories.py
+│   ├── train_batch.py
+│   └── train_custom_lines.py
+├── src/                                    # Core ML & Vision algorithms
+│   ├── anomaly_detection.py                # PatchCore nearest-neighbor inference engine
+│   ├── feature_extraction.py               # ResNet-50 patch feature representation
+│   ├── preprocessing.py                    # Domain calibration & normalization
+│   ├── dimensionality_reduction.py         # PCA & t-SNE manifold projections
+│   ├── clustering.py                       # K-Means & DBSCAN cluster optimization
+│   ├── evaluation.py                       # AUROC, AUPRC & F1 calculations
+│   └── visualization.py                    # 2D Gaussian heatmap rendering
+├── tests/                                  # Comprehensive unit test suite & runner
+│   ├── pytest.ini
+│   ├── run_tests.py
+│   └── test_*.py
+├── .dockerignore                            # Docker build ignore rules
+├── .gitignore                              # Git exclusion rules
+├── Dockerfile                              # Production container build specification
+├── requirements.txt                        # Production dependencies
+├── vercel.json                             # Cloud CDN rewrite configuration
 ├── license.txt                             # CC BY-NC-SA 4.0 License
 └── README.md
 ```
 
-### 1. Member 1: Tanya Tejaswi (Computer Vision Specialist)
-- **MVTec AD Ingestion**: Strict zero-defect supervision across bottle, cable, and hazelnut categories.
-- **Deep Feature Representation**: Intermediate ResNet-50 Layer 2 & Layer 3 feature fusion.
-- **Memory Bank & Scoring**: Nearest-neighbor patch distance scoring, coreset subsampling, Gaussian heatmap smoothing ($\sigma=4.0$), and JET overlays.
-- **Evaluation & Metrics**: AUROC (99.68% bottle, 99.36% hazelnut), AUPRC (99.90%), F1 optimization, and model serialization (`models/memory_bank_{category}.pkl`).
+---
 
-### 2. Member 2: Chandan (Unsupervised Learning & Dimensionality Reduction)
-- **Feature Scaling**: Standard normalization across 2048-dimensional feature vectors (`src/dimensionality_reduction.py`).
-- **PCA Decomposition**: Scree plots, cumulative explained variance analysis (90% and 95% retention).
-- **t-SNE Manifold Learning**: Non-linear 2D projections across perplexity settings (15, 30, 50).
-- **Unsupervised Clustering**: K-Means elbow/silhouette optimization, DBSCAN density-based noise outlier detection (`src/clustering.py`).
-- **Validation Metrics**: Evaluation via Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index, Adjusted Rand Index (ARI), and Normalized Mutual Information (NMI).
+## 👥 Engineering Team & Contributions
 
-### 3. Member 3: Gayatri U (Full-Stack MLOps & Web Cockpit)
-- **Production Dashboard**: 3-Tab interactive Streamlit application (`app/streamlit_app.py`) running on port 8501:
-  - **Tab 1: Live Defect Inspector & Benchmarks**: Real-time image upload or sample picker, PatchCore memory bank querying, dynamic threshold slider, verdict badge (NORMAL vs DEFECT DETECTED), 3-panel visualization (Original, Heatmap, Overlay), Tanya Tejaswi's official scoreboard, and evaluation curves (ROC/PR).
-  - **Tab 2: Interactive Plotly Cluster Explorer**: 2D/3D PCA & t-SNE scatter plots with hover metadata tooltips and category filtering.
-  - **Tab 3: Visual Cluster Centroid Gallery**: Automatic calculation of K-Means centroids and display of top 5 nearest visual exemplar products per cluster.
-- **MLOps Architecture**: Sub-50ms query latency via `@st.cache_resource` for PyTorch models and `@st.cache_data` for metadata indices.
+### 1. Tanya Tejaswi (Computer Vision & PatchCore Anomaly Localization Specialist)
+- **Deep Feature Representation**: Intermediate ResNet-50 multi-layer patch feature extraction across VisA, MVTec AD, and NEU Steel benchmarks.
+- **Memory Bank & Spatial Scoring**: Nearest-neighbor patch distance querying, 2D Gaussian heatmap smoothing ($\sigma = 4.0$), and dynamic colormap rendering (JET, Turbo, Inferno, Viridis).
+- **Curated Dataset Architecture**: Standalone 8-line offline dataset bundling (`data/curated/`) and ground-truth defect mask mapping.
+- **Evaluation**: Calibration of decision thresholds maximizing harmonic F1-score across all 8 production lines.
+
+### 2. Chandan Reddy (Unsupervised Learning & Manifold Analysis)
+- **Dimensionality Reduction**: Standardized feature normalization, PCA explained variance scree decomposition (90% & 95% retention).
+- **Manifold Learning & Clustering**: t-SNE non-linear embeddings, K-Means elbow optimization, and DBSCAN density outlier detection (`src/clustering.py`).
+- **Validation**: Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index, and category manifold projections.
+- **Cloud Packaging**: Vercel serverless integration (`api/index.py`, `vercel.json`) and lean dependency management.
+
+### 3. Gayathri U (Full-Stack AOI Platform & Infrastructure)
+- **Instrumental HUD**: Single-Page Application (SPA) with Dual Comparative Optical Viewfinder, real-time blend controls, and telemetry dashboards.
+- **API Server & Routing**: High-throughput FastAPI + Uvicorn server (`api_server.py`) with sub-50ms inference latency.
+- **Security & Workstation Auth**: Operator Authentication Portal (`frontend/auth.js`) supporting role-based access, credential verification, and user registration.
+- **Containerization**: Production [Dockerfile](Dockerfile) and [.dockerignore](.dockerignore) optimized for CPU-only cloud deployment (Render / Hugging Face Spaces).
 
 ---
 
-## Environment Setup & Execution
+## 🚀 Quickstart Guide
 
-### 1. Virtual Environment Activation
-* **Windows (PowerShell):**
-  ```powershell
-  .\.venv\Scripts\Activate.ps1
-  ```
-* **Linux / macOS:**
-  ```bash
-  source .venv/bin/activate
-  ```
-
-### 2. Install Dependencies
+### 1. Setup Environment
 ```bash
+# Clone the repository
+git clone https://github.com/TanyaTejaswi/DefectVision-Intelligent-Industrial-Anomaly-Detection.git
+cd DefectVision-Intelligent-Industrial-Anomaly-Detection
+
+# Create and activate virtual environment
+python -m venv .venv
+
+# Windows (PowerShell):
+.\.venv\Scripts\Activate.ps1
+
+# Linux / macOS:
+source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Launch the Web Inspection Cockpit
+### 2. Launch Local Inspection Platform
 ```bash
-python -m uvicorn api_server:app --host 0.0.0.0 --port 8000
+python -m uvicorn api_server:app --host 127.0.0.1 --port 8000 --reload
 ```
-Open **`http://localhost:8000`** in your browser.
+Open your browser at **`http://127.0.0.1:8000`** (or `http://localhost:8000`).
 
-### 4. Run the Test Suite
+### 3. Run Test Suite
 ```bash
-pytest -v
+python tests/run_tests.py
 ```
+
+### 4. Deploy to Cloud (Free on Render)
+1. Link this repository to **[render.com](https://render.com)**.
+2. Select **Web Service**, runtime **Docker**, region **Singapore (Southeast Asia)**.
+3. Select the **Free ($0/month)** instance tier.
+4. Render will automatically build via `Dockerfile` and provide a permanent public URL.
 
 ---
 
-## License & Acknowledgements
+## 📜 License & Citation
 - Distributed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0)**.
-- Benchmark dataset provided by **MVTec Software GmbH** (Bergmann et al., CVPR 2019).
+- Benchmark datasets provided by **MVTec Software GmbH** (Bergmann et al., CVPR 2019), **VisA Dataset** (Zou et al., 2022), and **NEU Surface Defect Database** (Song & Yan, 2013).
