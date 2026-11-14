@@ -1394,6 +1394,12 @@ async def inspect_unit(
             except Exception as e:
                 print(f"Steel surface analyzer note: {e}")
 
+        # Active decision threshold
+        active_thresh = final_threshold
+        if detector is not None and getattr(detector, "optimal_threshold", None) is not None:
+            active_thresh = float(detector.optimal_threshold)
+            final_threshold = active_thresh
+
         # 2. Extract real ResNet-50 PatchCore spatial features & score against memory bank
         model_score = None
         model_amap = None
@@ -1418,12 +1424,6 @@ async def inspect_unit(
                 model_amap = calc_amap
             except Exception as e:
                 print(f"Error computing PatchCore inference: {e}")
-
-        # 3. Active decision threshold
-        active_thresh = final_threshold
-        if detector is not None and getattr(detector, "optimal_threshold", None) is not None:
-            active_thresh = float(detector.optimal_threshold)
-            final_threshold = active_thresh
 
         # 4. Formulate detection verdict & anomaly localization
         if model_score is not None and model_amap is not None:
