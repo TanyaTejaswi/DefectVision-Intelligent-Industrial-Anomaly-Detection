@@ -1,0 +1,28 @@
+# Exclude heavy raw datasets (curated samples in data/curated are used for deployment)
+datasets/
+data/mvtec/
+data/steel/
+data/visa/
+
+# Exclude notebooks and experiment scrapbooks
+notebooks/
+scratch/
+temp/
+tmp/
+*.log
+
+# Exclude Git and environment artifacts
+.git/
+.gitignore
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+venv/
+env/
+.venv/
+.idea/
+.vscode/
+.gemini/
