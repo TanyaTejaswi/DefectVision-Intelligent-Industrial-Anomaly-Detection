@@ -1,5 +1,5 @@
 # ==============================
-# Raw Dataset and Archives
+# Raw Dataset and Archives (Kept local, curated standalone dataset tracked below)
 # ==============================
 mvtec-ad/
 mvtec_ad/
@@ -16,6 +16,10 @@ data/datasets/
 *.zip
 node_modules/
 frontend/node_modules/
+
+# Keep curated lightweight standalone dataset (~45MB) tracked for out-of-the-box operation
+!data/curated/
+!data/curated/**
 
 # ==============================
 # Python Cache and Compiled Files
@@ -79,6 +83,7 @@ dist/
 
 # ==============================
 # Model and Large Generated Files (>100MB GitHub limit)
+# Whitelist 8 production line float16 models for offline out-of-the-box operation
 # ==============================
 *.h5
 *.hdf5
@@ -86,6 +91,14 @@ dist/
 *.pt
 *.pth
 *.pkl
+!models/memory_bank_pcb1.pkl
+!models/memory_bank_pcb2.pkl
+!models/memory_bank_pcb3.pkl
+!models/memory_bank_pcb4.pkl
+!models/memory_bank_capsules.pkl
+!models/memory_bank_bottle.pkl
+!models/memory_bank_cable.pkl
+!models/memory_bank_steel.pkl
 *.npy
 !data/embeddings/metadata.csv
 

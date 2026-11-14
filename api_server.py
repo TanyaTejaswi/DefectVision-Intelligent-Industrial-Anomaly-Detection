@@ -195,9 +195,24 @@ sync_suite_with_ml_reports()
 # Image Finder Helper
 # -----------------------------------------------------------------------------
 def find_image(category: str, defect_type: str = "good", index: int = 0) -> Optional[Path]:
-    """Finds image path from MVTec, VisA, or Steel datasets."""
+    """Finds image path from Curated standalone, MVTec, VisA, or Steel datasets."""
     root = PROJECT_ROOT
     is_normal = defect_type.lower() in ["good", "normal", "pristine", "nominal", "pass"]
+
+    # 0. Curated Standalone Dataset (Ships directly with repo for offline / fresh laptop operation)
+    curated_cat_dir = root / "data" / "curated" / category
+    if curated_cat_dir.exists():
+        sub_dir = "good" if is_normal else "anomaly"
+        folder = curated_cat_dir / sub_dir
+        if folder.exists():
+            files = sorted(list(folder.glob("*.[jJ][pP][gG]")) + list(folder.glob("*.[pP][nN][gG]")))
+            if files:
+                if not is_normal and defect_type.lower() not in ["defect", "anomaly"]:
+                    keyword = defect_type.lower()
+                    matched = [f for f in files if keyword in f.stem.lower() or f.stem.lower() in keyword]
+                    if matched:
+                        return matched[index % len(matched)]
+                return files[index % len(files)]
 
     # 1. VisA Check
     visa_cat_dir = root / "datasets" / "visa" / category
@@ -1050,6 +1065,41 @@ def get_dataset_samples_for_line(cat: str) -> List[Dict[str, Any]]:
     """Retrieves real dataset files formatted like '#000 | TRAIN | good' or '#000 | ANOMALY | defect'."""
     items = []
     root = PROJECT_ROOT
+
+    # 0. Curated Standalone Dataset (Ships directly with repo for offline / fresh laptop operation)
+    c_dir = root / "data" / "curated" / cat
+    if c_dir.exists():
+        anom_files = sorted(list((c_dir / "anomaly").glob("*.*")))
+        norm_files = sorted(list((c_dir / "good").glob("*.*")))
+        if anom_files or norm_files:
+            for f in anom_files:
+                parts = f.stem.split("_")
+                defect_label = "_".join(parts[:-1]) if len(parts) > 1 and parts[-1].isdigit() else "defect"
+                display_num = parts[-1] if len(parts) > 1 and parts[-1].isdigit() else f.stem
+                items.append({
+                    "id": f"{cat}_anom_{f.stem}",
+                    "category": cat,
+                    "display": f"#{display_num} | ANOMALY | {defect_label}",
+                    "filename": f.name,
+                    "split": "ANOMALY",
+                    "defect_type": defect_label,
+                    "is_anomaly": True,
+                    "rel_path": str(f.relative_to(root)).replace("\\", "/")
+                })
+            for f in norm_files:
+                parts = f.stem.split("_")
+                display_num = parts[-1] if len(parts) > 1 and parts[-1].isdigit() else f.stem
+                items.append({
+                    "id": f"{cat}_norm_{f.stem}",
+                    "category": cat,
+                    "display": f"#{display_num} | NORMAL | good",
+                    "filename": f.name,
+                    "split": "NORMAL",
+                    "defect_type": "good",
+                    "is_anomaly": False,
+                    "rel_path": str(f.relative_to(root)).replace("\\", "/")
+                })
+            return items
 
     # 1. VisA
     v = root / "datasets" / "visa" / cat / "Data" / "Images"
