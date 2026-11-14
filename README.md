@@ -116,25 +116,25 @@ DefectVision/
 
 ---
 
-## 👥 Engineering Team & Contributions
+## ⚙️ Core Technical Modules & Functionality
 
-### 1. Tanya Tejaswi (Computer Vision & PatchCore Anomaly Localization Specialist)
+### 1. Computer Vision & PatchCore Anomaly Localization Engine (`src/`)
 - **Deep Feature Representation**: Intermediate ResNet-50 multi-layer patch feature extraction across VisA, MVTec AD, and NEU Steel benchmarks.
-- **Memory Bank & Spatial Scoring**: Nearest-neighbor patch distance querying, 2D Gaussian heatmap smoothing ($\sigma = 4.0$), and dynamic colormap rendering (JET, Turbo, Inferno, Viridis).
-- **Curated Dataset Architecture**: Standalone 8-line offline dataset bundling (`data/curated/`) and ground-truth defect mask mapping.
-- **Evaluation**: Calibration of decision thresholds maximizing harmonic F1-score across all 8 production lines.
+- **Memory Bank & Spatial Scoring**: Nearest-neighbor patch distance querying, 2D Gaussian heatmap smoothing ($\sigma = 4.0$), and dynamic thermal colormaps (JET, Turbo, Inferno, Viridis).
+- **Curated Dataset & Defect Masks**: Standalone 8-line offline dataset bundling (`data/curated/`) and ground-truth pixel-level defect mask mapping.
+- **Decision Threshold Calibration**: Harmonic F1-score optimization across all 8 production lines for automated PASS / DEFECT conveyor decisions.
 
-### 2. Chandan Reddy (Unsupervised Learning & Manifold Analysis)
-- **Dimensionality Reduction**: Standardized feature normalization, PCA explained variance scree decomposition (90% & 95% retention).
-- **Manifold Learning & Clustering**: t-SNE non-linear embeddings, K-Means elbow optimization, and DBSCAN density outlier detection (`src/clustering.py`).
-- **Validation**: Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index, and category manifold projections.
-- **Cloud Packaging**: Vercel serverless integration (`api/index.py`, `vercel.json`) and lean dependency management.
+### 2. Unsupervised Learning & Manifold Analysis (`src/dimensionality_reduction.py`, `src/clustering.py`)
+- **Dimensionality Reduction**: Standardized feature normalization and PCA explained variance scree decomposition (90% & 95% retention).
+- **Manifold Learning & Clustering**: t-SNE non-linear embeddings, K-Means elbow optimization, and DBSCAN density-based outlier detection.
+- **Quantitative Validation**: Evaluation via Silhouette Score, Davies-Bouldin Index, Calinski-Harabasz Index, and category manifold projections.
+- **Serverless Integration**: Vercel serverless integration (`api/index.py`, `vercel.json`) with lean production requirements.
 
-### 3. Gayathri U (Full-Stack AOI Platform & Infrastructure)
+### 3. Full-Stack AOI Platform & Infrastructure (`frontend/`, `api_server.py`)
 - **Instrumental HUD**: Single-Page Application (SPA) with Dual Comparative Optical Viewfinder, real-time blend controls, and telemetry dashboards.
 - **API Server & Routing**: High-throughput FastAPI + Uvicorn server (`api_server.py`) with sub-50ms inference latency.
-- **Security & Workstation Auth**: Operator Authentication Portal (`frontend/auth.js`) supporting role-based access, credential verification, and user registration.
-- **Containerization**: Production [Dockerfile](Dockerfile) and [.dockerignore](.dockerignore) optimized for CPU-only cloud deployment (Render / Hugging Face Spaces).
+- **Workstation Security & Auth**: Operator Authentication Portal (`frontend/auth.js`) supporting role-based access, credential verification, and user registration.
+- **Lean Containerization**: Production [Dockerfile](Dockerfile) and [.dockerignore](.dockerignore) optimized for memory-constrained CPU cloud environments (Render / Hugging Face Spaces).
 
 ---
 
