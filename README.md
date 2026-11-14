@@ -1,10 +1,13 @@
 # DefectVision 2.0: Autonomous Optical Inspection & Defect Discovery Platform
 
+[![Live Demo: Render](https://img.shields.io/badge/Live%20Demo-Render%20Cloud-success.svg)](https://defectvision-intelligent-industrial.onrender.com)
 [![Python 3.10 - 3.14](https://img.shields.io/badge/python-3.10%20--%203.14-blue.svg)](https://www.python.org/downloads/)
 [![Framework: PyTorch](https://img.shields.io/badge/framework-PyTorch%20(CPU%20%2F%20CUDA)-EE4C2C.svg)](https://pytorch.org/)
-[![Platform: FastAPI & Tailwind HUD](https://img.shields.io/badge/platform-FastAPI%20%26%20Tailwind%20HUD-00B050.svg)](http://localhost:8000)
+[![Platform: FastAPI & Tailwind HUD](https://img.shields.io/badge/platform-FastAPI%20%26%20Tailwind%20HUD-00B050.svg)](https://defectvision-intelligent-industrial.onrender.com)
 [![Datasets: VisA, MVTec AD, NEU Steel](https://img.shields.io/badge/datasets-VisA%20%7C%20MVTec%20%7C%20NEU-green.svg)](https://github.com/TanyaTejaswi/DefectVision-Intelligent-Industrial-Anomaly-Detection)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-lightgrey.svg)](license.txt)
+
+> 🌐 **Live Web Application**: [https://defectvision-intelligent-industrial.onrender.com](https://defectvision-intelligent-industrial.onrender.com)
 
 ---
 
@@ -170,11 +173,11 @@ Open your browser at **`http://127.0.0.1:8000`** (or `http://localhost:8000`).
 python tests/run_tests.py
 ```
 
-### 4. Deploy to Cloud (Free on Render)
-1. Link this repository to **[render.com](https://render.com)**.
-2. Select **Web Service**, runtime **Docker**, region **Singapore (Southeast Asia)**.
-3. Select the **Free ($0/month)** instance tier.
-4. Render will automatically build via `Dockerfile` and provide a permanent public URL.
+### 4. Cloud Deployment (Live on Render)
+DefectVision 2.0 is live and deployed on Render's container runtime:
+- 🔗 **Live Web URL**: [https://defectvision-intelligent-industrial.onrender.com](https://defectvision-intelligent-industrial.onrender.com)
+- **Deployment Type**: Docker Web Service (CPU-only, memory-optimized with single-model LRU caching < 200 MB).
+- **Auto-Sync**: Automatically synchronized with the `main` branch.
 
 ---
 
