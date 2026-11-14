@@ -1738,6 +1738,19 @@
             </button>
           </div>
 
+          <!-- Inspection Mode Selector for Web Images -->
+          <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-xl border border-gray-200">
+            <span class="text-xs font-mono text-gray-700 font-bold flex items-center gap-1.5">
+              <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-[#00B050]"></i>
+              <span>Inspection Target Type:</span>
+            </span>
+            <div class="flex gap-1 font-mono text-[11px]">
+              <button type="button" id="btnWebModeAuto" onclick="setWebInspectMode('auto')" class="px-2.5 py-1 rounded-lg bg-gray-900 text-white font-bold transition shadow-sm">Auto (AI Vision)</button>
+              <button type="button" id="btnWebModeGood" onclick="setWebInspectMode('good')" class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 font-bold transition">Nominal / Good Unit</button>
+              <button type="button" id="btnWebModeDefect" onclick="setWebInspectMode('defect')" class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 hover:bg-rose-50 hover:text-rose-700 font-bold transition">Defective Unit</button>
+            </div>
+          </div>
+
           <!-- Easy Paste / Drop Zone from Browser -->
           <div id="modalWebDropZone" class="p-5 rounded-xl border-2 border-dashed border-gray-300 hover:border-[#00B050] bg-white text-center flex flex-col items-center justify-center gap-2 cursor-pointer transition" onclick="pasteFromClipboard()">
             <div class="w-10 h-10 rounded-full bg-emerald-50 text-[#00B050] flex items-center justify-center">

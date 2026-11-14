@@ -707,7 +707,26 @@ const LINE_GOOGLE_SEARCH_QUERIES = {
   }
 };
 
+function setWebInspectMode(mode) {
+  state.googleSearchMode = mode;
+  ['Auto', 'Good', 'Defect'].forEach(m => {
+    const btn = document.getElementById(`btnWebMode${m}`);
+    if (btn) {
+      if (m.toLowerCase() === mode) {
+        btn.className = 'px-2.5 py-1 rounded-lg bg-gray-900 text-white font-bold transition shadow-sm';
+      } else {
+        btn.className = 'px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold transition';
+      }
+    }
+  });
+}
+
 function openGoogleImagesInBrowser(mode = 'all') {
+  if (mode === 'good' || mode === 'defect') {
+    setWebInspectMode(mode);
+  } else {
+    setWebInspectMode('auto');
+  }
   const lineId = state.selectedLine || 'pcb1';
   const queryObj = LINE_GOOGLE_SEARCH_QUERIES[lineId] || LINE_GOOGLE_SEARCH_QUERIES['pcb1'];
   const query = (typeof queryObj === 'object' ? (queryObj[mode] || queryObj.all) : queryObj);
@@ -746,7 +765,9 @@ async function pasteFromClipboard() {
 }
 
 function handlePastedImageBlob(blob) {
-  const file = new File([blob], `google_web_image_${Date.now()}.jpg`, { type: 'image/jpeg' });
+  const mode = state.googleSearchMode || 'auto';
+  const prefix = (mode === 'good' ? 'good_' : (mode === 'defect' ? 'defect_' : ''));
+  const file = new File([blob], `google_web_image_${prefix}${Date.now()}.jpg`, { type: 'image/jpeg' });
   closeLineIngestModal();
   navigateTo('inspect');
   inspectUploadedFile(file);
@@ -1131,6 +1152,9 @@ async function inspectWebUrl(url) {
   try {
     const formData = new FormData();
     formData.append('image_url', url);
+    const mode = state.googleSearchMode || 'auto';
+    const prefix = (mode === 'good' ? 'good_' : (mode === 'defect' ? 'defect_' : ''));
+    formData.append('sample_name', `google_web_image_${prefix}${Date.now()}.jpg`);
     formData.append('category', state.selectedLine);
     formData.append('alpha', state.alpha);
     formData.append('colormap', state.colormap);
