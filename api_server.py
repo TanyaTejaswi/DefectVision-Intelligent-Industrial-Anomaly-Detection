@@ -82,7 +82,7 @@ INDUSTRIAL_SUITE = [
         "name": "pcb1 (Mainboard Traces)",
         "icon": "🖥️",
         "defects": "Broken copper traces, missing SMD resistors, solder bridging",
-        "threshold": 34.20,
+        "threshold": 46.80,
         "auroc": 0.9840,
         "f1": 0.9620
     },
@@ -93,7 +93,7 @@ INDUSTRIAL_SUITE = [
         "name": "pcb2 (Micro-Soldering)",
         "icon": "🔬",
         "defects": "Cold solder joints, misaligned chips, trace scratches",
-        "threshold": 36.10,
+        "threshold": 39.50,
         "auroc": 0.9710,
         "f1": 0.9510
     },
@@ -104,7 +104,7 @@ INDUSTRIAL_SUITE = [
         "name": "pcb3 (IC Component Array)",
         "icon": "🔲",
         "defects": "Integrated circuit pin defects, solder shorts, missing capacitors",
-        "threshold": 35.50,
+        "threshold": 43.50,
         "auroc": 0.9680,
         "f1": 0.9480
     },
@@ -115,7 +115,7 @@ INDUSTRIAL_SUITE = [
         "name": "pcb4 (High-Density Board)",
         "icon": "⚡",
         "defects": "Multi-layer surface scratch, flux contamination, via defects",
-        "threshold": 34.80,
+        "threshold": 42.80,
         "auroc": 0.9790,
         "f1": 0.9590
     },
@@ -126,7 +126,7 @@ INDUSTRIAL_SUITE = [
         "name": "capsules (Medical Capsules)",
         "icon": "💊",
         "defects": "Cracked gelatin shells, foreign particulate, under-filled capsules",
-        "threshold": 33.70,
+        "threshold": 41.00,
         "auroc": 0.9890,
         "f1": 0.9740
     },
@@ -137,7 +137,7 @@ INDUSTRIAL_SUITE = [
         "name": "bottle (Bottling & Cap Line)",
         "icon": "🍾",
         "defects": "Glass fractures, lip/cap sealing flaws, chemical contamination",
-        "threshold": 35.88,
+        "threshold": 36.00,
         "auroc": 0.9968,
         "f1": 0.9756
     },
@@ -148,7 +148,7 @@ INDUSTRIAL_SUITE = [
         "name": "cable (Wiring Harness)",
         "icon": "🔌",
         "defects": "Wire cuts, exposed conductor braids, swapped core wires",
-        "threshold": 39.54,
+        "threshold": 41.50,
         "auroc": 0.8308,
         "f1": 0.8377
     },
@@ -159,7 +159,7 @@ INDUSTRIAL_SUITE = [
         "name": "steel (Hot-Rolled Strips)",
         "icon": "🔩",
         "defects": "Hot-rolled steel strip abrasions, scale oxide indentations",
-        "threshold": 42.19,
+        "threshold": 35.00,
         "auroc": 0.9620,
         "f1": 0.9430
     }
@@ -634,7 +634,8 @@ def detect_best_orientation(target_pil: Image.Image, golden_pil: Optional[Image.
 def compute_fast_anomaly_map(
     detector: MemoryBankAnomalyDetector,
     patches: np.ndarray,
-    target_size: Tuple[int, int] = (224, 224)
+    target_size: Tuple[int, int] = (224, 224),
+    raw_img_pil: Optional[Image.Image] = None
 ) -> Tuple[float, np.ndarray]:
     """Computes PatchCore anomaly distance and 2D spatial heatmap using fast BLAS GEMM (~40ms)."""
     mb = detector.memory_bank.astype(np.float32)
@@ -646,10 +647,27 @@ def compute_fast_anomaly_map(
     dists = np.sqrt(np.maximum(0, p_sq + detector._mb_sq[None, :] - 2 * dots))
     patch_scores = dists.min(axis=1)
 
-    image_score = float(np.max(patch_scores))
-
     # Reshape 784 patch scores to 28x28 spatial grid
-    feat_map = patch_scores.reshape((28, 28))
+    feat_map = patch_scores.reshape((28, 28)).copy()
+
+    # Background suppression for web/e-commerce/Google images with plain white or bright background
+    if raw_img_pil is not None:
+        try:
+            img_224 = np.array(raw_img_pil.convert("RGB").resize((224, 224), Image.Resampling.BILINEAR), dtype=np.float32)
+            corners = [img_224[0:16, 0:16], img_224[0:16, -16:], img_224[-16:, 0:16], img_224[-16:, -16:]]
+            bg_mean = float(np.median([c.mean() for c in corners]))
+            
+            if bg_mean > 190.0:
+                for r in range(28):
+                    for c in range(28):
+                        cell = img_224[r*8:(r+1)*8, c*8:(c+1)*8]
+                        if cell.mean() > 200.0 or (cell.mean() > 165.0 and cell.std() < 22.0):
+                            feat_map[r, c] = min(feat_map[r, c], 14.0)
+        except Exception as e:
+            print(f"Background suppression note: {e}")
+
+    image_score = float(np.max(feat_map))
+
     feat_img = Image.fromarray(feat_map)
     resized_map = feat_img.resize((target_size[1], target_size[0]), resample=Image.Resampling.BILINEAR)
     amap = np.array(resized_map, dtype=np.float32)
@@ -1369,7 +1387,7 @@ async def inspect_unit(
         if detector is not None:
             try:
                 patches = extract_patch_features_from_pil(target_img_pil, grid_size=(28, 28))
-                calc_score, calc_amap = compute_fast_anomaly_map(detector, patches, target_size=(H, W))
+                calc_score, calc_amap = compute_fast_anomaly_map(detector, patches, target_size=(H, W), raw_img_pil=target_img_pil)
                 model_score = float(calc_score)
                 model_amap = calc_amap
             except Exception as e:
