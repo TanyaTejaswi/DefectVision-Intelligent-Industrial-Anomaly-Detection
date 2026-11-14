@@ -80,8 +80,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   navigateTo(initialPage, false, /* isInitialLoad */ true);
 
-  // Initial inspection pre-load
-  await triggerInspection(state.activePresetId, state.selectedLine);
+  // Initial inspection pre-load (pass true to avoid creating an audit log entry on page load)
+  await triggerInspection(state.activePresetId, state.selectedLine, /* isInitialPrewarm */ true);
 });
 
 // Chrome Back / Forward / Undo Arrow Listener
@@ -1240,7 +1240,7 @@ async function inspectWebUrl(url) {
   }
 }
 
-async function triggerInspection(presetId, category) {
+async function triggerInspection(presetId, category, isInitialPrewarm = false) {
   state.activeInspectionTarget = {
     type: 'preset',
     presetId: presetId,
@@ -1274,14 +1274,14 @@ async function triggerInspection(presetId, category) {
     const data = await res.json();
     state.currentInspectionData = data;
 
-    applyInspectionResults(data);
+    applyInspectionResults(data, isInitialPrewarm);
   } catch (err) {
     console.error('Inspection error:', err);
     if (placeholder) placeholder.innerHTML = `<span class="text-rose-400 text-xs">Inspection Error: ${err.message}</span>`;
   }
 }
 
-function applyInspectionResults(data) {
+function applyInspectionResults(data, isInitialPrewarm = false) {
   const goldenImg = document.getElementById('goldenImage');
   const goldenPlaceholder = document.getElementById('goldenPlaceholder');
   const rawImg = document.getElementById('inspectedRawImage');
@@ -1612,8 +1612,10 @@ function updateTelemetry(data) {
 
   if (window.lucide) lucide.createIcons();
 
-  // Record this unit inspection in the rolling 20-item Audit Ledger
-  recordInspectionAudit(data);
+  // Record this unit inspection in the rolling 20-item Audit Ledger (skip during initial background prewarm)
+  if (!isInitialPrewarm) {
+    recordInspectionAudit(data);
+  }
 }
 
 /**
@@ -2082,8 +2084,18 @@ function getAuditLogStorageKey() {
 }
 
 function initAuditLog() {
-  const userObj = (window.AuthManager && window.AuthManager.currentUser) ? window.AuthManager.currentUser : null;
-  const username = userObj ? userObj.username : 'guest';
+  // If not authenticated, ensure the audit log is completely empty (zero default entries)
+  if (!window.AuthManager || !window.AuthManager.isAuthenticated()) {
+    state.auditLog = [];
+    try {
+      localStorage.removeItem('defectvision_audit_log_guest');
+      localStorage.removeItem('defectvision_audit_log');
+    } catch (e) {}
+    return;
+  }
+
+  const userObj = window.AuthManager.currentUser;
+  const username = userObj.username;
   const key = getAuditLogStorageKey();
 
   const saved = localStorage.getItem(key);
@@ -2099,8 +2111,8 @@ function initAuditLog() {
     }
   }
 
-  // Pre-populate with realistic baseline ONLY for default admin account
-  // Any other registered user, inspector, or new guest starts with a clean personal ledger!
+  // Pre-populate with realistic baseline ONLY for default admin account on first load
+  // Any other registered user starts with a clean personal ledger!
   if (username.toLowerCase() === 'admin') {
     state.auditLog = generateSeedAuditLog('admin (QA Operations Lead)', userObj ? userObj.workstationId : 'WS-101');
     try {
@@ -2449,6 +2461,12 @@ function generateSeedAuditLog(operator = 'admin (QA Operations Lead)', workstati
 
 function recordInspectionAudit(data) {
   if (!data) return;
+
+  // STRICT: Only record audit log entries when logged in under an authenticated operator account
+  if (!window.AuthManager || !window.AuthManager.isAuthenticated()) {
+    return;
+  }
+
   const now = new Date();
   const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const dateStr = now.toISOString().split('T')[0];
@@ -2507,9 +2525,11 @@ function recordInspectionAudit(data) {
     state.auditLog.unshift(entry);
   }
 
-  // Cap at 20 items (Rolling FIFO Buffer)
-  if (state.auditLog.length > 20) {
-    state.auditLog = state.auditLog.slice(0, 20);
+  // Rolling FIFO buffer: keep strictly the NEWEST 20 items.
+  // Prepend to top, and automatically drop the oldest entry from the tail.
+  // Never wipes or resets all data!
+  while (state.auditLog.length > 20) {
+    state.auditLog.pop();
   }
 
   try {
@@ -2526,6 +2546,11 @@ function recordInspectionAudit(data) {
 }
 
 function renderAuditLogPage() {
+  const isAuth = window.AuthManager && window.AuthManager.isAuthenticated();
+  if (!isAuth) {
+    state.auditLog = [];
+  }
+
   const total = state.auditLog.length;
   const defects = state.auditLog.filter(x => x.verdict === 'CRITICAL_DEFECT').length;
   const passed = state.auditLog.filter(x => x.verdict !== 'CRITICAL_DEFECT').length;
@@ -2536,19 +2561,19 @@ function renderAuditLogPage() {
   const elPassed = document.getElementById('auditMetricPassed');
   const elYield = document.getElementById('auditMetricYield');
 
-  if (elTotal) elTotal.innerText = `${total} / 20`;
+  if (elTotal) elTotal.innerText = `${total} Units`;
   if (elDefects) elDefects.innerText = `${defects} Units`;
   if (elPassed) elPassed.innerText = `${passed} Units`;
   if (elYield) elYield.innerText = `${yieldRate}%`;
 
-  const currentUser = (window.AuthManager && window.AuthManager.currentUser) ? window.AuthManager.currentUser : null;
+  const currentUser = isAuth ? window.AuthManager.currentUser : null;
   const elOpName = document.getElementById('auditOperatorName');
   const elStation = document.getElementById('auditWorkstationId');
   if (elOpName) {
-    elOpName.innerText = currentUser ? `${currentUser.username} (${currentUser.role || 'Inspector'})` : 'Guest / Unassigned Operator';
+    elOpName.innerText = currentUser ? `${currentUser.username} (${currentUser.role || 'Inspector'})` : 'Unauthenticated Visitor (Sign In Required)';
   }
   if (elStation) {
-    elStation.innerText = currentUser ? (currentUser.workstationId || 'WS-101') : 'WS-101';
+    elStation.innerText = currentUser ? (currentUser.workstationId || 'WS-101') : 'Station Locked';
   }
 
   const countAll = document.getElementById('auditFilterCount_all');
@@ -2566,6 +2591,28 @@ function renderAuditLogTable() {
   const tbody = document.getElementById('auditLogTableBody');
   if (!tbody) return;
   tbody.innerHTML = '';
+
+  const isAuth = window.AuthManager && window.AuthManager.isAuthenticated();
+  if (!isAuth) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td colspan="9" class="py-14 text-center text-gray-500 font-sans">
+        <div class="flex flex-col items-center justify-center gap-2 max-w-md mx-auto">
+          <div class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-1">
+            <i data-lucide="lock" class="w-6 h-6"></i>
+          </div>
+          <p class="font-bold text-gray-800 text-base">Sign In Required</p>
+          <p class="text-xs text-gray-500">Inspection audit telemetry is personal to each operator account. Please sign in with your credentials or create an account to start logging and tracking your inspected units.</p>
+          <button onclick="openAuthModal('login')" class="btn-instrumental px-5 py-2 text-xs uppercase tracking-wider font-mono font-bold mt-2 shadow-sm">
+            Sign In / Operator Login &rarr;
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
 
   const q = (state.auditSearchQuery || '').toLowerCase().trim();
   const filtered = state.auditLog.filter(item => {
